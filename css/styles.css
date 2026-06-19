@@ -1,0 +1,453 @@
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { height:200vh; }
+body {
+  width:100%; height:100%;
+  overflow-y:hidden;
+  cursor:none;
+  /* Warm cream base — the glass picks up this warmth */
+  background: linear-gradient(160deg, #fffdf4 0%, #fff8e2 60%, #fef3cc 100%);
+}
+
+/* ── CURSOR — dot + ring ───────────────────────────────────── */
+#cur {
+  position:fixed; width:6px; height:6px;
+  background:#00ff87; border-radius:50%;
+  pointer-events:none; z-index:9999;
+  transform:translate(-50%,-50%);
+  box-shadow:0 0 12px rgba(0,255,135,.65);
+  transition:background .35s, box-shadow .35s;
+}
+#cur-ring {
+  position:fixed; width:28px; height:28px;
+  border:1px solid rgba(0,255,135,.35);
+  border-radius:50%;
+  pointer-events:none; z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:left .12s ease-out, top .12s ease-out, border-color .35s, opacity .35s;
+}
+body.light-cursor #cur { background:#2a1c06; box-shadow:0 0 14px rgba(42,28,6,.25); }
+body.light-cursor #cur-ring { border-color:rgba(42,28,6,.2); }
+
+/* ── TROPHY: 3 layers ────────────────────────────────────────
+   Sized so the FULL trophy (base to globe top) fits on screen.
+   Layer 1 (bokeh): heavy blur, turns trophy into warm gold glow
+   Layer 2 (shape): medium blur, ghost of trophy form
+   Layer 3 (sharp): very faint, shows actual surface + reflections */
+
+/* Sharp layer: barely there, gives surface texture + gold reflections */
+#trophy-sharp {
+  position:fixed; left:50%; top:50%;
+  transform:translate(-50%,-50%);
+  width:min(34vh, 28vw);
+  height:auto; z-index:2;
+  filter:brightness(1.0) saturate(1.15) contrast(1.1);
+  opacity:0.4; pointer-events:none;
+}
+
+/* ── APPLE LIQUID GLASS LAYER ────────────────────────────── */
+#glass {
+  position:fixed; inset:0; z-index:3;
+  background:linear-gradient(
+    168deg,
+    rgba(255,255,255,0.48) 0%,
+    rgba(255,252,234,0.60) 50%,
+    rgba(255,247,212,0.66) 100%
+  );
+  box-shadow:inset 0 1.5px 0 rgba(255,255,255,0.5);
+}
+
+/* ── TROPHY HALO: pulsing warm glow around the trophy ─────────────────
+   A soft golden ring that breathes slowly — gives the trophy life      */
+#trophy-halo {
+  position:fixed; left:50%; top:50%;
+  transform:translate(-50%,-50%);
+  width:min(52vh, 44vw);
+  height:min(52vh, 44vw);
+  border-radius:50%;
+  background:radial-gradient(circle,
+    transparent        0%,
+    transparent        42%,
+    rgba(220,165,20,0.18) 58%,
+    rgba(200,140,10,0.10) 72%,
+    transparent        88%
+  );
+  z-index:2; pointer-events:none;
+  animation:haloPulse 3.5s ease-in-out infinite alternate;
+}
+@keyframes haloPulse {
+  from { opacity:0.5; transform:translate(-50%,-50%) scale(0.94); }
+  to   { opacity:1.0; transform:translate(-50%,-50%) scale(1.06); }
+}
+
+/* ── ANIMATED GLASS REFLECTIONS ─────────────────────────────
+   Two soft light orbs drift slowly across the glass surface.
+   This is the "glossy moving reflection" effect — very subtle,
+   never distracting, gives the glass physical presence.        */
+
+/* Orb 1: top-left, drifts toward bottom-right */
+#orb1 {
+  position:fixed;
+  width:70vmax; height:70vmax; border-radius:50%;
+  background:radial-gradient(circle,
+    rgba(255,255,245,0.28) 0%,
+    rgba(255,248,220,0.14) 35%,
+    transparent 68%
+  );
+  top:-20vmin; left:-15vmin;
+  z-index:4; pointer-events:none;
+  animation:orbDrift1 9s ease-in-out infinite alternate;
+}
+
+/* Orb 2: bottom-right, drifts toward top-left */
+#orb2 {
+  position:fixed;
+  width:55vmax; height:55vmax; border-radius:50%;
+  background:radial-gradient(circle,
+    rgba(255,252,230,0.22) 0%,
+    rgba(255,240,190,0.10) 40%,
+    transparent 68%
+  );
+  bottom:-15vmin; right:-10vmin;
+  z-index:4; pointer-events:none;
+  animation:orbDrift2 12s ease-in-out infinite alternate;
+}
+
+/* ── THE GLASS SHINE BEAM ────────────────────────────────────────────
+   THIS is the glassmorphism moment. A bright skewed beam of light
+   sweeps from the left edge to the right edge every 8 seconds.
+   Visible, intentional, premium — like light hitting a glass surface. */
+#glass-sweep {
+  position:fixed;
+  top:-20%; left:0;
+  width:28%;
+  height:140%;
+  background:linear-gradient(
+    90deg,
+    transparent               0%,
+    rgba(255,255,255,0.0)    15%,
+    rgba(255,255,255,0.38)   45%,
+    rgba(255,255,255,0.58)   50%,
+    rgba(255,255,255,0.38)   55%,
+    rgba(255,255,255,0.0)    85%,
+    transparent              100%
+  );
+  transform:skewX(-14deg) translateX(-200%);
+  z-index:8; pointer-events:none;
+  animation:shineBeam 8s cubic-bezier(.4,0,.2,1) infinite;
+}
+@keyframes shineBeam {
+  0%   { transform:skewX(-14deg) translateX(-200%); opacity:0; }
+  35%  { transform:skewX(-14deg) translateX(-200%); opacity:0; }
+  38%  { opacity:1; }
+  62%  { opacity:1; }
+  65%  { transform:skewX(-14deg) translateX(520%);  opacity:0; }
+  100% { transform:skewX(-14deg) translateX(520%);  opacity:0; }
+}
+
+/* ── INTRO STAGE ────────────────────────────────────────────── */
+#stage {
+  position:fixed; inset:0; z-index:10;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+}
+
+/* Year — large, dark warm, Cormorant SC */
+#yr {
+  font-family:'Cormorant SC', serif;
+  font-weight:300;
+  font-size:clamp(96px, 21vw, 290px);
+  line-height:0.88;
+  letter-spacing:0.18em;
+  color:#140d02;
+  text-align:center;
+  /* Subtle warm shadow gives depth on glass */
+  text-shadow:
+    0 2px 40px rgba(180,130,20,0.12),
+    0 1px 0   rgba(255,255,255,0.8);
+}
+
+/* Thin gold rule */
+#rule {
+  width:28px; height:1px;
+  background:rgba(160,110,20,0.35);
+  margin:18px auto 14px;
+}
+
+/* Country — warm gold-brown, spaced */
+#country {
+  font-family:'Barlow Condensed', sans-serif;
+  font-weight:300;
+  font-size:clamp(10px, 1.5vw, 17px);
+  letter-spacing:0.58em;
+  text-transform:uppercase;
+  color:rgba(29, 29, 31, 0.95); text-align:center;
+  text-align:center;
+}
+
+/* ── CHROME ─────────────────────────────────────────────────── */
+#count {
+  position:fixed; top:2rem; right:2.5rem; z-index:20;
+  font-family:'Barlow Condensed', sans-serif;
+  font-size:11px; letter-spacing:.4em;
+  color:rgba(42,28,6,0.40);
+}
+#prog {
+  position:fixed; bottom:0; left:0;
+  height:1.5px; width:0%;
+  background:rgba(160,110,20,0.5);
+  z-index:20;
+}
+#skip-btn {
+  position:fixed; bottom:2rem; right:2.5rem; z-index:20;
+  font-family:'Barlow Condensed', sans-serif;
+  font-size:10px; letter-spacing:.4em; text-transform:uppercase;
+  color:rgba(42,28,6,0.28); background:none; border:none;
+  cursor:none; opacity:0;
+  transition:color .2s;
+  animation:fadeIn .5s 1.5s forwards;
+}
+#skip-btn:hover { color:rgba(42,28,6,0.65); }
+#flash {
+  position:fixed; inset:0; z-index:15; pointer-events:none;
+  background:#fff; opacity:0;
+}
+
+/* ── REVEAL SCREEN ──────────────────────────────────────────── */
+#reveal {
+  position:fixed; inset:0; z-index:30;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  opacity:0; pointer-events:none;
+  transition:opacity .3s ease;
+}
+
+#rv-eyebrow {
+  font-family:'Barlow Condensed', sans-serif;
+  font-size:clamp(12px,1.3vw,16px); letter-spacing:.5em;
+  color:rgba(45,25,4,0.80); text-transform:uppercase;
+  margin-bottom:1.8rem; opacity:0;
+}
+
+#rv-title {
+  font-family:'Cormorant SC', serif; font-weight:300;
+  font-size:clamp(36px, 6.8vw, 92px);
+  letter-spacing:.18em; color:#1e1308;
+  line-height:1; overflow:hidden; white-space:nowrap;
+  text-shadow:0 2px 40px rgba(180,130,20,0.1), 0 1px 0 rgba(255,255,255,0.7);
+}
+.ch { display:inline-block; opacity:0; transform:translateY(22px); }
+.sp { display:inline-block; width:.25em; }
+
+#rv-line {
+  width:0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(160,110,20,0.6),transparent);
+  margin:22px auto 0; opacity:0;
+}
+#rv-sub {
+  font-family:'Barlow Condensed', sans-serif;
+  font-size:clamp(13px,1.4vw,17px); letter-spacing:.5em;
+  color:rgba(55,30,4,0.75); text-transform:uppercase;
+  margin-top:18px; opacity:0;
+}
+
+/* ── SCROLL HINT ────────────────────────────────────────────── */
+#scroll-hint {
+  position:absolute; bottom:3rem; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:7px;
+  opacity:0; pointer-events:none;
+}
+#scroll-hint span {
+  font-family:'Barlow Condensed', sans-serif;
+  font-size:clamp(11px,1.1vw,14px); letter-spacing:.55em; text-transform:uppercase;
+  color:rgba(42,28,6,0.50);
+}
+.chev {
+  width:9px; height:9px;
+  border-right:1px solid rgba(120,80,15,0.35);
+  border-bottom:1px solid rgba(120,80,15,0.35);
+  transform:rotate(45deg);
+  animation:chevBounce 1.6s ease-in-out infinite;
+}
+.chev:nth-child(3){ animation-delay:.15s; opacity:.6; }
+.chev:nth-child(4){ animation-delay:.30s; opacity:.3; }
+
+/* ── GLOBE SECTION (revealed on scroll) ─────────────────────── */
+#globe-wrap {
+  position:fixed; inset:0; z-index:25;
+  background:#03061a;
+  clip-path:circle(0% at 50% 50%);
+  transition:clip-path .05s linear;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+#globe-wrap::before {
+  content:''; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background-image:
+    radial-gradient(1px 1px at 8% 12%,rgba(255,255,255,.45) 0%,transparent 100%),
+    radial-gradient(1px 1px at 22% 78%,rgba(255,255,255,.25) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 38% 34%,rgba(255,255,255,.55) 0%,transparent 100%),
+    radial-gradient(1px 1px at 52% 8%,rgba(255,255,255,.35) 0%,transparent 100%),
+    radial-gradient(1px 1px at 67% 62%,rgba(255,255,255,.3) 0%,transparent 100%),
+    radial-gradient(2px 2px at 81% 22%,rgba(255,255,255,.5) 0%,transparent 100%),
+    radial-gradient(1px 1px at 14% 48%,rgba(255,255,255,.2) 0%,transparent 100%),
+    radial-gradient(1px 1px at 44% 91%,rgba(255,255,255,.4) 0%,transparent 100%),
+    radial-gradient(1px 1px at 73% 88%,rgba(255,255,255,.22) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 91% 44%,rgba(255,255,255,.38) 0%,transparent 100%),
+    radial-gradient(1px 1px at 31% 18%,rgba(255,255,255,.28) 0%,transparent 100%),
+    radial-gradient(1px 1px at 58% 52%,rgba(255,255,255,.18) 0%,transparent 100%),
+    radial-gradient(1px 1px at 96% 68%,rgba(255,255,255,.32) 0%,transparent 100%),
+    radial-gradient(2px 2px at 6% 66%,rgba(200,220,255,.35) 0%,transparent 100%),
+    radial-gradient(1px 1px at 48% 28%,rgba(255,255,255,.15) 0%,transparent 100%);
+  opacity:.85;
+}
+#globe-wrap::after {
+  content:''; position:absolute; inset:0; z-index:27; pointer-events:none;
+  background:radial-gradient(ellipse at center, transparent 42%, rgba(3,6,26,.72) 100%);
+}
+#globe-ui {
+  position:absolute; inset:0; z-index:28;
+  pointer-events:none;
+  display:none;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:clamp(18px,3vw,32px) clamp(20px,4vw,40px);
+  opacity:0;
+  transition:opacity .5s ease;
+}
+#globe-topbar {
+  font-family:'Bebas Neue', sans-serif;
+  font-size:clamp(18px,2.4vw,28px);
+  letter-spacing:.22em;
+  color:#f0ede6;
+  text-shadow:0 0 24px rgba(0,255,135,.15);
+  display:flex; align-items:center; gap:14px;
+}
+#globe-topbar::before {
+  content:''; width:32px; height:2px;
+  background:linear-gradient(90deg,#00ff87,transparent);
+}
+#globe-stats {
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 2fr;
+  gap:12px;
+  max-width:1400px;
+  width:100%;
+  margin:0 auto;
+}
+.globe-stat {
+  min-width:0;
+  padding:14px 16px;
+  border-radius:16px;
+  background:rgba(255,255,255,0.035);
+  border:1px solid rgba(255,255,255,0.07);
+  box-shadow:0 8px 20px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.06);
+  transition:border-color .25s, transform .25s;
+}
+.globe-stat:hover { border-color:rgba(0,255,135,.18); transform:translateY(-1px); }
+.globe-stat .label {
+  display:block;
+  font-family:'Barlow Condensed', sans-serif;
+  font-weight:400;
+  font-size:9px; letter-spacing:.42em; text-transform:uppercase;
+  color:#3d4f6b;
+  margin-bottom:6px;
+}
+.globe-stat .value {
+  font-family:'Bebas Neue', sans-serif;
+  font-size:clamp(22px, 2.4vw, 34px);
+  color:#f0ede6;
+  letter-spacing:.06em;
+  line-height:1;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.globe-stat.ticker {
+  grid-column:span 1;
+  padding:0;
+  overflow:hidden;
+  position:relative;
+  display:flex; align-items:center;
+}
+.globe-stat.ticker::before,
+.globe-stat.ticker::after {
+  content:''; position:absolute; top:0; bottom:0; width:24px; z-index:2; pointer-events:none;
+}
+.globe-stat.ticker::before { left:0; background:linear-gradient(90deg,rgba(3,6,26,.9),transparent); }
+.globe-stat.ticker::after  { right:0; background:linear-gradient(-90deg,rgba(3,6,26,.9),transparent); }
+#match-ticker {
+  display:flex; white-space:nowrap;
+  font-family:'Barlow Condensed', sans-serif;
+  font-weight:400;
+  font-size:11px; letter-spacing:.28em; text-transform:uppercase;
+  color:#00ff87;
+  animation:tickerScroll 42s linear infinite;
+  padding:14px 0;
+}
+#match-ticker span { padding:0 2.5rem; color:rgba(240,237,230,.55); }
+#match-ticker span.live { color:#ff5f1f; }
+@keyframes tickerScroll {
+  from { transform:translateX(0); }
+  to   { transform:translateX(-50%); }
+}
+#globe-container {
+  width:100vw; height:100vh; z-index:25; position:relative;
+}
+#globe-container canvas { display:block; cursor:grab; }
+#globe-container canvas:active { cursor:grabbing; }
+.flag-pin {
+  font-size:15px; line-height:1;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,.65));
+  transform:translate(-50%,-120%);
+  pointer-events:none;
+  user-select:none;
+  transition:transform .2s;
+}
+.flag-pin.pulse { animation:pinPulse 2.4s ease-in-out infinite; }
+@keyframes pinPulse {
+  0%,100% { transform:translate(-50%,-120%) scale(1); }
+  50%     { transform:translate(-50%,-130%) scale(1.08); }
+}
+#globe-hint {
+  position:absolute; bottom:120px; left:50%; transform:translateX(-50%);
+  font-family:'Barlow Condensed', sans-serif;
+  font-size:10px; letter-spacing:.45em; text-transform:uppercase;
+  color:#3d4f6b; z-index:28; pointer-events:none;
+  opacity:0; transition:opacity .6s;
+}
+
+/* ── KEYFRAMES ──────────────────────────────────────────────── */
+@keyframes fadeIn    { from{opacity:0} to{opacity:1} }
+
+@keyframes orbDrift1 {
+  from { transform:translate(0,0) scale(1);    }
+  to   { transform:translate(18vmin,14vmin) scale(1.08); }
+}
+@keyframes orbDrift2 {
+  from { transform:translate(0,0) scale(1);    }
+  to   { transform:translate(-16vmin,-12vmin) scale(1.06); }
+}
+/* shineBeam keyframe defined inline above */
+@keyframes chevBounce {
+  0%,100%{ transform:rotate(45deg) translateY(0); }
+  50%    { transform:rotate(45deg) translateY(4px); opacity:.5; }
+}
+
+@media (max-width:900px) {
+  #globe-stats {
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .globe-stat.ticker { grid-column:span 2; }
+  #globe-hint { bottom:100px; font-size:9px; letter-spacing:.3em; }
+}
+@media (max-width:520px) {
+  #globe-stats { grid-template-columns:1fr; }
+  .globe-stat.ticker { grid-column:span 1; }
+  #globe-topbar { font-size:16px; letter-spacing:.16em; }
+}
+
+#orb1,#orb2{display:none!important;}
+#cur,#cur-ring{will-change:transform;}
+@media (max-width:768px){
+ #cur,#cur-ring{display:none!important;}
+ body{cursor:auto!important;}
+}
