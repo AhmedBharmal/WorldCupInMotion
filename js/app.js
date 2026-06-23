@@ -48,6 +48,7 @@ const progEl  = document.getElementById('prog');
 const countEl = document.getElementById('count');
 const stageEl = document.getElementById('stage');
 const globeWrap = document.getElementById('globe-wrap');
+const skipBtn = document.getElementById('skip-btn');
 let tid = null;
 
 // ── SEQUENCE ──────────────────────────────────────────────────
@@ -156,8 +157,18 @@ const decorEls  = ['trophy-sharp','trophy-halo','glass','orb1','orb2','glass-swe
   .map(id => document.getElementById(id))
   .filter(Boolean);
 
+let revealLocked = false;
+
+function isAtScrollBottom() {
+  const doc = document.documentElement;
+  return window.scrollY + window.innerHeight >= doc.scrollHeight - 2; // 2px tolerance
+}
+
 function updateScrollReveal() {
-  const progress = Math.min(window.scrollY / window.innerHeight, 1);
+  const rawProgress = Math.min(window.scrollY / window.innerHeight, 1);
+  if (rawProgress >= 0.98 || isAtScrollBottom()) revealLocked = true;
+  const progress = revealLocked ? 1 : rawProgress;
+
   const radius   = progress * 200;
   globeWrap.style.clipPath   = `circle(${radius}% at 50% 50%)`;
   globeWrap.style.transition = 'none';
@@ -187,7 +198,41 @@ window.addEventListener('scroll',()=>{
   });
 },{passive:true});
 
-showFrame(0);
+// ── REVISIT: skip intro if already seen this browser session ──
+const INTRO_SEEN_KEY = 'wcim-intro-seen';
+
+function skipToGlobe() {
+  // Instantly land in the same end-state beginReveal()/animateTitle() reach,
+  // but with no animation and no intro stage flash.
+  stageEl.style.display = 'none';
+  document.getElementById('skip-btn').style.display = 'none';
+  countEl.style.display = 'none';
+
+  const rev = document.getElementById('reveal');
+  rev.style.opacity = '0';
+  rev.style.pointerEvents = 'none';
+
+  globeWrap.style.clipPath = 'circle(200% at 50% 50%)';
+  globeWrap.style.transition = 'none';
+
+  document.body.classList.remove('light-cursor');
+  document.body.style.overflowY = 'auto';
+
+  globeUi.style.display = 'flex';
+  globeUi.style.opacity = '1';
+  globeHint.style.opacity = '1';
+
+  decorEls.forEach(el => { el.style.opacity = '0'; });
+
+  revealLocked = true;
+}
+
+if (sessionStorage.getItem(INTRO_SEEN_KEY)) {
+  skipToGlobe();
+} else {
+  sessionStorage.setItem(INTRO_SEEN_KEY, '1');
+  showFrame(0);
+}
 
 // ── WC 2026 DATA ─────────────────────────────────────────────
 const GROUP_COLORS = {
@@ -207,7 +252,7 @@ const WC_NATIONS = [
   {iso:'BRA',name:'Brazil',     flag:'🇧🇷',lat:-14.24,lng:-51.93,group:'C'},
   {iso:'MAR',name:'Morocco',    flag:'🇲🇦',lat:31.79,lng:-7.09, group:'C'},
   {iso:'HTI',name:'Haiti',      flag:'🇭🇹',lat:18.97,lng:-72.29,group:'C'},
-  {iso:'GBR',name:'England',    flag:'🇬🇧',lat:52.36,lng:-1.17, group:'C'},
+  {iso:'GBR',name:'England',    flag:'🇬🇧',lat:52.36,lng:-1.17, group:'L'},
   {iso:'USA',name:'USA',        flag:'🇺🇸',lat:37.09,lng:-95.71, group:'D'},
   {iso:'PRY',name:'Paraguay',   flag:'🇵🇾',lat:-23.44,lng:-58.44,group:'D'},
   {iso:'AUS',name:'Australia',  flag:'🇦🇺',lat:-25.27,lng:133.78,group:'D'},
@@ -243,10 +288,28 @@ const WC_NATIONS = [
   {iso:'HRV',name:'Croatia',    flag:'🇭🇷',lat:45.10,lng:15.20, group:'L'},
   {iso:'GHA',name:'Ghana',      flag:'🇬🇭',lat:7.95, lng:-1.02, group:'L'},
   {iso:'PAN',name:'Panama',     flag:'🇵🇦',lat:8.54, lng:-80.78, group:'L'},
-  {iso:'DNK',name:'Denmark',    flag:'🇩🇰',lat:56.26,lng:9.50,  group:'L'}
+  {iso:'SCO',name:'Scotland',   flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',lat:56.49,lng:-4.20,  group:'C'}
 ];
 const nationByIso = Object.fromEntries(WC_NATIONS.map(n => [n.iso, n]));
+
+// flagcdn.com needs 2-letter ISO codes; our data uses 3-letter codes.
+const ISO3_TO_ISO2 = {
+  MEX:'mx', ZAF:'za', KOR:'kr', CZE:'cz', CAN:'ca', BIH:'ba', QAT:'qa', CHE:'ch',
+  BRA:'br', MAR:'ma', HTI:'ht', GBR:'gb', USA:'us', PRY:'py', AUS:'au', TUR:'tr',
+  DEU:'de', CUW:'cw', CIV:'ci', ECU:'ec', NLD:'nl', JPN:'jp', SWE:'se', TUN:'tn',
+  BEL:'be', EGY:'eg', IRN:'ir', NZL:'nz', ESP:'es', CPV:'cv', SAU:'sa', URY:'uy',
+  FRA:'fr', SEN:'sn', IRQ:'iq', NOR:'no', ARG:'ar', DZA:'dz', AUT:'at', JOR:'jo',
+  PRT:'pt', COD:'cd', UZB:'uz', COL:'co', HRV:'hr', GHA:'gh', PAN:'pa', SCO:'gb-sct'
+};
+function flagImgUrl(iso3) {
+  const iso2 = ISO3_TO_ISO2[iso3];
+  return iso2 ? `https://flagcdn.com/w80/${iso2}.png` : '';
+}
 const NAME_TO_ISO = {
+  // Note: the topojson dataset has one shape for the whole UK, so the
+  // landmass hover-highlight can only resolve to one of England/Scotland
+  // (mapped to England here). This doesn't affect selection — both have
+  // their own correct, independent flag pins.
   'united states of america':'USA','united states':'USA','united kingdom':'GBR',
   'england':'GBR','korea':'KOR','south korea':'KOR','republic of korea':'KOR',
   'czechia':'CZE','czech republic':'CZE','ivory coast':'CIV',"cote d'ivoire":'CIV',
@@ -255,14 +318,21 @@ const NAME_TO_ISO = {
   'new zealand':'NZL','cape verde':'CPV','cabo verde':'CPV','curacao':'CUW','curaçao':'CUW'
 };
 
+function normalizeName(s) {
+  return (s || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip accents
+    .trim();
+}
+
 function nationForPolygon(props) {
   if (!props) return null;
   const iso = props.ISO_A3 || props.ADM0_A3 || props.iso_a3;
   if (iso && nationByIso[iso]) return nationByIso[iso];
-  const name = (props.NAME || props.ADMIN || props.name || '').toLowerCase().trim();
+  const name = normalizeName(props.NAME || props.ADMIN || props.name);
   const mapped = NAME_TO_ISO[name];
   if (mapped && nationByIso[mapped]) return nationByIso[mapped];
-  return WC_NATIONS.find(n => n.name.toLowerCase() === name) || null;
+  return WC_NATIONS.find(n => normalizeName(n.name) === name) || null;
 }
 
 function updateTournamentStatus() {
@@ -312,9 +382,31 @@ setTimeout(() => {
   let geoFeatures = [];
   let globe;
 
-  function refreshGlobeStyles(updatePins = false) {
+  function refreshGlobeStyles() {
     globe.polygonsData(geoFeatures);
-    if (updatePins) globe.htmlElementsData(WC_NATIONS.map(n => ({...n})));
+  }
+
+  // Small island/compact nations need a much closer zoom altitude —
+  // at the default 1.6 they're too tiny on screen to look "zoomed in".
+  const CLOSE_ZOOM_ISO = new Set(['CPV', 'CUW', 'HTI']);
+
+  function selectNation(n) {
+    const prevIso = selectedIso;
+    selectedIso = selectedIso === n.iso ? null : n.iso;
+    refreshGlobeStyles();
+    globeContainer.dataset.selectedIso = selectedIso || '';
+    if (prevIso) {
+      const prevPin = globeContainer.querySelector(`.flag-pin[data-iso="${prevIso}"]`);
+      if (prevPin) prevPin.classList.remove('pulse');
+    }
+    if (selectedIso) {
+      const newPin = globeContainer.querySelector(`.flag-pin[data-iso="${selectedIso}"]`);
+      if (newPin) newPin.classList.add('pulse');
+    }
+    pauseSpin();
+    const altitude = CLOSE_ZOOM_ISO.has(n.iso) ? 0.7 : 1.6;
+    globe.pointOfView({ lat: n.lat, lng: n.lng, altitude }, 900);
+    document.getElementById('globe-hint').style.opacity = '0';
   }
 
   globe = Globe()(globeContainer)
@@ -350,31 +442,47 @@ setTimeout(() => {
       if (hoverIso === n.iso) return 0.11;
       return 0.07;
     })
-    .polygonLabel(f => {
-      const n = nationForPolygon(f.properties);
-      return n ? `<div style="font-family:Barlow Condensed,sans-serif;font-size:11px;letter-spacing:.2em;padding:6px 10px;background:rgba(3,6,26,.85);border:1px solid ${GROUP_COLORS[n.group]}55;border-radius:8px;color:#f0ede6;">${n.flag} ${n.name}<br><span style="color:#3d4f6b;font-size:9px;">GROUP ${n.group}</span></div>` : '';
-    })
+    .polygonLabel(() => '')
     .onPolygonHover(f => {
-      globeContainer.style.cursor = f && nationForPolygon(f.properties) ? 'pointer' : 'grab';
+      globeContainer.style.cursor = 'grab';
       const nextHoverIso = f ? (nationForPolygon(f.properties) || {}).iso : null;
       if (nextHoverIso === hoverIso) return;
       hoverIso = nextHoverIso;
       refreshGlobeStyles();
     })
-    .onPolygonClick(f => {
-      const n = nationForPolygon(f.properties);
-      if (!n) return;
-      selectedIso = selectedIso === n.iso ? null : n.iso;
-      refreshGlobeStyles(true);
-      globe.pointOfView({ lat: n.lat, lng: n.lng, altitude: 1.6 }, 900);
-      document.getElementById('globe-hint').style.opacity = '0';
-    })
     .htmlElementsData(WC_NATIONS)
     .htmlElement(d => {
       const el = document.createElement('div');
-      el.className = 'flag-pin' + (selectedIso === d.iso ? ' pulse' : '');
-      el.textContent = d.flag;
-      el.title = d.name;
+      el.className = 'flag-pin';
+      el.dataset.iso = d.iso;
+      const img = document.createElement('img');
+      img.src = flagImgUrl(d.iso);
+      img.alt = d.name;
+      img.loading = 'lazy';
+      el.appendChild(img);
+      el.style.pointerEvents = 'auto';
+      el.style.cursor = 'pointer';
+
+      const tip = document.createElement('div');
+      tip.className = 'pin-tooltip';
+      tip.innerHTML = `${d.flag} ${d.name}<br><span class="pin-tooltip-group">GROUP ${d.group}</span>`;
+      el.appendChild(tip);
+
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectNation(d);
+      });
+      el.addEventListener('mouseenter', () => {
+        if (hoverIso === d.iso) return;
+        hoverIso = d.iso;
+        globeContainer.style.cursor = 'pointer';
+        refreshGlobeStyles();
+      });
+      el.addEventListener('mouseleave', () => {
+        hoverIso = null;
+        globeContainer.style.cursor = 'grab';
+        refreshGlobeStyles();
+      });
       return el;
     })
     .htmlAltitude(0.12)
