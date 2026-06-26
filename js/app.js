@@ -25,6 +25,9 @@ const EDITIONS = [
 ];
 
 const FRAME_MS=300, LAST_MS=2400;
+let zoomGlobe = () => {};
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+window.scrollTo(0, 0);
 
 // Cursor
 const cur=document.getElementById('cur');
@@ -153,6 +156,8 @@ function animateTitle() {
 const revealEl  = document.getElementById('reveal');
 const globeUi   = document.getElementById('globe-ui');
 const globeHint = document.getElementById('globe-hint');
+const globeZoom = document.getElementById('globe-zoom');
+const statsScene = document.getElementById('stats-scene');
 const decorEls  = ['trophy-sharp','trophy-halo','glass','orb1','orb2','glass-sweep']
   .map(id => document.getElementById(id))
   .filter(Boolean);
@@ -164,39 +169,52 @@ function isAtScrollBottom() {
   return window.scrollY + window.innerHeight >= doc.scrollHeight - 2; // 2px tolerance
 }
 
-function updateScrollReveal() {
-  const rawProgress = Math.min(window.scrollY / window.innerHeight, 1);
-  if (rawProgress >= 0.98 || isAtScrollBottom()) revealLocked = true;
+function updateScrollReveal(scrollY = window.scrollY) {
+  const rawProgress = Math.min(scrollY / window.innerHeight, 1);
+  if (rawProgress >= 0.98) revealLocked = true;
   const progress = revealLocked ? 1 : rawProgress;
+  const statsProgress = Math.max(0, Math.min((scrollY - window.innerHeight * 1.18) / (window.innerHeight * 1.18), 1));
+  const statsEnter = Math.max(0, Math.min(statsProgress * 1.2, 1));
 
   const radius   = progress * 200;
   globeWrap.style.clipPath   = `circle(${radius}% at 50% 50%)`;
   globeWrap.style.transition = 'none';
+  globeWrap.style.opacity    = String(1 - statsProgress * 0.42);
+  globeWrap.style.transform  = `scale(${1 - statsProgress * 0.035}) translateY(${-statsProgress * 10}px)`;
+  globeWrap.style.pointerEvents = statsProgress > 0.08 ? 'none' : 'auto';
   revealEl.style.opacity     = String(Math.max(0, 1 - progress * 1.2));
   if (progress >= 0.83) revealEl.style.pointerEvents = 'none';
 
   if (progress > 0.12) {
     globeUi.style.display = 'flex';
-    globeUi.style.opacity = String(Math.min(1, (progress - 0.12) * 2.2));
+    globeUi.style.opacity = String(Math.min(1, (progress - 0.12) * 2.2) * (1 - statsProgress));
+  }
+  if (globeZoom) {
+    globeZoom.style.opacity = String(1 - Math.min(statsProgress * 2.5, 1));
+    globeZoom.style.pointerEvents = statsProgress > 0.04 ? 'none' : 'auto';
   }
   if (progress > 0.35) {
     document.body.classList.remove('light-cursor');
-    globeHint.style.opacity = String(Math.min(1, (progress - 0.35) * 2.5));
+    globeHint.style.opacity = String(Math.min(1, (progress - 0.35) * 2.5) * (1 - statsProgress));
   }
   decorEls.forEach(el => {
     el.style.opacity = String(Math.max(0, 1 - progress * 1.35));
   });
+
+  if (statsScene) {
+    statsScene.style.setProperty('--stats-progress', statsProgress.toFixed(3));
+    statsScene.style.setProperty('--stats-enter', statsEnter.toFixed(3));
+  }
 }
 
-let scrollTicking = false;
-window.addEventListener('scroll',()=>{
-  if (scrollTicking) return;
-  scrollTicking = true;
-  requestAnimationFrame(() => {
-    updateScrollReveal();
-    scrollTicking = false;
-  });
-},{passive:true});
+let visualScrollY = window.scrollY;
+function animateScrollReveal() {
+  visualScrollY += (window.scrollY - visualScrollY) * 0.14;
+  if (Math.abs(window.scrollY - visualScrollY) < 0.35) visualScrollY = window.scrollY;
+  updateScrollReveal(visualScrollY);
+  requestAnimationFrame(animateScrollReveal);
+}
+requestAnimationFrame(animateScrollReveal);
 
 // ── REVISIT: skip intro if already seen this browser session ──
 const INTRO_SEEN_KEY = 'wcim-intro-seen';
@@ -214,6 +232,9 @@ function skipToGlobe() {
 
   globeWrap.style.clipPath = 'circle(200% at 50% 50%)';
   globeWrap.style.transition = 'none';
+  globeWrap.style.opacity = '1';
+  globeWrap.style.transform = 'none';
+  globeWrap.style.pointerEvents = 'auto';
 
   document.body.classList.remove('light-cursor');
   document.body.style.overflowY = 'auto';
@@ -225,6 +246,7 @@ function skipToGlobe() {
   decorEls.forEach(el => { el.style.opacity = '0'; });
 
   revealLocked = true;
+  updateScrollReveal();
 }
 
 if (sessionStorage.getItem(INTRO_SEEN_KEY)) {
@@ -291,6 +313,145 @@ const WC_NATIONS = [
   {iso:'SCO',name:'Scotland',   flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',lat:56.49,lng:-4.20,  group:'C'}
 ];
 const nationByIso = Object.fromEntries(WC_NATIONS.map(n => [n.iso, n]));
+
+const PLATFORM_PROFILES = {
+  ARG: {
+    rank: '1', form: 'Elite', model: '18%',
+    summary: 'Defending champions with a possession-first identity, lethal transition moments, and the highest pressure every opponent can feel.',
+    players: ['Lionel Messi - creator', 'Julian Alvarez - forward press', 'Emiliano Martinez - penalty edge'],
+    fixtures: ['Opening path: Group J launch window', 'Key route: Miami atmosphere game', 'Venue watch: Hard Rock Stadium'],
+    story: ['3 titles', '2022 champions', 'A last-dance narrative that turns every touch into theatre']
+  },
+  BRA: {
+    rank: '5', form: 'Surge', model: '15%',
+    summary: 'Brazil brings the most cinematic attacking brand in world football: rhythm, width, individual chaos, and tournament gravity.',
+    players: ['Vinicius Jr. - left-side ignition', 'Rodrygo - central drift', 'Bruno Guimaraes - tempo control'],
+    fixtures: ['Opening path: Group C launch window', 'Key route: New York/New Jersey showcase', 'Venue watch: MetLife Stadium'],
+    story: ['5 titles', 'Most World Cup wins', 'Every campaign carries the weight of the yellow shirt']
+  },
+  FRA: {
+    rank: '2', form: 'Prime', model: '16%',
+    summary: 'France pairs explosive vertical speed with elite depth, making every substitution feel like the next phase of a final boss fight.',
+    players: ['Kylian Mbappe - gravity runner', 'Antoine Griezmann - space reader', 'Aurelien Tchouameni - midfield shield'],
+    fixtures: ['Opening path: Group I launch window', 'Key route: Dallas night match', 'Venue watch: AT&T Stadium'],
+    story: ['2 titles', 'Back-to-back finalist era', 'A modern dynasty trying to keep its crown aura']
+  },
+  USA: {
+    rank: '11', form: 'Host', model: '7%',
+    summary: 'The host pulse: young legs, vertical attacks, and stadium energy built to turn every home match into a spectacle.',
+    players: ['Christian Pulisic - wide creator', 'Weston McKennie - box runner', 'Tyler Adams - ball winner'],
+    fixtures: ['Opening path: Group D launch window', 'Key route: Los Angeles spotlight', 'Venue watch: SoFi Stadium'],
+    story: ['Host nation', 'Best finish: 1930 semifinal', 'The tournament becomes a home-field stress test']
+  },
+  ESP: {
+    rank: '3', form: 'Control', model: '12%',
+    summary: 'Spain compresses the pitch with patient control, sudden overloads, and a midfield rhythm that makes games feel inevitable.',
+    players: ['Pedri - rhythm maker', 'Lamine Yamal - edge threat', 'Rodri - control tower'],
+    fixtures: ['Opening path: Group H launch window', 'Key route: Atlanta showcase', 'Venue watch: Mercedes-Benz Stadium'],
+    story: ['1 title', '2010 champions', 'A new generation carrying the memory of total control']
+  },
+  DEU: {
+    rank: '9', form: 'Reset', model: '9%',
+    summary: 'Germany arrives with tournament memory, structural discipline, and the familiar sense that a run can harden fast.',
+    players: ['Jamal Musiala - line breaker', 'Florian Wirtz - creator', 'Joshua Kimmich - organizer'],
+    fixtures: ['Opening path: Group E launch window', 'Key route: Houston pressure game', 'Venue watch: NRG Stadium'],
+    story: ['4 titles', 'Eight finals', 'A rebuild trying to become a machine again']
+  },
+  PRT: {
+    rank: '6', form: 'Loaded', model: '11%',
+    summary: 'Portugal has premium squad density, technical calm, and enough final-third options to change the texture of any match.',
+    players: ['Cristiano Ronaldo - box presence', 'Bruno Fernandes - chance engine', 'Rafael Leao - open-field threat'],
+    fixtures: ['Opening path: Group K launch window', 'Key route: West Coast travel test', 'Venue watch: Levi\'s Stadium'],
+    story: ['Best finish: 1966 third place', 'Euro-era confidence', 'The squad depth now matches the ambition']
+  },
+  ENG: {
+    rank: '4', form: 'Loaded', model: '13%',
+    summary: 'England carries elite attacking options, tournament scars, and the tension between control and release.',
+    players: ['Harry Kane - reference point', 'Jude Bellingham - power creator', 'Bukayo Saka - right-side threat'],
+    fixtures: ['Opening path: Group L launch window', 'Key route: Midwest pressure match', 'Venue watch: Arrowhead Stadium'],
+    story: ['1 title', '1966 champions', 'A nation chasing release from history']
+  },
+  GBR: {
+    rank: '4', form: 'Loaded', model: '13%',
+    summary: 'England carries elite attacking options, tournament scars, and the tension between control and release.',
+    players: ['Harry Kane - reference point', 'Jude Bellingham - power creator', 'Bukayo Saka - right-side threat'],
+    fixtures: ['Opening path: Group L launch window', 'Key route: Midwest pressure match', 'Venue watch: Arrowhead Stadium'],
+    story: ['1 title', '1966 champions', 'A nation chasing release from history']
+  }
+};
+
+const HOST_STADIUMS = [
+  { name:'Estadio Azteca', city:'Mexico City', note:'Opening-night mythology' },
+  { name:'SoFi Stadium', city:'Los Angeles', note:'Host spotlight bowl' },
+  { name:'MetLife Stadium', city:'New York/New Jersey', note:'Final-scale pressure' },
+  { name:'BC Place', city:'Vancouver', note:'Glass-roof theatre' }
+];
+
+function profileForNation(n) {
+  return PLATFORM_PROFILES[n.iso] || {
+    rank: '--',
+    form: 'Build',
+    model: 'Feed',
+    summary: `${n.name} is connected to the tournament command layer. Attach live rankings, verified squads, fixtures, and model probabilities through the same profile object.`,
+    players: ['Captain profile - live feed slot', 'Breakout player - live feed slot', 'Tactical key - analyst slot'],
+    fixtures: [`Group ${n.group} opener - schedule feed`, 'Second match - venue route feed', 'Final group match - qualification pressure'],
+    story: ['Tournament history feed', 'Records and milestones feed', 'Nation-specific documentary beat']
+  };
+}
+
+let activePanel = 'squad';
+
+function splitDetailItem(item) {
+  const divider = item.includes(' - ') ? ' - ' : ': ';
+  const [title, ...rest] = item.split(divider);
+  return [title, rest.join(divider)];
+}
+
+function renderPanelContent(profile) {
+  const panelContent = document.getElementById('panel-content');
+  if (!panelContent) return;
+  if (activePanel === 'fixtures') {
+    panelContent.innerHTML = profile.fixtures.map(item => {
+      const [title, detail] = splitDetailItem(item);
+      return `<div class="detail-row"><strong>${title}</strong><span>${detail || 'Connected fixture intelligence'}</span></div>`;
+    }).join('');
+    return;
+  }
+  if (activePanel === 'story') {
+    panelContent.innerHTML = [
+      ...profile.story.map(item => `<div class="detail-row"><strong>${item}</strong><span>History, records, and cinematic archive context.</span></div>`),
+      `<div class="venue-grid">${HOST_STADIUMS.map(s => `<div class="venue-chip"><strong>${s.name}</strong><span>${s.city} - ${s.note}</span></div>`).join('')}</div>`
+    ].join('');
+    return;
+  }
+  panelContent.innerHTML = profile.players.map(item => {
+    const [title, detail] = splitDetailItem(item);
+    return `<div class="detail-row"><strong>${title}</strong><span>${detail || 'Player intelligence'}</span></div>`;
+  }).join('');
+}
+
+function renderNationPanel(n) {
+  const profile = profileForNation(n);
+  const panel = document.getElementById('nation-panel');
+  document.getElementById('panel-kicker').textContent = `${n.iso} selected`;
+  document.getElementById('panel-title').textContent = n.name;
+  document.getElementById('panel-group').textContent = `GROUP ${n.group}`;
+  document.getElementById('panel-summary').textContent = profile.summary;
+  document.getElementById('metric-rank').textContent = profile.rank;
+  document.getElementById('metric-form').textContent = profile.form;
+  document.getElementById('metric-odds').textContent = profile.model;
+  renderPanelContent(profile);
+  panel.classList.add('visible');
+}
+
+function setPlatformView(view) {
+  document.querySelectorAll('.nav-pill').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === view);
+  });
+  document.querySelectorAll('.deck-card').forEach(card => {
+    card.classList.toggle('active', card.dataset.card === view);
+  });
+}
 
 // flagcdn.com needs 2-letter ISO codes; our data uses 3-letter codes.
 const ISO3_TO_ISO2 = {
@@ -372,6 +533,206 @@ function buildTicker() {
 updateTournamentStatus();
 buildTicker();
 
+document.querySelectorAll('.nav-pill').forEach(btn => {
+  btn.addEventListener('click', () => setPlatformView(btn.dataset.view));
+});
+
+document.querySelectorAll('.panel-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activePanel = btn.dataset.panel;
+    document.querySelectorAll('.panel-tab').forEach(tab => {
+      tab.classList.toggle('active', tab === btn);
+    });
+    const selectedIso = document.getElementById('globe-container')?.dataset.selectedIso;
+    const selectedNation = selectedIso ? nationByIso[selectedIso] : null;
+    if (selectedNation) renderNationPanel(selectedNation);
+  });
+});
+
+document.getElementById('panel-close')?.addEventListener('click', () => {
+  const globeContainer = document.getElementById('globe-container');
+  document.getElementById('nation-panel')?.classList.remove('visible');
+  if (globeContainer) globeContainer.dataset.selectedIso = '';
+  globeContainer?.dispatchEvent(new CustomEvent('clearSelection'));
+  document.querySelectorAll('.flag-pin.pulse').forEach(pin => pin.classList.remove('pulse'));
+  setPlatformView('overview');
+});
+
+document.querySelectorAll('.zoom-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    zoomGlobe(btn.dataset.zoom === 'in' ? -1 : 1);
+  });
+});
+
+function startCanvasGlobe(globeContainer, selectNation) {
+  globeContainer.classList.add('fallback-globe');
+  globeContainer.innerHTML = '';
+
+  const canvas = document.createElement('canvas');
+  canvas.id = 'fallback-globe-canvas';
+  globeContainer.appendChild(canvas);
+
+  const ctx = canvas.getContext('2d');
+  let width = 0;
+  let height = 0;
+  let radius = 0;
+  let rotY = -0.55;
+  let rotX = -0.18;
+  let zoomLevel = 1;
+  let dragging = false;
+  let lastX = 0;
+  let lastY = 0;
+  let selectedFallbackIso = null;
+  const pinEls = WC_NATIONS.map(n => {
+    const el = document.createElement('button');
+    el.className = 'flag-pin fallback-pin';
+    el.dataset.iso = n.iso;
+    el.type = 'button';
+    el.innerHTML = `
+      <img src="${flagImgUrl(n.iso)}" alt="${n.name}" loading="lazy">
+      <span class="pin-tooltip">${n.flag} ${n.name}<br><span class="pin-tooltip-group">GROUP ${n.group}</span></span>
+    `;
+    el.addEventListener('click', (event) => {
+      event.stopPropagation();
+      selectedFallbackIso = selectedFallbackIso === n.iso ? null : n.iso;
+      selectNation(n);
+    });
+    globeContainer.appendChild(el);
+    return { nation: n, el };
+  });
+
+  function resizeFallbackGlobe() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = globeContainer.clientWidth || window.innerWidth;
+    height = globeContainer.clientHeight || window.innerHeight;
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    radius = Math.min(width, height) * (width < 700 ? 0.34 : 0.38) * zoomLevel;
+  }
+
+  function project(lat, lng) {
+    const phi = lat * Math.PI / 180;
+    const theta = (lng * Math.PI / 180) + rotY;
+    const x = Math.cos(phi) * Math.sin(theta);
+    const y = Math.sin(phi);
+    const z = Math.cos(phi) * Math.cos(theta);
+    const y2 = y * Math.cos(rotX) - z * Math.sin(rotX);
+    const z2 = y * Math.sin(rotX) + z * Math.cos(rotX);
+    const scale = 0.74 + z2 * 0.26;
+    return {
+      x: width / 2 + x * radius * scale,
+      y: height / 2 - y2 * radius * scale,
+      z: z2,
+      scale
+    };
+  }
+
+  function drawGlobe() {
+    ctx.clearRect(0, 0, width, height);
+    const cx = width / 2;
+    const cy = height / 2;
+    const glow = ctx.createRadialGradient(cx, cy, radius * 0.12, cx, cy, radius * 1.34);
+    glow.addColorStop(0, 'rgba(0,255,135,0.15)');
+    glow.addColorStop(0.55, 'rgba(77,166,255,0.08)');
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius * 1.45, 0, Math.PI * 2);
+    ctx.fill();
+
+    const sphere = ctx.createRadialGradient(cx - radius * 0.32, cy - radius * 0.36, radius * 0.08, cx, cy, radius);
+    sphere.addColorStop(0, '#235f85');
+    sphere.addColorStop(0.42, '#0d2543');
+    sphere.addColorStop(0.78, '#071226');
+    sphere.addColorStop(1, '#020711');
+    ctx.fillStyle = sphere;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.strokeStyle = 'rgba(0,255,135,0.14)';
+    ctx.lineWidth = 1;
+    for (let lat = -60; lat <= 60; lat += 30) {
+      ctx.beginPath();
+      for (let lng = -180; lng <= 180; lng += 5) {
+        const p = project(lat, lng);
+        if (p.z < -0.95) continue;
+        if (lng === -180) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+    }
+    for (let lng = -150; lng <= 180; lng += 30) {
+      ctx.beginPath();
+      for (let lat = -80; lat <= 80; lat += 4) {
+        const p = project(lat, lng);
+        if (p.z < -0.95) continue;
+        if (lat === -80) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.strokeStyle = 'rgba(0,255,135,0.5)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    pinEls.forEach(({ nation, el }) => {
+      const p = project(nation.lat, nation.lng);
+      const visible = p.z > -0.08;
+      el.style.opacity = visible ? String(0.36 + Math.max(0, p.z) * 0.64) : '0';
+      el.style.pointerEvents = visible ? 'auto' : 'none';
+      el.style.transform = `translate(-50%,-120%) scale(${Math.max(0.72, p.scale)})`;
+      el.style.left = p.x + 'px';
+      el.style.top = p.y + 'px';
+      el.style.zIndex = String(30 + Math.round(p.z * 20));
+      el.classList.toggle('pulse', selectedFallbackIso === nation.iso);
+    });
+
+    if (!dragging) rotY += 0.0018;
+    requestAnimationFrame(drawGlobe);
+  }
+
+  globeContainer.addEventListener('pointerdown', event => {
+    dragging = true;
+    lastX = event.clientX;
+    lastY = event.clientY;
+    globeContainer.setPointerCapture?.(event.pointerId);
+  });
+  globeContainer.addEventListener('pointermove', event => {
+    if (!dragging) return;
+    rotY += (event.clientX - lastX) * 0.006;
+    rotX = Math.max(-0.65, Math.min(0.65, rotX + (event.clientY - lastY) * 0.004));
+    lastX = event.clientX;
+    lastY = event.clientY;
+  });
+  globeContainer.addEventListener('pointerup', () => { dragging = false; });
+  globeContainer.addEventListener('pointercancel', () => { dragging = false; });
+  globeContainer.addEventListener('clearSelection', () => {
+    selectedFallbackIso = null;
+    pinEls.forEach(({ el }) => el.classList.remove('pulse'));
+  });
+  zoomGlobe = direction => {
+    zoomLevel = Math.max(0.72, Math.min(1.34, zoomLevel + direction * -0.12));
+    globeContainer.dataset.zoomLevel = zoomLevel.toFixed(2);
+    resizeFallbackGlobe();
+  };
+
+  resizeFallbackGlobe();
+  window.addEventListener('resize', resizeFallbackGlobe);
+  drawGlobe();
+}
+
 setTimeout(() => {
   const globeContainer = document.getElementById('globe-container');
   if (!globeContainer) return;
@@ -381,9 +742,20 @@ setTimeout(() => {
   let idleTimer = null;
   let geoFeatures = [];
   let globe;
+  let controls = null;
+  let cameraAltitude = 2.35;
+  let cameraLat = 18;
+  let cameraLng = -45;
 
   function refreshGlobeStyles() {
-    globe.polygonsData(geoFeatures);
+    if (globe) globe.polygonsData(geoFeatures);
+  }
+
+  function pauseSpin() {
+    if (!controls) return;
+    controls.autoRotate = false;
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => { controls.autoRotate = true; }, 4500);
   }
 
   // Small island/compact nations need a much closer zoom altitude —
@@ -405,8 +777,28 @@ setTimeout(() => {
     }
     pauseSpin();
     const altitude = CLOSE_ZOOM_ISO.has(n.iso) ? 0.7 : 1.6;
-    globe.pointOfView({ lat: n.lat, lng: n.lng, altitude }, 900);
+    cameraLat = n.lat;
+    cameraLng = n.lng;
+    cameraAltitude = altitude;
+    if (globe) globe.pointOfView({ lat: cameraLat, lng: cameraLng, altitude: cameraAltitude }, 900);
     document.getElementById('globe-hint').style.opacity = '0';
+    if (selectedIso) {
+      renderNationPanel(n);
+      setPlatformView('teams');
+    } else {
+      document.getElementById('nation-panel').classList.remove('visible');
+      setPlatformView('overview');
+    }
+  }
+
+  globeContainer.addEventListener('clearSelection', () => {
+    selectedIso = null;
+    refreshGlobeStyles();
+  });
+
+  if (new URLSearchParams(location.search).has('fallback') || typeof Globe !== 'function' || typeof topojson === 'undefined') {
+    startCanvasGlobe(globeContainer, selectNation);
+    return;
   }
 
   globe = Globe()(globeContainer)
@@ -486,21 +878,37 @@ setTimeout(() => {
       return el;
     })
     .htmlAltitude(0.12)
-    .htmlElementVisibilityModifier((el, vis) => { el.style.opacity = vis ? 1 : 0; });
+    .htmlElementVisibilityModifier((el, vis) => {
+      el.style.opacity = vis ? 1 : 0;
+      el.style.pointerEvents = vis ? 'auto' : 'none';
+    });
 
-  const controls = globe.controls();
+  controls = globe.controls();
   controls.autoRotate = true;
   controls.autoRotateSpeed = 0.3;
-  controls.enableZoom = true;
+  controls.enableZoom = false;
   controls.enablePan = false;
   controls.minDistance = 120;
   controls.maxDistance = 420;
+  globe.pointOfView({ lat: cameraLat, lng: cameraLng, altitude: cameraAltitude }, 0);
+  zoomGlobe = direction => {
+    try {
+      const pov = globe.pointOfView();
+      if (pov && typeof pov.lat === 'number') cameraLat = pov.lat;
+      if (pov && typeof pov.lng === 'number') cameraLng = pov.lng;
+    } catch (err) {
+      // Some Globe.gl builds do not expose pointOfView as a getter.
+    }
+    cameraAltitude = Math.max(0.82, Math.min(3.4, cameraAltitude + direction * 0.28));
+    globeContainer.dataset.zoomLevel = cameraAltitude.toFixed(2);
+    globe.pointOfView({
+      lat: cameraLat,
+      lng: cameraLng,
+      altitude: cameraAltitude
+    }, 520);
+    pauseSpin();
+  };
 
-  function pauseSpin() {
-    controls.autoRotate = false;
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => { controls.autoRotate = true; }, 4500);
-  }
   globeContainer.addEventListener('mousedown', pauseSpin);
   globeContainer.addEventListener('touchstart', pauseSpin, {passive:true});
   globeContainer.addEventListener('wheel', pauseSpin, {passive:true});
