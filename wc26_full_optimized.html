@@ -6,7 +6,7 @@
 <title>WorldCupInMotion</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+SC:wght@300;400;500&family=Barlow+Condensed:wght@200;300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=20260626-layout-zoom">
+<link rel="stylesheet" href="css/styles.css?v=20260627-feature-hub">
 <script src="https://unpkg.com/globe.gl"></script>
 <script src="https://unpkg.com/topojson-client@3"></script>
 </head>
@@ -32,9 +32,12 @@
     <div id="globe-topbar">WORLD CUP IN MOTION</div>
     <nav id="platform-nav" aria-label="WorldCupInMotion platform sections">
       <button class="nav-pill active" data-view="overview">Globe</button>
-      <button class="nav-pill" data-view="teams">Teams</button>
-      <button class="nav-pill" data-view="fixtures">Fixtures</button>
+      <button class="nav-pill" data-view="countries">Countries</button>
+      <button class="nav-pill" data-view="live">Live</button>
+      <button class="nav-pill" data-view="groups">Groups</button>
+      <button class="nav-pill" data-view="bracket">Bracket</button>
       <button class="nav-pill" data-view="stadiums">Stadiums</button>
+      <button class="nav-pill" data-view="stats">Stats</button>
       <button class="nav-pill" data-view="history">History</button>
       <button class="nav-pill" data-view="predictions">Predictions</button>
     </nav>
@@ -88,8 +91,8 @@
     <div id="panel-content"></div>
   </aside>
   <section id="platform-deck" aria-label="World Cup platform deck">
-    <article class="deck-card" data-card="teams">
-      <span>Teams</span>
+    <article class="deck-card" data-card="countries">
+      <span>Countries</span>
       <strong>National identities, key players, and tactical profiles.</strong>
       <p>Designed for quick scanning without breaking the cinematic atmosphere.</p>
     </article>
@@ -113,6 +116,20 @@
       <strong>Probability signals presented as elegant match intelligence.</strong>
       <p>Kept clearly separated from live facts so the product stays trustworthy.</p>
     </article>
+  </section>
+  <section id="feature-hub" aria-label="World Cup feature hub">
+    <div class="hub-head">
+      <div>
+        <span id="hub-kicker">Platform layer</span>
+        <h2 id="hub-title">World Cup Command</h2>
+      </div>
+      <button id="hub-close" type="button" aria-label="Close feature panel">&times;</button>
+    </div>
+    <label id="global-search-wrap">
+      <span>Search</span>
+      <input id="global-search" type="search" autocomplete="off" placeholder="Teams, players, stadiums, countries">
+    </label>
+    <div id="feature-panel"></div>
   </section>
 </div>
 
@@ -176,7 +193,7 @@
   </div>
 </section>
 
-<script src="js/app.js?v=20260626-layout-zoom"></script>
+<script src="js/app.js?v=20260627-feature-hub"></script>
 
 </body>
 </html>

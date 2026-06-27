@@ -381,11 +381,92 @@ const PLATFORM_PROFILES = {
 };
 
 const HOST_STADIUMS = [
-  { name:'Estadio Azteca', city:'Mexico City', note:'Opening-night mythology' },
-  { name:'SoFi Stadium', city:'Los Angeles', note:'Host spotlight bowl' },
-  { name:'MetLife Stadium', city:'New York/New Jersey', note:'Final-scale pressure' },
-  { name:'BC Place', city:'Vancouver', note:'Glass-roof theatre' }
+  { name:'Estadio Azteca', city:'Mexico City', capacity:'87,523', matches:'Opening match, group stage', note:'Opening-night mythology' },
+  { name:'SoFi Stadium', city:'Los Angeles', capacity:'70,240', matches:'Group stage, knockout path', note:'Host spotlight bowl' },
+  { name:'MetLife Stadium', city:'New York/New Jersey', capacity:'82,500', matches:'Knockouts, final path', note:'Final-scale pressure' },
+  { name:'BC Place', city:'Vancouver', capacity:'54,500', matches:'Group stage, round of 32', note:'Glass-roof theatre' },
+  { name:'AT&T Stadium', city:'Dallas', capacity:'80,000', matches:'Semifinal route, high-pressure nights', note:'Scale and spectacle' },
+  { name:'Mercedes-Benz Stadium', city:'Atlanta', capacity:'71,000', matches:'Group stage, knockout showcase', note:'Indoor theatre' }
 ];
+
+const LIVE_MATCHES = [
+  {
+    status:'Live 62',
+    home:'Mexico',
+    away:'South Africa',
+    score:'1 - 1',
+    meta:'Group A - Estadio Azteca',
+    events:['12 Henry Martin goal', '31 Percy Tau goal', '58 Mexico chance review'],
+    stats:'Possession 54-46 - Shots 9-7 - Corners 4-3'
+  },
+  {
+    status:'Preview',
+    home:'USA',
+    away:'Paraguay',
+    score:'20:00',
+    meta:'Group D - SoFi Stadium',
+    events:['Lineups pending', 'Host opener atmosphere', 'Probability USA 58%'],
+    stats:'API-ready timeline, lineups, substitutions, cards'
+  }
+];
+
+const GROUP_TABLES = {
+  A: [
+    ['Mexico', 1, 1, 0, 0, 2, '+1', '68%'],
+    ['South Africa', 1, 0, 1, 0, 1, '0', '42%'],
+    ['South Korea', 0, 0, 0, 0, 0, '0', '55%'],
+    ['Czech Republic', 0, 0, 0, 0, 0, '0', '36%']
+  ],
+  D: [
+    ['USA', 0, 0, 0, 0, 0, '0', '61%'],
+    ['Paraguay', 0, 0, 0, 0, 0, '0', '38%'],
+    ['Australia', 0, 0, 0, 0, 0, '0', '44%'],
+    ['Turkey', 0, 0, 0, 0, 0, '0', '53%']
+  ],
+  J: [
+    ['Argentina', 0, 0, 0, 0, 0, '0', '78%'],
+    ['Algeria', 0, 0, 0, 0, 0, '0', '39%'],
+    ['Austria', 0, 0, 0, 0, 0, '0', '46%'],
+    ['Jordan', 0, 0, 0, 0, 0, '0', '24%']
+  ]
+};
+
+const BRACKET_PATH = [
+  { round:'Round of 32', matches:['Mexico vs Turkey', 'France vs Japan', 'Brazil vs Croatia'] },
+  { round:'Round of 16', matches:['Argentina vs Portugal', 'Spain vs Germany', 'USA vs Netherlands'] },
+  { round:'Semifinals', matches:['Brazil vs France', 'Argentina vs Spain'] },
+  { round:'Final', matches:['Argentina vs France'] }
+];
+
+const HISTORY_TIMELINE = [
+  { year:'1930', host:'Uruguay', winner:'Uruguay', final:'Uruguay 4-2 Argentina', fact:'The first tournament created the mythic starting point.' },
+  { year:'1970', host:'Mexico', winner:'Brazil', final:'Brazil 4-1 Italy', fact:'Pele and Brazil defined the beautiful game on the world stage.' },
+  { year:'1998', host:'France', winner:'France', final:'France 3-0 Brazil', fact:'A host-nation coronation became a modern football image.' },
+  { year:'2022', host:'Qatar', winner:'Argentina', final:'Argentina 3-3 France', fact:'A penalty-shootout epic closed Messi era storytelling.' },
+  { year:'2026', host:'Canada, Mexico, USA', winner:'To be played', final:'MetLife Stadium', fact:'The tournament expands to 48 teams and 104 matches.' }
+];
+
+const TOURNAMENT_LEADERS = [
+  ['Top scorers', 'Mbappe', 'Projected 7 goals'],
+  ['Most assists', 'Bruno Fernandes', 'Projected 5 assists'],
+  ['Clean sheets', 'Alisson', 'Projected 5'],
+  ['Possession leaders', 'Spain', '64% model'],
+  ['Most shots', 'Brazil', '17.2 per match'],
+  ['Most saves', 'Canada', '5.8 per match']
+];
+
+const FEATURE_TITLES = {
+  overview:['Platform layer', 'World Cup Command'],
+  countries:['Countries', 'Country Pages'],
+  live:['Live match center', 'Match Control'],
+  groups:['Group stage', 'Qualification Tables'],
+  bracket:['Knockout stage', 'Interactive Bracket'],
+  stadiums:['Stadium explorer', 'Host Routes'],
+  stats:['Statistics', 'Tournament Leaders'],
+  history:['World Cup history', '1930 To 2026'],
+  predictions:['Predictions', 'Probability Engine'],
+  search:['Global search', 'Find Anything']
+};
 
 function profileForNation(n) {
   return PLATFORM_PROFILES[n.iso] || {
@@ -444,6 +525,148 @@ function renderNationPanel(n) {
   panel.classList.add('visible');
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function hubCard(kicker, title, body, extra = '') {
+  return `<article class="hub-card ${extra}"><span>${escapeHtml(kicker)}</span><strong>${escapeHtml(title)}</strong><p>${escapeHtml(body)}</p></article>`;
+}
+
+function renderCountriesView() {
+  const featured = WC_NATIONS.slice(0, 12);
+  return `<div class="hub-grid three">${featured.map(n => {
+    const profile = profileForNation(n);
+    return hubCard(`Group ${n.group}`, `${n.name}`, `Rank ${profile.rank} - ${profile.form} form - ${profile.model} model`);
+  }).join('')}</div>`;
+}
+
+function renderLiveView() {
+  return LIVE_MATCHES.map(match => `
+    <article class="match-card">
+      <div class="match-meta">${escapeHtml(match.status)} - ${escapeHtml(match.meta)}</div>
+      <div class="match-row">
+        <span class="match-team">${escapeHtml(match.home)}</span>
+        <strong class="match-score">${escapeHtml(match.score)}</strong>
+        <span class="match-team">${escapeHtml(match.away)}</span>
+      </div>
+      <p>${escapeHtml(match.stats)}</p>
+      <ul class="event-list">${match.events.map(event => `<li><span>${escapeHtml(event)}</span><span>Timeline</span></li>`).join('')}</ul>
+    </article>
+  `).join('');
+}
+
+function renderGroupsView() {
+  return `<div class="hub-grid">${Object.entries(GROUP_TABLES).map(([group, rows]) => `
+    <article class="group-card">
+      <h3>Group ${escapeHtml(group)}</h3>
+      <table class="group-table">
+        <thead><tr><th>Team</th><th>Pts</th><th>GD</th><th>Q</th></tr></thead>
+        <tbody>${rows.map(row => `<tr><td>${escapeHtml(row[0])}</td><td>${row[4]}</td><td>${escapeHtml(row[6])}</td><td>${escapeHtml(row[7])}</td></tr>`).join('')}</tbody>
+      </table>
+    </article>
+  `).join('')}</div>`;
+}
+
+function renderBracketView() {
+  return `<div class="bracket-track">${BRACKET_PATH.map(round => `
+    <div class="bracket-column">
+      <div class="bracket-round">${escapeHtml(round.round)}</div>
+      ${round.matches.map(match => `<article class="bracket-match"><strong>${escapeHtml(match)}</strong><em>Animated progression slot</em></article>`).join('')}
+    </div>
+  `).join('')}</div>`;
+}
+
+function renderStadiumsView() {
+  return `
+    <div class="hub-grid">${HOST_STADIUMS.map(stadium => `
+      <article class="hub-card stadium-card">
+        <span>${escapeHtml(stadium.city)}</span>
+        <strong>${escapeHtml(stadium.name)}</strong>
+        <p>${escapeHtml(stadium.capacity)} seats - ${escapeHtml(stadium.matches)} - ${escapeHtml(stadium.note)}</p>
+      </article>
+    `).join('')}</div>
+    <div class="route-strip">
+      ${HOST_STADIUMS.slice(0, 5).map((stadium, index) => `${index ? '<span class="route-line"></span>' : ''}<span class="route-dot" title="${escapeHtml(stadium.city)}"></span>`).join('')}
+    </div>
+  `;
+}
+
+function renderStatsView() {
+  return `<div class="hub-grid three">${TOURNAMENT_LEADERS.map(([label, name, detail]) => hubCard(label, name, detail)).join('')}</div>`;
+}
+
+function renderHistoryView() {
+  return `<div class="hub-grid">${HISTORY_TIMELINE.map(item => hubCard(`${item.year} - ${item.host}`, item.winner, `${item.final}. ${item.fact}`)).join('')}</div>`;
+}
+
+function renderPredictionsView() {
+  return `<div class="hub-grid three">
+    ${hubCard('Winner model', 'Argentina 18%', 'Defending champions lead the current static probability layer.')}
+    ${hubCard('Dark horse', 'USA 7%', 'Host boost, young squad profile, and favorable atmosphere swings.')}
+    ${hubCard('Final path', 'France vs Argentina', 'Bracket slot prepared for API or model-driven simulation.')}
+    ${hubCard('Team comparison', 'Brazil +2.4 xG', 'Comparison cards can attach shots, possession, saves, and pressure.')}
+    ${hubCard('Player comparison', 'Mbappe vs Vinicius', 'Player cards are ready for goals, assists, club, age, and live stats.')}
+    ${hubCard('Confidence', 'Prototype', 'Predictions are separated from verified facts to keep the product trustworthy.')}
+  </div>`;
+}
+
+function searchItems(query) {
+  const normalized = normalizeName(query);
+  const players = Object.entries(PLATFORM_PROFILES).flatMap(([iso, profile]) =>
+    profile.players.map(player => ({ type:'Player', title:player.split(' - ')[0], body:`${nationByIso[iso]?.name || iso} - ${player.split(' - ')[1] || 'profile'}`, iso }))
+  );
+  const countries = WC_NATIONS.map(n => ({ type:'Country', title:n.name, body:`Group ${n.group} - ${profileForNation(n).form} form`, iso:n.iso }));
+  const stadiums = HOST_STADIUMS.map(s => ({ type:'Stadium', title:s.name, body:`${s.city} - ${s.matches}` }));
+  const all = [...countries, ...players, ...stadiums];
+  if (!normalized) return all.slice(0, 8);
+  return all.filter(item => normalizeName(`${item.type} ${item.title} ${item.body}`).includes(normalized)).slice(0, 10);
+}
+
+function renderSearchView(query = '') {
+  const results = searchItems(query);
+  if (!results.length) return '<div class="search-results"><article class="search-result"><strong>No results</strong><p>Try a team, player, stadium, or country.</p></article></div>';
+  return `<div class="search-results">${results.map(item => `
+    <article class="search-result" data-iso="${escapeHtml(item.iso || '')}">
+      <small>${escapeHtml(item.type)}</small>
+      <strong>${escapeHtml(item.title)}</strong>
+      <p>${escapeHtml(item.body)}</p>
+    </article>
+  `).join('')}</div>`;
+}
+
+function renderFeatureView(view, query = '') {
+  const hub = document.getElementById('feature-hub');
+  const panel = document.getElementById('feature-panel');
+  const title = document.getElementById('hub-title');
+  const kicker = document.getElementById('hub-kicker');
+  if (!hub || !panel || !title || !kicker) return;
+
+  const [nextKicker, nextTitle] = FEATURE_TITLES[view] || FEATURE_TITLES.overview;
+  kicker.textContent = nextKicker;
+  title.textContent = nextTitle;
+
+  const views = {
+    countries: renderCountriesView,
+    live: renderLiveView,
+    groups: renderGroupsView,
+    bracket: renderBracketView,
+    stadiums: renderStadiumsView,
+    stats: renderStatsView,
+    history: renderHistoryView,
+    predictions: renderPredictionsView,
+    search: () => renderSearchView(query)
+  };
+
+  panel.innerHTML = (views[view] || renderCountriesView)();
+  hub.classList.toggle('visible', view !== 'overview');
+}
+
 function setPlatformView(view) {
   document.querySelectorAll('.nav-pill').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.view === view);
@@ -451,6 +674,7 @@ function setPlatformView(view) {
   document.querySelectorAll('.deck-card').forEach(card => {
     card.classList.toggle('active', card.dataset.card === view);
   });
+  renderFeatureView(view);
 }
 
 // flagcdn.com needs 2-letter ISO codes; our data uses 3-letter codes.
@@ -535,6 +759,25 @@ buildTicker();
 
 document.querySelectorAll('.nav-pill').forEach(btn => {
   btn.addEventListener('click', () => setPlatformView(btn.dataset.view));
+});
+
+document.getElementById('hub-close')?.addEventListener('click', () => {
+  setPlatformView('overview');
+});
+
+document.getElementById('global-search')?.addEventListener('input', event => {
+  renderFeatureView('search', event.target.value);
+  document.querySelectorAll('.nav-pill').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === 'search');
+  });
+});
+
+document.getElementById('feature-panel')?.addEventListener('click', event => {
+  const result = event.target.closest('.search-result[data-iso]');
+  const iso = result?.dataset.iso;
+  if (!iso || !nationByIso[iso]) return;
+  renderNationPanel(nationByIso[iso]);
+  setPlatformView('countries');
 });
 
 document.querySelectorAll('.panel-tab').forEach(btn => {
@@ -784,7 +1027,7 @@ setTimeout(() => {
     document.getElementById('globe-hint').style.opacity = '0';
     if (selectedIso) {
       renderNationPanel(n);
-      setPlatformView('teams');
+      setPlatformView('countries');
     } else {
       document.getElementById('nation-panel').classList.remove('visible');
       setPlatformView('overview');
