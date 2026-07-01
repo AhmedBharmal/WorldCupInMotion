@@ -194,7 +194,7 @@ function updateScrollReveal(scrollY = window.scrollY) {
     globeZoom.style.pointerEvents = statsProgress > 0.04 ? 'none' : 'auto';
   }
   if (progress > 0.35) {
-    document.body.classList.remove('light-cursor');
+    document.body.classList.add('globe-active');
     globeHint.style.opacity = String(Math.min(1, (progress - 0.35) * 2.5) * (1 - statsProgress));
   }
   decorEls.forEach(el => {
@@ -209,7 +209,7 @@ function updateScrollReveal(scrollY = window.scrollY) {
 
 let visualScrollY = window.scrollY;
 function animateScrollReveal() {
-  visualScrollY += (window.scrollY - visualScrollY) * 0.14;
+  visualScrollY += (window.scrollY - visualScrollY) * 0.20;
   if (Math.abs(window.scrollY - visualScrollY) < 0.35) visualScrollY = window.scrollY;
   updateScrollReveal(visualScrollY);
   requestAnimationFrame(animateScrollReveal);
@@ -236,7 +236,7 @@ function skipToGlobe() {
   globeWrap.style.transform = 'none';
   globeWrap.style.pointerEvents = 'auto';
 
-  document.body.classList.remove('light-cursor');
+  document.body.classList.add('globe-active');
   document.body.style.overflowY = 'auto';
 
   globeUi.style.display = 'flex';

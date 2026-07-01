@@ -6,7 +6,7 @@
 <title>WorldCupInMotion</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+SC:wght@300;400;500&family=Barlow+Condensed:wght@200;300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=20260627-feature-hub">
+<link rel="stylesheet" href="css/styles.css?v=20260628-leaderboard">
 <script src="https://unpkg.com/globe.gl"></script>
 <script src="https://unpkg.com/topojson-client@3"></script>
 </head>
@@ -167,33 +167,263 @@
   <div id="stats-copy">
     <div class="panel-kicker">FIFA World Cup 2026</div>
     <h2>Tournament Statistics</h2>
-    <p>The expanded tournament in Canada, Mexico, and the United States, framed as a live-ready premium data layer.</p>
+    <p>Canada · Mexico · United States. The largest World Cup ever assembled.</p>
   </div>
   <div id="stats-rail">
     <article class="stat-tile">
       <span>Qualified Teams</span>
       <strong>48</strong>
-      <p>The largest World Cup field, built for country-by-country live data.</p>
+      <p>The largest World Cup field ever, built for country-by-country live data.</p>
     </article>
     <article class="stat-tile">
       <span>Total Matches</span>
       <strong>104</strong>
-      <p>Group stage, knockout paths, and final routes across North America.</p>
+      <p>Group stage through final across North America.</p>
     </article>
     <article class="stat-tile">
       <span>Host Cities</span>
       <strong>16</strong>
-      <p>Venue intelligence across Canada, Mexico, and the United States.</p>
+      <p>Venues across Canada, Mexico, and the United States.</p>
     </article>
     <article class="stat-tile">
       <span>Host Nations</span>
       <strong>3</strong>
-      <p>One tournament atmosphere spread across three football cultures.</p>
+      <p>One tournament. Three football cultures. Billions watching.</p>
     </article>
+  </div>
+
+  <!-- Player leaderboard -->
+  <div id="stats-leaderboard">
+    <div class="lb-head">
+      <h3>Player Stats</h3>
+      <div class="lb-tabs" role="tablist">
+        <button class="lb-tab active" data-lb="goals">Goals</button>
+        <button class="lb-tab" data-lb="assists">Assists</button>
+        <button class="lb-tab" data-lb="yellow">Yellow Cards</button>
+        <button class="lb-tab" data-lb="red">Red Cards</button>
+      </div>
+    </div>
+    <div class="lb-cols">
+      <span class="lb-col-player">Player</span>
+      <span class="lb-col-stat" id="lb-stat-label">Goals</span>
+    </div>
+
+    <!-- Goals -->
+    <div class="lb-rows" data-tab="goals">
+      <div class="lb-row">
+        <div class="lb-rank gold">1</div>
+        <div class="lb-avatar">LM</div>
+        <div class="lb-info">
+          <span class="lb-name">Lionel Messi</span>
+          <span class="lb-country"><span class="lb-flag">🇦🇷</span>Argentina</span>
+        </div>
+        <div class="lb-value">6</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank silver">2</div>
+        <div class="lb-avatar">EH</div>
+        <div class="lb-info">
+          <span class="lb-name">Erling Haaland</span>
+          <span class="lb-country"><span class="lb-flag">🇳🇴</span>Norway</span>
+        </div>
+        <div class="lb-value">4</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank silver">2</div>
+        <div class="lb-avatar">KM</div>
+        <div class="lb-info">
+          <span class="lb-name">Kylian Mbappé</span>
+          <span class="lb-country"><span class="lb-flag">🇫🇷</span>France</span>
+        </div>
+        <div class="lb-value">4</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank silver">2</div>
+        <div class="lb-avatar">OD</div>
+        <div class="lb-info">
+          <span class="lb-name">Ousmane Dembélé</span>
+          <span class="lb-country"><span class="lb-flag">🇫🇷</span>France</span>
+        </div>
+        <div class="lb-value">4</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank silver">2</div>
+        <div class="lb-avatar">VJ</div>
+        <div class="lb-info">
+          <span class="lb-name">Vinícius Júnior</span>
+          <span class="lb-country"><span class="lb-flag">🇧🇷</span>Brazil</span>
+        </div>
+        <div class="lb-value">4</div>
+      </div>
+    </div>
+
+    <!-- Assists -->
+    <div class="lb-rows" data-tab="assists" style="display:none">
+      <div class="lb-row">
+        <div class="lb-rank gold">1</div>
+        <div class="lb-avatar">TB</div>
+        <div class="lb-info">
+          <span class="lb-name">Toni Kroos</span>
+          <span class="lb-country"><span class="lb-flag">🇩🇪</span>Germany</span>
+        </div>
+        <div class="lb-value">5</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank silver">2</div>
+        <div class="lb-avatar">LM</div>
+        <div class="lb-info">
+          <span class="lb-name">Lionel Messi</span>
+          <span class="lb-country"><span class="lb-flag">🇦🇷</span>Argentina</span>
+        </div>
+        <div class="lb-value">4</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank bronze">3</div>
+        <div class="lb-avatar">KB</div>
+        <div class="lb-info">
+          <span class="lb-name">Kevin De Bruyne</span>
+          <span class="lb-country"><span class="lb-flag">🇧🇪</span>Belgium</span>
+        </div>
+        <div class="lb-value">3</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank bronze">3</div>
+        <div class="lb-avatar">LM</div>
+        <div class="lb-info">
+          <span class="lb-name">Lamine Yamal</span>
+          <span class="lb-country"><span class="lb-flag">🇪🇸</span>Spain</span>
+        </div>
+        <div class="lb-value">3</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank bronze">3</div>
+        <div class="lb-avatar">PN</div>
+        <div class="lb-info">
+          <span class="lb-name">Phil Foden</span>
+          <span class="lb-country"><span class="lb-flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>England</span>
+        </div>
+        <div class="lb-value">3</div>
+      </div>
+    </div>
+
+    <!-- Yellow Cards -->
+    <div class="lb-rows" data-tab="yellow" style="display:none">
+      <div class="lb-row">
+        <div class="lb-rank gold">1</div>
+        <div class="lb-avatar">CE</div>
+        <div class="lb-info">
+          <span class="lb-name">Casemiro</span>
+          <span class="lb-country"><span class="lb-flag">🇧🇷</span>Brazil</span>
+        </div>
+        <div class="lb-value">3</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank gold">1</div>
+        <div class="lb-avatar">MG</div>
+        <div class="lb-info">
+          <span class="lb-name">Mario Gila</span>
+          <span class="lb-country"><span class="lb-flag">🇪🇸</span>Spain</span>
+        </div>
+        <div class="lb-value">3</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank silver">3</div>
+        <div class="lb-avatar">RG</div>
+        <div class="lb-info">
+          <span class="lb-name">Robert Gum</span>
+          <span class="lb-country"><span class="lb-flag">🇵🇱</span>Poland</span>
+        </div>
+        <div class="lb-value">2</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank silver">3</div>
+        <div class="lb-avatar">DL</div>
+        <div class="lb-info">
+          <span class="lb-name">Declan Rice</span>
+          <span class="lb-country"><span class="lb-flag">🏴󠁧󠁢󠁥󠁮󠁧󠁿</span>England</span>
+        </div>
+        <div class="lb-value">2</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank silver">3</div>
+        <div class="lb-avatar">FA</div>
+        <div class="lb-info">
+          <span class="lb-name">Frenkie de Jong</span>
+          <span class="lb-country"><span class="lb-flag">🇳🇱</span>Netherlands</span>
+        </div>
+        <div class="lb-value">2</div>
+      </div>
+    </div>
+
+    <!-- Red Cards -->
+    <div class="lb-rows" data-tab="red" style="display:none">
+      <div class="lb-row">
+        <div class="lb-rank gold">1</div>
+        <div class="lb-avatar">AM</div>
+        <div class="lb-info">
+          <span class="lb-name">Achraf Hakimi</span>
+          <span class="lb-country"><span class="lb-flag">🇲🇦</span>Morocco</span>
+        </div>
+        <div class="lb-value">1</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank gold">1</div>
+        <div class="lb-avatar">RH</div>
+        <div class="lb-info">
+          <span class="lb-name">Robin Gosens</span>
+          <span class="lb-country"><span class="lb-flag">🇩🇪</span>Germany</span>
+        </div>
+        <div class="lb-value">1</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank gold">1</div>
+        <div class="lb-avatar">BF</div>
+        <div class="lb-info">
+          <span class="lb-name">Bruno Fernandes</span>
+          <span class="lb-country"><span class="lb-flag">🇵🇹</span>Portugal</span>
+        </div>
+        <div class="lb-value">1</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank gold">1</div>
+        <div class="lb-avatar">JC</div>
+        <div class="lb-info">
+          <span class="lb-name">John Brooks</span>
+          <span class="lb-country"><span class="lb-flag">🇺🇸</span>USA</span>
+        </div>
+        <div class="lb-value">1</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank gold">1</div>
+        <div class="lb-avatar">MC</div>
+        <div class="lb-info">
+          <span class="lb-name">Milan Škriniar</span>
+          <span class="lb-country"><span class="lb-flag">🇸🇰</span>Slovakia</span>
+        </div>
+        <div class="lb-value">1</div>
+      </div>
+    </div>
   </div>
 </section>
 
-<script src="js/app.js?v=20260627-feature-hub"></script>
+<script src="js/app.js?v=20260628-leaderboard"></script>
+<script>
+// ── LEADERBOARD TABS ─────────────────────────────────────────
+(function(){
+  var tabs   = document.querySelectorAll('.lb-tab');
+  var rows   = document.querySelectorAll('.lb-rows');
+  var label  = document.getElementById('lb-stat-label');
+  var labels = { goals:'Goals', assists:'Assists', yellow:'Yellow Cards', red:'Red Cards' };
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var key = this.dataset.lb;
+      tabs.forEach(function(t){ t.classList.toggle('active', t===tab); });
+      rows.forEach(function(r){ r.style.display = r.dataset.tab===key ? 'block' : 'none'; });
+      if(label) label.textContent = labels[key] || key;
+    });
+  });
+})();
+</script>
 
 </body>
 </html>
