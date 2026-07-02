@@ -470,13 +470,25 @@ const FEATURE_TITLES = {
 
 function profileForNation(n) {
   return PLATFORM_PROFILES[n.iso] || {
-    rank: '--',
-    form: 'Build',
-    model: 'Feed',
-    summary: `${n.name} is connected to the tournament command layer. Attach live rankings, verified squads, fixtures, and model probabilities through the same profile object.`,
-    players: ['Captain profile - live feed slot', 'Breakout player - live feed slot', 'Tactical key - analyst slot'],
-    fixtures: [`Group ${n.group} opener - schedule feed`, 'Second match - venue route feed', 'Final group match - qualification pressure'],
-    story: ['Tournament history feed', 'Records and milestones feed', 'Nation-specific documentary beat']
+    rank: 'TBC',
+    form: 'TBC',
+    model: 'TBC',
+    summary: `${n.name} · Group ${n.group}. Full squad, rankings, form, and fixture data will load from the live feed once tournament data is available.`,
+    players: [
+      `${n.name} captain · Data unavailable`,
+      `Key forward · Data unavailable`,
+      `Tactical key · Data unavailable`
+    ],
+    fixtures: [
+      `Group ${n.group} opener · Schedule pending`,
+      `Second group match · Schedule pending`,
+      `Third group match · Schedule pending`
+    ],
+    story: [
+      `${n.name} World Cup history · Data soon`,
+      'Tournament records · Data soon',
+      'Qualification route · Data soon'
+    ]
   };
 }
 
@@ -499,10 +511,10 @@ function renderPanelContent(profile) {
     return;
   }
   if (activePanel === 'story') {
-    panelContent.innerHTML = [
-      ...profile.story.map(item => `<div class="detail-row"><strong>${item}</strong><span>History, records, and cinematic archive context.</span></div>`),
-      `<div class="venue-grid">${HOST_STADIUMS.map(s => `<div class="venue-chip"><strong>${s.name}</strong><span>${s.city} - ${s.note}</span></div>`).join('')}</div>`
-    ].join('');
+    const storyItems = profile.story.map(item =>
+      `<div class="detail-row"><strong>${escapeHtml(item)}</strong></div>`
+    ).join('');
+    panelContent.innerHTML = storyItems;
     return;
   }
   panelContent.innerHTML = profile.players.map(item => {
@@ -538,12 +550,41 @@ function hubCard(kicker, title, body, extra = '') {
   return `<article class="hub-card ${extra}"><span>${escapeHtml(kicker)}</span><strong>${escapeHtml(title)}</strong><p>${escapeHtml(body)}</p></article>`;
 }
 
-function renderCountriesView() {
-  const featured = WC_NATIONS.slice(0, 12);
-  return `<div class="hub-grid three">${featured.map(n => {
-    const profile = profileForNation(n);
-    return hubCard(`Group ${n.group}`, `${n.name}`, `Rank ${profile.rank} - ${profile.form} form - ${profile.model} model`);
-  }).join('')}</div>`;
+function renderCountriesView(filterGroup = '') {
+  const nations = filterGroup
+    ? WC_NATIONS.filter(n => n.group === filterGroup)
+    : WC_NATIONS;
+
+  const groups = [...new Set(WC_NATIONS.map(n => n.group))].sort();
+  const filterBar = `
+    <div class="group-filter-bar" role="group" aria-label="Filter by group">
+      <button class="group-filter-btn${!filterGroup ? ' active' : ''}" data-group="">All</button>
+      ${groups.map(g => `<button class="group-filter-btn${filterGroup === g ? ' active' : ''}" data-group="${g}">Group ${g}</button>`).join('')}
+    </div>`;
+
+  const cards = nations.map(n => {
+    const profile = PLATFORM_PROFILES[n.iso];
+    const rank  = profile ? `#${profile.rank}` : 'Rank TBC';
+    const form  = profile ? profile.form : 'Data soon';
+    const model = profile ? profile.model : '—';
+    const iso2  = ISO3_TO_ISO2[n.iso] || '';
+    const flagSrc = iso2 ? `https://flagcdn.com/w80/${iso2}.png` : '';
+    return `
+      <article class="hub-card country-card" data-iso="${escapeHtml(n.iso)}" tabindex="0" role="button" aria-label="${escapeHtml(n.name)}, Group ${n.group}">
+        <div class="country-card-head">
+          ${flagSrc ? `<img class="country-flag-thumb" src="${flagSrc}" alt="${escapeHtml(n.name)} flag" loading="lazy" width="32" height="22">` : `<span class="country-flag-emoji">${n.flag}</span>`}
+          <span class="country-card-group">Group ${escapeHtml(n.group)}</span>
+        </div>
+        <strong>${escapeHtml(n.name)}</strong>
+        <div class="country-card-meta">
+          <span class="country-card-rank">${escapeHtml(rank)}</span>
+          <span class="country-card-form">${escapeHtml(form)}</span>
+          ${model !== '—' ? `<span class="country-card-model">${escapeHtml(model)}</span>` : ''}
+        </div>
+      </article>`;
+  }).join('');
+
+  return filterBar + `<div class="hub-grid three country-grid">${cards}</div>`;
 }
 
 function renderLiveView() {
@@ -577,7 +618,7 @@ function renderBracketView() {
   return `<div class="bracket-track">${BRACKET_PATH.map(round => `
     <div class="bracket-column">
       <div class="bracket-round">${escapeHtml(round.round)}</div>
-      ${round.matches.map(match => `<article class="bracket-match"><strong>${escapeHtml(match)}</strong><em>Animated progression slot</em></article>`).join('')}
+      ${round.matches.map(match => `<article class="bracket-match"><strong>${escapeHtml(match)}</strong><em>Projected path · updates live</em></article>`).join('')}
     </div>
   `).join('')}</div>`;
 }
@@ -606,14 +647,16 @@ function renderHistoryView() {
 }
 
 function renderPredictionsView() {
-  return `<div class="hub-grid three">
-    ${hubCard('Winner model', 'Argentina 18%', 'Defending champions lead the current static probability layer.')}
-    ${hubCard('Dark horse', 'USA 7%', 'Host boost, young squad profile, and favorable atmosphere swings.')}
-    ${hubCard('Final path', 'France vs Argentina', 'Bracket slot prepared for API or model-driven simulation.')}
-    ${hubCard('Team comparison', 'Brazil +2.4 xG', 'Comparison cards can attach shots, possession, saves, and pressure.')}
-    ${hubCard('Player comparison', 'Mbappe vs Vinicius', 'Player cards are ready for goals, assists, club, age, and live stats.')}
-    ${hubCard('Confidence', 'Prototype', 'Predictions are separated from verified facts to keep the product trustworthy.')}
-  </div>`;
+  return `
+    <p class="hub-data-note">Model outputs — not verified match data. Updated pre-tournament.</p>
+    <div class="hub-grid three">
+      ${hubCard('Winner model', 'Argentina 18%', 'Defending champions lead the current pre-tournament probability model.')}
+      ${hubCard('Dark horse', 'USA 7%', 'Host boost, young squad profile, and favorable home atmosphere factor.')}
+      ${hubCard('Projected final', 'France vs Argentina', 'Model-driven bracket simulation — updates live once knockout stage begins.')}
+      ${hubCard('Team xG leader', 'Brazil +2.4 xG', 'Expected goals model based on squad depth, recent form, and opposition quality.')}
+      ${hubCard('Player to watch', 'Mbappé vs Vinícius', 'Head-to-head model comparison ready for goals, assists, and pressure metrics.')}
+      ${hubCard('Model confidence', 'Pre-tournament', 'All projections are separated from verified facts. Confidence scores attach once group stage completes.')}
+    </div>`;
 }
 
 function searchItems(query) {
@@ -667,6 +710,38 @@ function renderFeatureView(view, query = '') {
   hub.classList.toggle('visible', view !== 'overview');
 }
 
+// ── ONE-SURFACE-AT-A-TIME ROUTING ────────────────────────────
+// Never show feature hub and nation panel simultaneously.
+// This is the single source of truth for surface visibility.
+
+function closeNationPanel() {
+  const panel = document.getElementById('nation-panel');
+  const globeContainer = document.getElementById('globe-container');
+  if (panel) panel.classList.remove('visible');
+  if (globeContainer) {
+    globeContainer.dataset.selectedIso = '';
+    globeContainer.dispatchEvent(new CustomEvent('clearSelection'));
+  }
+  document.querySelectorAll('.flag-pin.pulse').forEach(pin => pin.classList.remove('pulse'));
+}
+
+function closeHub() {
+  const hub = document.getElementById('feature-hub');
+  if (hub) hub.classList.remove('visible');
+}
+
+function openNationPanel(n) {
+  // Collapse hub first — one surface at a time
+  closeHub();
+  renderNationPanel(n);
+}
+
+function openHub(view, query = '') {
+  // Collapse nation panel first — one surface at a time
+  closeNationPanel();
+  renderFeatureView(view, query);
+}
+
 function setPlatformView(view) {
   document.querySelectorAll('.nav-pill').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.view === view);
@@ -674,7 +749,11 @@ function setPlatformView(view) {
   document.querySelectorAll('.deck-card').forEach(card => {
     card.classList.toggle('active', card.dataset.card === view);
   });
-  renderFeatureView(view);
+  if (view === 'overview') {
+    closeHub();
+  } else {
+    openHub(view);
+  }
 }
 
 // flagcdn.com needs 2-letter ISO codes; our data uses 3-letter codes.
@@ -773,11 +852,59 @@ document.getElementById('global-search')?.addEventListener('input', event => {
 });
 
 document.getElementById('feature-panel')?.addEventListener('click', event => {
+  // Search result → open nation panel
   const result = event.target.closest('.search-result[data-iso]');
-  const iso = result?.dataset.iso;
-  if (!iso || !nationByIso[iso]) return;
-  renderNationPanel(nationByIso[iso]);
-  setPlatformView('countries');
+  if (result?.dataset.iso && nationByIso[result.dataset.iso]) {
+    openNationPanel(nationByIso[result.dataset.iso]);
+    document.querySelectorAll('.nav-pill').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.view === 'countries');
+    });
+    return;
+  }
+  // Country card → open nation panel
+  const card = event.target.closest('.country-card[data-iso]');
+  if (card?.dataset.iso && nationByIso[card.dataset.iso]) {
+    openNationPanel(nationByIso[card.dataset.iso]);
+    document.querySelectorAll('.nav-pill').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.view === 'countries');
+    });
+    return;
+  }
+  // Group filter button
+  const filterBtn = event.target.closest('.group-filter-btn');
+  if (filterBtn) {
+    const group = filterBtn.dataset.group;
+    const panel = document.getElementById('feature-panel');
+    if (panel) {
+      const hub = document.getElementById('feature-hub');
+      hub?.querySelectorAll('.group-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.group === group));
+      const grid = panel.querySelector('.country-grid');
+      if (grid) {
+        const nations = group ? WC_NATIONS.filter(n => n.group === group) : WC_NATIONS;
+        grid.innerHTML = nations.map(n => {
+          const profile = PLATFORM_PROFILES[n.iso];
+          const rank  = profile ? `#${profile.rank}` : 'Rank TBC';
+          const form  = profile ? profile.form : 'Data soon';
+          const model = profile ? profile.model : '—';
+          const iso2  = ISO3_TO_ISO2[n.iso] || '';
+          const flagSrc = iso2 ? `https://flagcdn.com/w80/${iso2}.png` : '';
+          return `
+            <article class="hub-card country-card" data-iso="${escapeHtml(n.iso)}" tabindex="0" role="button" aria-label="${escapeHtml(n.name)}, Group ${n.group}">
+              <div class="country-card-head">
+                ${flagSrc ? `<img class="country-flag-thumb" src="${flagSrc}" alt="${escapeHtml(n.name)} flag" loading="lazy" width="32" height="22">` : `<span class="country-flag-emoji">${n.flag}</span>`}
+                <span class="country-card-group">Group ${escapeHtml(n.group)}</span>
+              </div>
+              <strong>${escapeHtml(n.name)}</strong>
+              <div class="country-card-meta">
+                <span class="country-card-rank">${escapeHtml(rank)}</span>
+                <span class="country-card-form">${escapeHtml(form)}</span>
+                ${model !== '—' ? `<span class="country-card-model">${escapeHtml(model)}</span>` : ''}
+              </div>
+            </article>`;
+        }).join('');
+      }
+    }
+  }
 });
 
 document.querySelectorAll('.panel-tab').forEach(btn => {
@@ -793,11 +920,7 @@ document.querySelectorAll('.panel-tab').forEach(btn => {
 });
 
 document.getElementById('panel-close')?.addEventListener('click', () => {
-  const globeContainer = document.getElementById('globe-container');
-  document.getElementById('nation-panel')?.classList.remove('visible');
-  if (globeContainer) globeContainer.dataset.selectedIso = '';
-  globeContainer?.dispatchEvent(new CustomEvent('clearSelection'));
-  document.querySelectorAll('.flag-pin.pulse').forEach(pin => pin.classList.remove('pulse'));
+  closeNationPanel();
   setPlatformView('overview');
 });
 
@@ -980,6 +1103,32 @@ setTimeout(() => {
   const globeContainer = document.getElementById('globe-container');
   if (!globeContainer) return;
 
+  // ── LOADING STATE ──────────────────────────────────────────
+  const loadingEl = document.createElement('div');
+  loadingEl.id = 'globe-loading';
+  loadingEl.innerHTML = `
+    <div class="globe-loading-ring"></div>
+    <span>Loading globe data…</span>
+  `;
+  globeContainer.appendChild(loadingEl);
+
+  function hideLoading() {
+    loadingEl.style.opacity = '0';
+    setTimeout(() => loadingEl.remove(), 400);
+  }
+
+  function showError(msg) {
+    hideLoading();
+    const errEl = document.createElement('div');
+    errEl.id = 'globe-error';
+    errEl.innerHTML = `
+      <span class="globe-error-icon">⚠</span>
+      <strong>${escapeHtml(msg)}</strong>
+      <button onclick="location.reload()" class="globe-retry-btn">Retry</button>
+    `;
+    globeContainer.appendChild(errEl);
+  }
+
   let hoverIso = null;
   let selectedIso = null;
   let idleTimer = null;
@@ -1026,8 +1175,11 @@ setTimeout(() => {
     if (globe) globe.pointOfView({ lat: cameraLat, lng: cameraLng, altitude: cameraAltitude }, 900);
     document.getElementById('globe-hint').style.opacity = '0';
     if (selectedIso) {
-      renderNationPanel(n);
-      setPlatformView('countries');
+      openNationPanel(n);
+      // Mark the Countries pill active without opening hub
+      document.querySelectorAll('.nav-pill').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === 'countries');
+      });
     } else {
       document.getElementById('nation-panel').classList.remove('visible');
       setPlatformView('overview');
@@ -1040,6 +1192,7 @@ setTimeout(() => {
   });
 
   if (new URLSearchParams(location.search).has('fallback') || typeof Globe !== 'function' || typeof topojson === 'undefined') {
+    hideLoading();
     startCanvasGlobe(globeContainer, selectNation);
     return;
   }
@@ -1157,12 +1310,19 @@ setTimeout(() => {
   globeContainer.addEventListener('wheel', pauseSpin, {passive:true});
 
   fetch('https://unpkg.com/world-atlas/countries-110m.json')
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error(`Map data ${res.status}`);
+      return res.json();
+    })
     .then(data => {
       geoFeatures = topojson.feature(data, data.objects.countries).features;
       globe.polygonsData(geoFeatures);
+      hideLoading();
     })
-    .catch(err => console.error('Globe data failed:', err));
+    .catch(err => {
+      console.error('Globe data failed:', err);
+      showError('Map data unavailable — try refreshing.');
+    });
 
   globe.width(window.innerWidth);
   globe.height(window.innerHeight);
