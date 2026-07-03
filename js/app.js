@@ -389,83 +389,541 @@ const HOST_STADIUMS = [
   { name:'Mercedes-Benz Stadium', city:'Atlanta', capacity:'71,000', matches:'Group stage, knockout showcase', note:'Indoor theatre' }
 ];
 
-const LIVE_MATCHES = [
-  {
-    status:'Live 62',
-    home:'Mexico',
-    away:'South Africa',
-    score:'1 - 1',
-    meta:'Group A - Estadio Azteca',
-    events:['12 Henry Martin goal', '31 Percy Tau goal', '58 Mexico chance review'],
-    stats:'Possession 54-46 - Shots 9-7 - Corners 4-3'
-  },
-  {
-    status:'Preview',
-    home:'USA',
-    away:'Paraguay',
-    score:'20:00',
-    meta:'Group D - SoFi Stadium',
-    events:['Lineups pending', 'Host opener atmosphere', 'Probability USA 58%'],
-    stats:'API-ready timeline, lineups, substitutions, cards'
-  }
-];
+// ═══════════════════════════════════════════════════════════════
+// LIVE DATA LAYER — football-data.org via /api/fd Vercel proxy
+// Competition: FIFA World Cup 2026 (ID 2000)
+// All surfaces read from LIVE_DATA. Falls back to static snapshot.
+// ═══════════════════════════════════════════════════════════════
 
-const GROUP_TABLES = {
-  A: [
-    ['Mexico', 1, 1, 0, 0, 2, '+1', '68%'],
-    ['South Africa', 1, 0, 1, 0, 1, '0', '42%'],
-    ['South Korea', 0, 0, 0, 0, 0, '0', '55%'],
-    ['Czech Republic', 0, 0, 0, 0, 0, '0', '36%']
-  ],
-  D: [
-    ['USA', 0, 0, 0, 0, 0, '0', '61%'],
-    ['Paraguay', 0, 0, 0, 0, 0, '0', '38%'],
-    ['Australia', 0, 0, 0, 0, 0, '0', '44%'],
-    ['Turkey', 0, 0, 0, 0, 0, '0', '53%']
-  ],
-  J: [
-    ['Argentina', 0, 0, 0, 0, 0, '0', '78%'],
-    ['Algeria', 0, 0, 0, 0, 0, '0', '39%'],
-    ['Austria', 0, 0, 0, 0, 0, '0', '46%'],
-    ['Jordan', 0, 0, 0, 0, 0, '0', '24%']
-  ]
+const FD_COMP    = 2000;
+const FD_PROXY   = '/api/fd';
+const FD_TIMEOUT = 8000;
+
+// Single source of truth
+const LIVE_DATA = {
+  isLive:      false,   // true once any API call succeeds
+  fetchedAt:   null,
+  matches:     [],      // normalised match objects
+  standings:   {},      // { [groupLetter]: [{pos,team,mp,w,d,l,gf,ga,gd,pts},...] }
+  scorers:     [],      // [{rank,player,short,team,goals,assists}]
+  squads:      {},      // { [ISO3]: {coach, squad:[{name,short,position,number,age,club}]} }
+  totalGoals:  0,
+  topScorer:   '—',
+  matchday:    'Pre-tournament',
 };
 
+// ── proxy fetch helper ────────────────────────────────────────
+async function fdFetch(fdPath, params = {}) {
+  const qs  = new URLSearchParams({ path: fdPath, ...params });
+  const res = await fetch(`${FD_PROXY}?${qs}`, { signal: AbortSignal.timeout(FD_TIMEOUT) });
+  if (!res.ok) throw new Error(`FD ${res.status} ${fdPath}`);
+  return res.json();
+}
+
+// ── normalise a raw football-data match object ────────────────
+function normaliseMatch(m) {
+  return {
+    id:       m.id,
+    status:   m.status,   // SCHEDULED|IN_PLAY|PAUSED|FINISHED
+    minute:   m.minute ?? null,
+    utcDate:  m.utcDate,
+    group:    (m.group || '').replace('GROUP_',''),
+    stage:    m.stage || '',
+    venue:    m.venue || '',
+    homeTeam: { id: m.homeTeam?.id, name: m.homeTeam?.shortName || m.homeTeam?.name || '?', tla: m.homeTeam?.tla || '' },
+    awayTeam: { id: m.awayTeam?.id, name: m.awayTeam?.shortName || m.awayTeam?.name || '?', tla: m.awayTeam?.tla || '' },
+    score:    { home: m.score?.fullTime?.home ?? m.score?.halfTime?.home ?? null,
+                away: m.score?.fullTime?.away ?? m.score?.halfTime?.away ?? null },
+  };
+}
+
+// ── fetch matches ─────────────────────────────────────────────
+async function fetchMatches() {
+  const data = await fdFetch(`/v4/competitions/${FD_COMP}/matches`);
+  LIVE_DATA.matches = (data.matches || []).map(normaliseMatch);
+
+  const live   = LIVE_DATA.matches.filter(m => m.status === 'IN_PLAY' || m.status === 'PAUSED');
+  const recent = LIVE_DATA.matches.filter(m => m.status === 'FINISHED');
+  LIVE_DATA.matchday = live.length > 0
+    ? `Live · ${live.length} match${live.length > 1 ? 'es' : ''}`
+    : recent.length > 0
+      ? `Matchday ${data.resultSet?.matchday || '—'}`
+      : 'Pre-tournament';
+}
+
+// ── fetch standings ───────────────────────────────────────────
+async function fetchStandings() {
+  const data = await fdFetch(`/v4/competitions/${FD_COMP}/standings`);
+  const groups = {};
+  (data.standings || []).forEach(s => {
+    if (s.type !== 'TOTAL') return;
+    const letter = (s.group || s.stage || '').replace('GROUP_','') || '?';
+    groups[letter] = (s.table || []).map(r => ({
+      pos:  r.position,
+      team: r.team?.shortName || r.team?.name || '?',
+      tla:  r.team?.tla || '',
+      mp:   r.playedGames ?? 0,
+      w:    r.won          ?? 0,
+      d:    r.draw         ?? 0,
+      l:    r.lost         ?? 0,
+      gf:   r.goalsFor     ?? 0,
+      ga:   r.goalsAgainst ?? 0,
+      gd:   r.goalDifference ?? 0,
+      pts:  r.points       ?? 0,
+    }));
+  });
+  LIVE_DATA.standings = groups;
+}
+
+// ── fetch scorers ─────────────────────────────────────────────
+async function fetchScorers() {
+  const data = await fdFetch(`/v4/competitions/${FD_COMP}/scorers`, { limit: 20 });
+  LIVE_DATA.scorers = (data.scorers || []).map((s, i) => ({
+    rank:    i + 1,
+    player:  s.player?.name || '?',
+    short:   s.player?.shortName || s.player?.name || '?',
+    team:    s.team?.shortName   || s.team?.name   || '?',
+    goals:   s.goals   ?? s.numberOfGoals ?? 0,
+    assists: s.assists  ?? 0,
+  }));
+  LIVE_DATA.totalGoals = LIVE_DATA.scorers.reduce((t, s) => t + s.goals, 0);
+  LIVE_DATA.topScorer  = LIVE_DATA.scorers[0]?.short || '—';
+}
+
+// ── fetch squad on demand (when nation panel opens) ───────────
+// football-data.org team IDs for WC2026 squads
+const FD_TEAM_IDS = {
+  ARG:762,  BRA:1630, FRA:773,  DEU:759,  ESP:760,  PRT:765,  NLD:1920,
+  BEL:1396, ENG:66,   URY:788,  MEX:758,  USA:762,  CAN:7578, MAR:1938,
+  JPN:1777, KOR:2612, SEN:825,  GHA:1700, ECU:1773, QAT:172,  AUS:737,
+  NOR:1631, CHE:1646, HRV:799,  TUR:1572, IRN:2000, EGY:60,
+};
+
+async function fetchSquad(iso3) {
+  if (LIVE_DATA.squads[iso3]) return LIVE_DATA.squads[iso3];
+  const teamId = FD_TEAM_IDS[iso3];
+  if (!teamId) return null;
+  try {
+    const data  = await fdFetch(`/v4/teams/${teamId}`);
+    const squad = (data.squad || []).map(p => ({
+      name:     p.name || '?',
+      short:    p.shortName || p.name || '?',
+      position: p.position || '?',
+      number:   p.shirtNumber ?? null,
+      age:      p.dateOfBirth
+        ? Math.floor((Date.now() - new Date(p.dateOfBirth)) / (365.25 * 86400000))
+        : null,
+      club:     p.currentTeam?.shortName || p.currentTeam?.name || '',
+    }));
+    const result = { coach: data.coach?.name || null, squad };
+    LIVE_DATA.squads[iso3] = result;
+    return result;
+  } catch (e) {
+    console.info(`[WCIM] Squad unavailable for ${iso3}:`, e.message);
+    return null;
+  }
+}
+
+// ── main refresh ──────────────────────────────────────────────
+let _refreshTimer = null;
+
+async function refreshAll() {
+  const results = await Promise.allSettled([fetchMatches(), fetchStandings(), fetchScorers()]);
+  const anyOk   = results.some(r => r.status === 'fulfilled');
+
+  if (anyOk) {
+    LIVE_DATA.isLive   = true;
+    LIVE_DATA.fetchedAt = new Date().toISOString();
+  }
+
+  results.forEach((r, i) => {
+    if (r.status === 'rejected')
+      console.info('[WCIM]', ['matches','standings','scorers'][i], 'unavailable:', r.reason?.message);
+  });
+
+  // Update all live surfaces
+  updateGlobeStats();
+  updateTickerFromLive();
+  updateLeaderboard();
+  if (document.getElementById('feature-hub')?.classList.contains('visible')) {
+    const active = document.querySelector('.nav-pill.active')?.dataset.view;
+    if (active === 'live')   document.getElementById('feature-panel').innerHTML = renderLiveView();
+    if (active === 'groups') document.getElementById('feature-panel').innerHTML = renderGroupsView();
+    if (active === 'stats')  document.getElementById('feature-panel').innerHTML = renderStatsView();
+  }
+
+  // Schedule next — 45s if live, 5min otherwise
+  clearTimeout(_refreshTimer);
+  const hasLive = LIVE_DATA.matches.some(m => m.status === 'IN_PLAY' || m.status === 'PAUSED');
+  _refreshTimer = setTimeout(refreshAll, hasLive ? 45_000 : 300_000);
+}
+
+// ── globe stats bar updater ───────────────────────────────────
+function updateGlobeStats() {
+  const goalEl   = document.getElementById('goal-count');
+  const scorerEl = document.getElementById('top-scorer');
+  const daysEl   = document.getElementById('tournament-days');
+
+  if (goalEl)   goalEl.textContent   = LIVE_DATA.isLive ? LIVE_DATA.totalGoals : '0';
+  if (scorerEl) scorerEl.textContent = LIVE_DATA.isLive ? LIVE_DATA.topScorer  : '—';
+
+  const gl = goalEl?.closest('.globe-stat')?.querySelector('.label');
+  const sl = scorerEl?.closest('.globe-stat')?.querySelector('.label');
+  if (gl) gl.textContent = LIVE_DATA.isLive ? 'Tournament goals'     : 'Goals (pre-tournament)';
+  if (sl) sl.textContent = LIVE_DATA.isLive ? 'Top scorer'           : 'Top scorer (projected)';
+
+  updateTournamentStatus(daysEl);
+}
+
+// ── tournament countdown / matchday ───────────────────────────
+function updateTournamentStatus(el) {
+  el = el || document.getElementById('tournament-days');
+  if (!el) return;
+  const start = new Date('2026-06-11T00:00:00');
+  const end   = new Date('2026-07-19T23:59:59');
+  const now   = new Date();
+  if (LIVE_DATA.isLive && LIVE_DATA.matchday !== 'Pre-tournament') {
+    el.textContent = LIVE_DATA.matchday;
+    el.style.color = 'var(--green-text)';
+  } else if (now < start) {
+    const days = Math.ceil((start - now) / 86400000);
+    el.textContent = days === 1 ? '1d to kickoff' : `${days}d to kickoff`;
+    el.style.color = '';
+  } else if (now <= end) {
+    el.textContent = `Day ${Math.floor((now - start) / 86400000) + 1}`;
+    el.style.color = 'var(--green-text)';
+  } else {
+    el.textContent = 'Champions crowned';
+    el.style.color = 'var(--gold-text)';
+  }
+}
+
+// ── ticker updater ────────────────────────────────────────────
+function buildTicker() {
+  // Called on page load — shows static schedule immediately
+  const STATIC = [
+    { home:'Mexico',    away:'South Africa', date:'Jun 12', venue:'Mexico City',   group:'A' },
+    { home:'France',    away:'Iraq',          date:'Jun 15', venue:'Dallas',        group:'I' },
+    { home:'Brazil',    away:'Morocco',       date:'Jun 16', venue:'NY/NJ',         group:'C' },
+    { home:'USA',       away:'Paraguay',      date:'Jun 17', venue:'Los Angeles',   group:'D' },
+    { home:'Germany',   away:'Curaçao',       date:'Jun 18', venue:'Houston',       group:'E' },
+    { home:'Spain',     away:'Cape Verde',    date:'Jun 20', venue:'Atlanta',       group:'H' },
+    { home:'Argentina', away:'Algeria',       date:'Jun 21', venue:'Miami',         group:'J' },
+    { home:'England',   away:'Panama',        date:'Jun 19', venue:'Kansas City',   group:'L' },
+  ];
+  const items = STATIC.map(f => {
+    const n1 = WC_NATIONS.find(n => n.name === f.home);
+    const n2 = WC_NATIONS.find(n => n.name === f.away);
+    return `${n1?.flag||''} ${f.home} vs ${n2?.flag||''} ${f.away} &nbsp;·&nbsp; ${f.date} &nbsp;·&nbsp; ${f.venue}`;
+  });
+  const el = document.getElementById('match-ticker');
+  if (el) el.innerHTML = items.join(' &ensp;|&ensp; ') + ' &ensp;|&ensp; ' + items.join(' &ensp;|&ensp; ');
+}
+
+function updateTickerFromLive() {
+  if (!LIVE_DATA.matches.length) return;
+  const el = document.getElementById('match-ticker');
+  if (!el) return;
+
+  const items = LIVE_DATA.matches.slice(0, 20).map(m => {
+    const n1 = WC_NATIONS.find(n => normalizeName(n.name).includes(normalizeName(m.homeTeam.name.split(' ')[0])));
+    const n2 = WC_NATIONS.find(n => normalizeName(n.name).includes(normalizeName(m.awayTeam.name.split(' ')[0])));
+    const f1 = n1?.flag || '';
+    const f2 = n2?.flag || '';
+    const grp = m.group ? ` · Grp ${m.group}` : '';
+
+    if (m.status === 'IN_PLAY' || m.status === 'PAUSED') {
+      const min = m.minute ? ` ${m.minute}'` : '';
+      return `<span class="live">● LIVE${min}</span> ${f1} ${m.homeTeam.name} ${m.score.home}–${m.score.away} ${f2} ${m.awayTeam.name}${grp}`;
+    }
+    if (m.status === 'FINISHED') {
+      return `${f1} ${m.homeTeam.name} ${m.score.home}–${m.score.away} ${f2} ${m.awayTeam.name} FT${grp}`;
+    }
+    const d = new Date(m.utcDate);
+    const ds = d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+    return `${f1} ${m.homeTeam.name} vs ${f2} ${m.awayTeam.name} &nbsp;·&nbsp; ${ds}${grp}`;
+  });
+
+  if (!items.length) return;
+  el.innerHTML = items.join(' &ensp;|&ensp; ') + ' &ensp;|&ensp; ' + items.join(' &ensp;|&ensp; ');
+}
+
+// ── leaderboard in stats scene ────────────────────────────────
+function updateLeaderboard() {
+  if (!LIVE_DATA.scorers.length) return;
+  // Re-render whichever tab is currently active
+  const activeTab = document.querySelector('.lb-tab.active')?.dataset.lb || 'goals';
+  renderLeaderboardTab(activeTab);
+}
+
+function renderLeaderboardTab(tab) {
+  const allRows = document.querySelectorAll('.lb-rows');
+  allRows.forEach(r => { r.style.display = r.dataset.tab === tab ? 'block' : 'none'; });
+
+  if (!LIVE_DATA.scorers.length) return; // keep static HTML
+
+  const sorted = [...LIVE_DATA.scorers].sort((a, b) =>
+    tab === 'assists' ? b.assists - a.goals : b.goals - a.assists
+  ).sort((a, b) =>
+    tab === 'assists' ? b.assists - a.assists : b.goals - a.goals
+  );
+
+  const rankClass = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+  const val       = p => tab === 'assists' ? p.assists : p.goals;
+
+  const activeRows = document.querySelector(`.lb-rows[data-tab="${tab}"]`);
+  if (!activeRows) return;
+
+  activeRows.innerHTML = sorted.slice(0, 8).map((p, i) => {
+    const initials = (p.short || p.player).split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    return `<div class="lb-row">
+      <div class="lb-rank ${rankClass(i)}">${i + 1}</div>
+      <div class="lb-avatar">${escapeHtml(initials)}</div>
+      <div class="lb-info">
+        <span class="lb-name">${escapeHtml(p.short || p.player)}</span>
+        <span class="lb-country">${escapeHtml(p.team)}</span>
+      </div>
+      <div class="lb-value">${val(p)}</div>
+    </div>`;
+  }).join('');
+
+  const label = document.getElementById('lb-stat-label');
+  if (label) label.textContent = tab === 'assists' ? 'Assists' : 'Goals';
+
+  const noteEl = document.querySelector('.data-note');
+  if (noteEl && LIVE_DATA.isLive) {
+    const d = new Date(LIVE_DATA.fetchedAt);
+    noteEl.innerHTML = `<strong>Live data</strong> · Updated ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} via football-data.org`;
+  }
+}
+
+// ── LIVE MATCHES hub view ─────────────────────────────────────
+function renderLiveView() {
+  const active   = LIVE_DATA.matches.filter(m => m.status === 'IN_PLAY' || m.status === 'PAUSED' || m.status === 'FINISHED');
+  const upcoming = LIVE_DATA.matches.filter(m => m.status === 'SCHEDULED').slice(0, 6);
+  const toRender = active.length ? active.slice(0, 6) : upcoming;
+
+  if (!toRender.length) {
+    // Static fallback cards until API responds
+    return `
+      <p class="hub-data-note">Loading live match data…</p>
+      <div class="hub-grid">
+        <article class="match-card">
+          <div class="match-meta">Group A · Estadio Azteca, Mexico City</div>
+          <div class="match-row">
+            <span class="match-team">Mexico</span>
+            <strong class="match-score-pending">vs</strong>
+            <span class="match-team">South Africa</span>
+          </div>
+          <p>Jun 12 · 19:00 local · Opening match</p>
+        </article>
+        <article class="match-card">
+          <div class="match-meta">Group D · SoFi Stadium, Los Angeles</div>
+          <div class="match-row">
+            <span class="match-team">USA</span>
+            <strong class="match-score-pending">vs</strong>
+            <span class="match-team">Paraguay</span>
+          </div>
+          <p>Jun 17 · 20:00 local</p>
+        </article>
+      </div>`;
+  }
+
+  return `<div class="hub-grid">${toRender.map(m => {
+    const isLive     = m.status === 'IN_PLAY' || m.status === 'PAUSED';
+    const isFinished = m.status === 'FINISHED';
+    const h = m.score.home ?? '—';
+    const a = m.score.away ?? '—';
+    const d = new Date(m.utcDate);
+    const ds = d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+    const ts = d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+
+    const badge = isLive
+      ? `<span class="match-live-badge">● ${m.minute ? m.minute + "'" : 'LIVE'}</span>`
+      : isFinished
+        ? `<span class="match-ft-badge">FT</span>`
+        : `<span class="match-sched-badge">${ds} ${ts}</span>`;
+
+    const score = (isLive || isFinished)
+      ? `<strong class="match-score">${h}–${a}</strong>`
+      : `<strong class="match-score-pending">vs</strong>`;
+
+    const grp = m.group ? `Group ${escapeHtml(m.group)}` : '';
+    const ven = m.venue ? ` · ${escapeHtml(m.venue)}` : '';
+
+    return `<article class="match-card">
+      <div class="match-meta">${badge} ${grp}${ven}</div>
+      <div class="match-row">
+        <span class="match-team">${escapeHtml(m.homeTeam.name)}</span>
+        ${score}
+        <span class="match-team">${escapeHtml(m.awayTeam.name)}</span>
+      </div>
+    </article>`;
+  }).join('')}</div>`;
+}
+
+// ── GROUP TABLES hub view ─────────────────────────────────────
+function renderGroupsView() {
+  const groups = LIVE_DATA.standings;
+  if (!Object.keys(groups).length) {
+    // Static fallback — 3 sample groups
+    const SAMPLE = {
+      A:[['Mexico',1,1,0,0,2,'+1'],['South Africa',1,0,1,0,1,'0'],['South Korea',0,0,0,0,0,'0'],['Czech Republic',0,0,0,0,0,'0']],
+      D:[['USA',0,0,0,0,0,'0'],['Paraguay',0,0,0,0,0,'0'],['Australia',0,0,0,0,0,'0'],['Turkey',0,0,0,0,0,'0']],
+      J:[['Argentina',0,0,0,0,0,'0'],['Algeria',0,0,0,0,0,'0'],['Austria',0,0,0,0,0,'0'],['Jordan',0,0,0,0,0,'0']],
+    };
+    return `<p class="hub-data-note">Pre-tournament standings — live once matches kick off.</p>
+    <div class="hub-grid">${Object.entries(SAMPLE).map(([grp, rows]) => `
+      <article class="group-card">
+        <h3>Group ${escapeHtml(grp)}</h3>
+        <table class="group-table">
+          <thead><tr><th>Team</th><th>MP</th><th>GD</th><th>Pts</th></tr></thead>
+          <tbody>${rows.map((r,i) => `<tr class="${i<2?'qualifying':''}"><td>${escapeHtml(r[0])}</td><td>${r[1]}</td><td>${escapeHtml(String(r[6]))}</td><td><strong>${r[4]}</strong></td></tr>`).join('')}</tbody>
+        </table>
+      </article>`).join('')}</div>`;
+  }
+
+  return `<div class="hub-grid">${Object.entries(groups).sort().map(([letter, rows]) => `
+    <article class="group-card">
+      <h3>Group ${escapeHtml(letter)}</h3>
+      <table class="group-table">
+        <thead><tr><th>Team</th><th>MP</th><th>GD</th><th>Pts</th></tr></thead>
+        <tbody>${rows.map((r, i) => `
+          <tr class="${i < 2 ? 'qualifying' : ''}">
+            <td>${escapeHtml(r.team)}</td>
+            <td>${r.mp}</td>
+            <td>${r.gd >= 0 ? '+' : ''}${r.gd}</td>
+            <td><strong>${r.pts}</strong></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </article>`).join('')}</div>`;
+}
+
+// ── STATS hub view (top scorers) ──────────────────────────────
+function renderStatsView() {
+  if (!LIVE_DATA.scorers.length) {
+    return `<p class="hub-data-note">Scorer data will appear once matches kick off.</p>
+    <div class="hub-grid three">
+      <article class="hub-card"><span>Top scorer</span><strong>TBC</strong><p>Live from football-data.org once the tournament begins.</p></article>
+      <article class="hub-card"><span>Most assists</span><strong>TBC</strong><p>Assist data updates in real-time during matches.</p></article>
+      <article class="hub-card"><span>Golden Boot race</span><strong>Live soon</strong><p>Scorer leaderboard available from matchday 1.</p></article>
+    </div>`;
+  }
+
+  return `<div class="hub-grid three">${LIVE_DATA.scorers.slice(0, 6).map((s, i) =>
+    hubCard(`#${i + 1} · ${escapeHtml(s.team)}`, escapeHtml(s.short || s.player), `${s.goals} goal${s.goals !== 1 ? 's' : ''}${s.assists ? ` · ${s.assists} assist${s.assists !== 1 ? 's' : ''}` : ''}`)
+  ).join('')}</div>`;
+}
+
+// ── NATION PANEL — squad & fixtures from live API ─────────────
+async function renderPanelContent(profile, nation) {
+  const panelContent = document.getElementById('panel-content');
+  if (!panelContent) return;
+
+  if (activePanel === 'fixtures') {
+    // Try live fixtures first
+    const matches = LIVE_DATA.matches.filter(m => {
+      const n = normalizeName(nation.name);
+      return normalizeName(m.homeTeam.name).includes(n.split(' ')[0]) ||
+             normalizeName(m.awayTeam.name).includes(n.split(' ')[0]);
+    });
+
+    if (matches.length) {
+      panelContent.innerHTML = matches.map(m => {
+        const d   = new Date(m.utcDate);
+        const ds  = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+        const isHome = normalizeName(m.homeTeam.name).includes(normalizeName(nation.name).split(' ')[0]);
+        const opp = isHome ? m.awayTeam.name : m.homeTeam.name;
+        const loc = isHome ? 'Home' : 'Away';
+        const scoreStr = m.status !== 'SCHEDULED'
+          ? ` · ${m.score.home ?? '?'}–${m.score.away ?? '?'} ${m.status === 'FINISHED' ? 'FT' : 'LIVE'}`
+          : '';
+        return `<div class="detail-row">
+          <strong>${loc} vs ${escapeHtml(opp)}${scoreStr}</strong>
+          <span>${escapeHtml(ds)}${m.group ? ` · Group ${escapeHtml(m.group)}` : ''}${m.venue ? ` · ${escapeHtml(m.venue)}` : ''}</span>
+        </div>`;
+      }).join('');
+      return;
+    }
+    // Fall back to static
+    panelContent.innerHTML = profile.fixtures.map(item => {
+      const [title, detail] = splitDetailItem(item);
+      return `<div class="detail-row"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(detail || '')}</span></div>`;
+    }).join('');
+    return;
+  }
+
+  if (activePanel === 'story') {
+    panelContent.innerHTML = profile.story.map(item =>
+      `<div class="detail-row"><strong>${escapeHtml(item)}</strong></div>`
+    ).join('');
+    return;
+  }
+
+  // Squad tab — try live API
+  panelContent.innerHTML = '<div class="detail-row"><strong>Loading squad…</strong></div>';
+  const squadData = await fetchSquad(nation.iso);
+
+  if (squadData && squadData.squad.length) {
+    const byPos = {};
+    squadData.squad.forEach(p => {
+      const pos = p.position?.includes('Goalkeeper') ? 'GK'
+                : p.position?.includes('Defender')   ? 'DEF'
+                : p.position?.includes('Midfielder')  ? 'MID'
+                : 'FWD';
+      (byPos[pos] = byPos[pos] || []).push(p);
+    });
+
+    let html = squadData.coach
+      ? `<div class="detail-row"><strong>Coach</strong><span>${escapeHtml(squadData.coach)}</span></div>`
+      : '';
+
+    const posOrder = ['GK','DEF','MID','FWD'];
+    posOrder.forEach(pos => {
+      if (!byPos[pos]?.length) return;
+      html += `<div class="squad-pos-label">${{ GK:'Goalkeepers', DEF:'Defenders', MID:'Midfielders', FWD:'Forwards' }[pos]}</div>`;
+      html += byPos[pos].map(p =>
+        `<div class="detail-row"><strong>${escapeHtml(p.short || p.name)}</strong><span>${p.number ? `#${p.number} · ` : ''}${escapeHtml(p.club || '—')}${p.age ? ` · ${p.age}y` : ''}</span></div>`
+      ).join('');
+    });
+    panelContent.innerHTML = html;
+  } else {
+    // Fallback to static profile
+    panelContent.innerHTML = profile.players.map(item => {
+      const [title, detail] = splitDetailItem(item);
+      return `<div class="detail-row"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(detail || 'Data unavailable')}</span></div>`;
+    }).join('');
+  }
+}
+
+// ── STATIC FALLBACK DATA ──────────────────────────────────────
 const BRACKET_PATH = [
   { round:'Round of 32', matches:['Mexico vs Turkey', 'France vs Japan', 'Brazil vs Croatia'] },
   { round:'Round of 16', matches:['Argentina vs Portugal', 'Spain vs Germany', 'USA vs Netherlands'] },
-  { round:'Semifinals', matches:['Brazil vs France', 'Argentina vs Spain'] },
-  { round:'Final', matches:['Argentina vs France'] }
+  { round:'Semifinals',  matches:['Brazil vs France', 'Argentina vs Spain'] },
+  { round:'Final',       matches:['Argentina vs France'] }
 ];
 
 const HISTORY_TIMELINE = [
-  { year:'1930', host:'Uruguay', winner:'Uruguay', final:'Uruguay 4-2 Argentina', fact:'The first tournament created the mythic starting point.' },
-  { year:'1970', host:'Mexico', winner:'Brazil', final:'Brazil 4-1 Italy', fact:'Pele and Brazil defined the beautiful game on the world stage.' },
-  { year:'1998', host:'France', winner:'France', final:'France 3-0 Brazil', fact:'A host-nation coronation became a modern football image.' },
-  { year:'2022', host:'Qatar', winner:'Argentina', final:'Argentina 3-3 France', fact:'A penalty-shootout epic closed Messi era storytelling.' },
-  { year:'2026', host:'Canada, Mexico, USA', winner:'To be played', final:'MetLife Stadium', fact:'The tournament expands to 48 teams and 104 matches.' }
-];
-
-const TOURNAMENT_LEADERS = [
-  ['Top scorers', 'Mbappe', 'Projected 7 goals'],
-  ['Most assists', 'Bruno Fernandes', 'Projected 5 assists'],
-  ['Clean sheets', 'Alisson', 'Projected 5'],
-  ['Possession leaders', 'Spain', '64% model'],
-  ['Most shots', 'Brazil', '17.2 per match'],
-  ['Most saves', 'Canada', '5.8 per match']
+  { year:'1930', host:'Uruguay',          winner:'Uruguay',   final:'Uruguay 4–2 Argentina',  fact:'The first World Cup — the mythic starting point.' },
+  { year:'1970', host:'Mexico',           winner:'Brazil',    final:'Brazil 4–1 Italy',        fact:'Pelé and Brazil defined the beautiful game.' },
+  { year:'1998', host:'France',           winner:'France',    final:'France 3–0 Brazil',       fact:'A host-nation coronation.' },
+  { year:'2022', host:'Qatar',            winner:'Argentina', final:'Argentina 3–3 France',    fact:'The penalty epic that closed Messi\'s era.' },
+  { year:'2026', host:'Canada/Mexico/USA',winner:'TBD',       final:'MetLife Stadium',         fact:'48 teams · 104 matches · 3 nations.' }
 ];
 
 const FEATURE_TITLES = {
-  overview:['Platform layer', 'World Cup Command'],
-  countries:['Countries', 'Country Pages'],
-  live:['Live match center', 'Match Control'],
-  groups:['Group stage', 'Qualification Tables'],
-  bracket:['Knockout stage', 'Interactive Bracket'],
-  stadiums:['Stadium explorer', 'Host Routes'],
-  stats:['Statistics', 'Tournament Leaders'],
-  history:['World Cup history', '1930 To 2026'],
-  predictions:['Predictions', 'Probability Engine'],
-  search:['Global search', 'Find Anything']
+  overview:['Platform layer',    'World Cup Command'],
+  countries:['Countries',        'Country Pages'],
+  live:['Live match center',     'Match Control'],
+  groups:['Group stage',         'Qualification Tables'],
+  bracket:['Knockout stage',     'Interactive Bracket'],
+  stadiums:['Stadium explorer',  'Host Routes'],
+  stats:['Statistics',           'Top Scorers'],
+  history:['World Cup history',  '1930 To 2026'],
+  predictions:['Predictions',    'Probability Engine'],
+  search:['Global search',       'Find Anything']
 };
 
 function profileForNation(n) {
