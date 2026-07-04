@@ -692,10 +692,6 @@ body.light-cursor #cur-ring { border-color:rgba(10,10,10,.2); }
   transform:translateY(calc((1 - var(--stats-enter)) * 20px));
   transition:opacity .12s linear;
 }
-/* Re-enable pointer events ONLY on the leaderboard card */
-#stats-leaderboard {
-  pointer-events:auto;
-}
 /* Semi-transparent so globe bleeds through behind */
 #stats-scene::before {
   content:''; position:absolute; inset:0;
@@ -764,11 +760,15 @@ body.light-cursor #cur-ring { border-color:rgba(10,10,10,.2); }
   font-size:13px; line-height:1.35; letter-spacing:.04em; color:var(--ink3);
 }
 
-/* Player leaderboard card */
+/* Player leaderboard card — fixed top+bottom so it can never grow
+   upward into the stat tiles above it, no matter how many rows exist */
 #stats-leaderboard {
   position:absolute; z-index:4;
+  pointer-events:auto;
   left:clamp(32px,8vw,112px); right:clamp(32px,7vw,100px);
+  top:clamp(460px,60vh,540px);
   bottom:clamp(18px,3.5vh,44px);
+  display:flex; flex-direction:column;
   background:var(--white); border-radius:18px;
   border:1.5px solid var(--border);
   box-shadow:0 2px 12px rgba(0,0,0,.07), 0 12px 40px rgba(0,0,0,.05);
@@ -778,7 +778,7 @@ body.light-cursor #cur-ring { border-color:rgba(10,10,10,.2); }
 .lb-head {
   display:flex; align-items:center; justify-content:space-between;
   padding:14px 20px 0; gap:12px; border-bottom:1.5px solid var(--border);
-  flex-wrap:wrap;
+  flex-wrap:wrap; flex:0 0 auto;
 }
 .lb-head h3 {
   font-family:'Bebas Neue',sans-serif; font-weight:400;
@@ -796,6 +796,7 @@ body.light-cursor #cur-ring { border-color:rgba(10,10,10,.2); }
 .lb-cols {
   display:flex; align-items:center; padding:7px 20px;
   border-bottom:1px solid var(--border); background:var(--surface);
+  flex:0 0 auto;
 }
 .lb-col-player {
   flex:1; font-family:'Barlow Condensed',sans-serif;
@@ -805,7 +806,9 @@ body.light-cursor #cur-ring { border-color:rgba(10,10,10,.2); }
   flex:0 0 56px; text-align:right; font-family:'Barlow Condensed',sans-serif;
   font-size:9px; letter-spacing:.30em; text-transform:uppercase; color:var(--ink3);
 }
-.lb-rows { display:block; }
+.lb-rows { display:block; flex:1; overflow-y:auto; }
+.lb-rows::-webkit-scrollbar { width:4px; }
+.lb-rows::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
 .lb-row {
   display:flex; align-items:center; padding:10px 20px;
   border-bottom:1px solid var(--border); gap:12px;
@@ -887,7 +890,7 @@ body.light-cursor #cur-ring { border-color:rgba(10,10,10,.2); }
   .stat-tile { padding:14px 14px 16px; }
   .stat-tile strong { font-size:clamp(36px,8vw,56px); }
   .stat-tile p { font-size:12px; }
-  #stats-leaderboard { left:clamp(24px,5vw,44px); right:clamp(24px,5vw,44px); bottom:16px; }
+  #stats-leaderboard { left:clamp(24px,5vw,44px); right:clamp(24px,5vw,44px); top:clamp(340px,58vh,420px); bottom:16px; }
 }
 @media (max-width:520px) {
   #globe-topbar { font-size:14px; letter-spacing:.14em; }
@@ -910,7 +913,7 @@ body.light-cursor #cur-ring { border-color:rgba(10,10,10,.2); }
   .stat-tile span { font-size:8px; }
   .stat-tile strong { font-size:34px; }
   .stat-tile p { display:none; }
-  #stats-leaderboard { left:16px; right:16px; bottom:12px; border-radius:14px; }
+  #stats-leaderboard { left:16px; right:16px; top:clamp(300px,56vh,380px); bottom:12px; border-radius:14px; }
   .lb-head { padding:12px 14px 0; }
   .lb-tab { padding:7px 10px 9px; font-size:11px; }
   .lb-row { padding:9px 14px; gap:9px; }
@@ -922,8 +925,7 @@ body.light-cursor #cur-ring { border-color:rgba(10,10,10,.2); }
 @media (prefers-reduced-motion:reduce) {
   #orb1,#orb2,#glass-sweep,#trophy-halo { animation:none!important; }
 }
-CSSEOF
-echo "CSS done: $(wc -l < /home/claude/WorldCupInMotion/css/styles.css) lines"
+
 /* ── MOBILE BOTTOM SHEET — nation panel ──────────────────────── */
 /* On mobile, nation panel becomes a bottom sheet that slides up  */
 @media (max-width: 768px) {
