@@ -173,17 +173,24 @@ function updateScrollReveal(scrollY = window.scrollY) {
   const rawProgress = Math.min(scrollY / window.innerHeight, 1);
   if (rawProgress >= 0.98) revealLocked = true;
   const progress = revealLocked ? 1 : rawProgress;
-  const statsProgress = Math.max(0, Math.min((scrollY - window.innerHeight * 1.18) / (window.innerHeight * 1.18), 1));
-  const statsEnter = Math.max(0, Math.min(statsProgress * 1.2, 1));
+  const statsProgress = Math.max(0, Math.min((scrollY - window.innerHeight * 1.22) / (window.innerHeight * 4.6), 1));
+  const statsEnter = Math.max(0, Math.min(statsProgress * 3, 1));
+  const statsActive = statsProgress > 0.06;
+  const boardPhase = Math.max(0, Math.min((statsProgress - 0.48) / 0.52, 1));
+  const factsFade = statsProgress <= 0.58
+    ? 1
+    : Math.max(0.16, 1 - ((statsProgress - 0.58) / 0.42) * 0.84);
+  const boardOpacity = Math.max(0, Math.min((statsProgress - 0.38) / 0.24, 1));
 
   const radius   = progress * 200;
   globeWrap.style.clipPath   = `circle(${radius}% at 50% 50%)`;
   globeWrap.style.transition = 'none';
   globeWrap.style.opacity    = String(1 - statsProgress * 0.42);
   globeWrap.style.transform  = `scale(${1 - statsProgress * 0.035}) translateY(${-statsProgress * 10}px)`;
-  globeWrap.style.pointerEvents = statsProgress > 0.08 ? 'none' : 'auto';
+  globeWrap.style.pointerEvents = statsActive ? 'none' : 'auto';
   revealEl.style.opacity     = String(Math.max(0, 1 - progress * 1.2));
   if (progress >= 0.83) revealEl.style.pointerEvents = 'none';
+  document.body.classList.toggle('stats-active', statsActive);
 
   if (progress > 0.12) {
     globeUi.style.display = 'flex';
@@ -191,7 +198,7 @@ function updateScrollReveal(scrollY = window.scrollY) {
   }
   if (globeZoom) {
     globeZoom.style.opacity = String(1 - Math.min(statsProgress * 2.5, 1));
-    globeZoom.style.pointerEvents = statsProgress > 0.04 ? 'none' : 'auto';
+    globeZoom.style.pointerEvents = statsActive ? 'none' : 'auto';
   }
   if (progress > 0.35) {
     document.body.classList.add('globe-active');
@@ -204,6 +211,10 @@ function updateScrollReveal(scrollY = window.scrollY) {
   if (statsScene) {
     statsScene.style.setProperty('--stats-progress', statsProgress.toFixed(3));
     statsScene.style.setProperty('--stats-enter', statsEnter.toFixed(3));
+    statsScene.style.setProperty('--stats-board-lift', `${Math.round(boardPhase * 460)}px`);
+    statsScene.style.setProperty('--stats-rail-lift', `${Math.round(boardPhase * 180)}px`);
+    statsScene.style.setProperty('--stats-facts-opacity', factsFade.toFixed(3));
+    statsScene.style.setProperty('--stats-board-opacity', boardOpacity.toFixed(3));
   }
 }
 
@@ -649,8 +660,51 @@ function updateTickerFromLive() {
 }
 
 // ── leaderboard in stats scene ────────────────────────────────
+const PLAYER_STAT_TABS = [
+  { key:'goals', label:'Goals' }, { key:'assists', label:'Assists' },
+  { key:'xg', label:'xG' }, { key:'shots', label:'Shots on Target' },
+  { key:'chances', label:'Key Passes' }, { key:'clean', label:'Clean Sheets' },
+  { key:'saves', label:'Saves' }, { key:'tackles', label:'Tackles Won' },
+  { key:'interceptions', label:'Interceptions' }, { key:'motm', label:'MOTM' },
+  { key:'yellow', label:'Yellow Cards' }, { key:'red', label:'Red Cards' }
+];
+
+const PLAYER_STATS = {
+  goals: [['Lionel Messi','Argentina','LM',6], ['Kylian Mbappe','France','KM',5], ['Erling Haaland','Norway','EH',5], ['Vinicius Junior','Brazil','VJ',4], ['Ousmane Dembele','France','OD',4], ['Harry Kane','England','HK',4], ['Cristiano Ronaldo','Portugal','CR',3], ['Julian Alvarez','Argentina','JA',3], ['Lamine Yamal','Spain','LY',3], ['Christian Pulisic','USA','CP',3]],
+  assists: [['Toni Kroos','Germany','TK',5], ['Lionel Messi','Argentina','LM',4], ['Kevin De Bruyne','Belgium','KD',4], ['Bruno Fernandes','Portugal','BF',4], ['Antoine Griezmann','France','AG',3], ['Lamine Yamal','Spain','LY',3], ['Phil Foden','England','PF',3], ['Jamal Musiala','Germany','JM',3], ['Christian Pulisic','USA','CP',2], ['Pedri','Spain','PD',2]],
+  xg: [['Erling Haaland','Norway','EH','5.9'], ['Kylian Mbappe','France','KM','5.4'], ['Lionel Messi','Argentina','LM','4.8'], ['Harry Kane','England','HK','4.6'], ['Cristiano Ronaldo','Portugal','CR','4.1'], ['Vinicius Junior','Brazil','VJ','3.8'], ['Julian Alvarez','Argentina','JA','3.5'], ['Randal Kolo Muani','France','RK','3.2'], ['Rodrygo','Brazil','RD','3.1'], ['Alvaro Morata','Spain','AM','2.9']],
+  shots: [['Kylian Mbappe','France','KM',18], ['Erling Haaland','Norway','EH',17], ['Lionel Messi','Argentina','LM',15], ['Vinicius Junior','Brazil','VJ',14], ['Cristiano Ronaldo','Portugal','CR',13], ['Harry Kane','England','HK',12], ['Rafael Leao','Portugal','RL',11], ['Lamine Yamal','Spain','LY',10], ['Jude Bellingham','England','JB',10], ['Christian Pulisic','USA','CP',9]],
+  chances: [['Kevin De Bruyne','Belgium','KD',19], ['Lionel Messi','Argentina','LM',18], ['Bruno Fernandes','Portugal','BF',17], ['Antoine Griezmann','France','AG',15], ['Toni Kroos','Germany','TK',14], ['Pedri','Spain','PD',13], ['Jude Bellingham','England','JB',12], ['Christian Pulisic','USA','CP',11], ['Lamine Yamal','Spain','LY',11], ['Jamal Musiala','Germany','JM',10]],
+  clean: [['Emiliano Martinez','Argentina','EM',5], ['Mike Maignan','France','MM',4], ['Alisson Becker','Brazil','AB',4], ['Manuel Neuer','Germany','MN',3], ['Unai Simon','Spain','US',3], ['Jordan Pickford','England','JP',3], ['Diogo Costa','Portugal','DC',2], ['Matt Turner','USA','MT',2], ['Yann Sommer','Switzerland','YS',2], ['Koen Casteels','Belgium','KC',2]],
+  saves: [['Andre Onana','Cameroon','AO',29], ['Emiliano Martinez','Argentina','EM',26], ['Matt Turner','USA','MT',24], ['Alisson Becker','Brazil','AB',22], ['Koen Casteels','Belgium','KC',21], ['Diogo Costa','Portugal','DC',20], ['Yann Sommer','Switzerland','YS',19], ['Unai Simon','Spain','US',18], ['Manuel Neuer','Germany','MN',17], ['Mike Maignan','France','MM',16]],
+  tackles: [['N Golo Kante','France','NK',31], ['Declan Rice','England','DR',29], ['Casemiro','Brazil','CE',27], ['Tyler Adams','USA','TA',25], ['Aurelien Tchouameni','France','AT',24], ['Joshua Kimmich','Germany','JK',23], ['Rodri','Spain','RD',22], ['Weston McKennie','USA','WM',21], ['Bruno Guimaraes','Brazil','BG',20], ['Sofyan Amrabat','Morocco','SA',20]],
+  interceptions: [['Virgil van Dijk','Netherlands','VD',18], ['William Saliba','France','WS',17], ['Marquinhos','Brazil','MQ',16], ['John Stones','England','JS',15], ['Antonio Rudiger','Germany','AR',15], ['Cristian Romero','Argentina','CR',14], ['Achraf Hakimi','Morocco','AH',13], ['Sergio Busquets','Spain','SB',13], ['Tim Ream','USA','TR',12], ['Pepe','Portugal','PP',12]],
+  motm: [['Lionel Messi','Argentina','LM',4], ['Kylian Mbappe','France','KM',3], ['Vinicius Junior','Brazil','VJ',3], ['Jude Bellingham','England','JB',3], ['Kevin De Bruyne','Belgium','KD',2], ['Christian Pulisic','USA','CP',2], ['Bruno Fernandes','Portugal','BF',2], ['Lamine Yamal','Spain','LY',2], ['Jamal Musiala','Germany','JM',2], ['Emiliano Martinez','Argentina','EM',2]],
+  yellow: [['Casemiro','Brazil','CE',3], ['Mario Gila','Spain','MG',3], ['Declan Rice','England','DR',2], ['Frenkie de Jong','Netherlands','FD',2], ['Robert Gum','Poland','RG',2], ['Sofyan Amrabat','Morocco','SA',2], ['Weston McKennie','USA','WM',2], ['Rodri','Spain','RD',2], ['Nicolas Otamendi','Argentina','NO',1], ['Pepe','Portugal','PP',1]],
+  red: [['Achraf Hakimi','Morocco','AH',1], ['Robin Gosens','Germany','RG',1], ['Bruno Fernandes','Portugal','BF',1], ['John Brooks','USA','JB',1], ['Milan Skriniar','Slovakia','MS',1], ['Nicolas Otamendi','Argentina','NO',1], ['Casemiro','Brazil','CE',1], ['Sergio Ramos','Spain','SR',1], ['Pepe','Portugal','PP',1], ['Granit Xhaka','Switzerland','GX',1]]
+};
+
+function initPlayerLeaderboard() {
+  const tabsWrap = document.querySelector('.lb-tabs');
+  const board = document.getElementById('stats-leaderboard');
+  if (!tabsWrap || !board) return;
+  tabsWrap.innerHTML = PLAYER_STAT_TABS.map((tab, i) =>
+    `<button class="lb-tab${i === 0 ? ' active' : ''}" data-lb="${tab.key}">${tab.label}</button>`
+  ).join('');
+  board.querySelectorAll('.lb-rows').forEach(row => row.remove());
+  board.insertAdjacentHTML('beforeend', PLAYER_STAT_TABS.map((tab, i) =>
+    `<div class="lb-rows" data-tab="${tab.key}" style="${i === 0 ? '' : 'display:none'}"></div>`
+  ).join(''));
+  tabsWrap.querySelectorAll('.lb-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabsWrap.querySelectorAll('.lb-tab').forEach(tab => tab.classList.toggle('active', tab === btn));
+      renderLeaderboardTab(btn.dataset.lb);
+    });
+  });
+  renderLeaderboardTab('goals');
+}
+
 function updateLeaderboard() {
-  if (!LIVE_DATA.scorers.length) return;
   // Re-render whichever tab is currently active
   const activeTab = document.querySelector('.lb-tab.active')?.dataset.lb || 'goals';
   renderLeaderboardTab(activeTab);
@@ -660,35 +714,38 @@ function renderLeaderboardTab(tab) {
   const allRows = document.querySelectorAll('.lb-rows');
   allRows.forEach(r => { r.style.display = r.dataset.tab === tab ? 'block' : 'none'; });
 
-  if (!LIVE_DATA.scorers.length) return; // keep static HTML
-
-  const sorted = [...LIVE_DATA.scorers].sort((a, b) =>
-    tab === 'assists' ? b.assists - a.goals : b.goals - a.assists
-  ).sort((a, b) =>
-    tab === 'assists' ? b.assists - a.assists : b.goals - a.goals
-  );
+  const staticRows = PLAYER_STATS[tab] || PLAYER_STATS.goals;
+  let rows = staticRows.map(([player, team, initials, value]) => ({ player, team, initials, value }));
+  if (LIVE_DATA.scorers.length && (tab === 'goals' || tab === 'assists')) {
+    rows = [...LIVE_DATA.scorers]
+      .sort((a, b) => tab === 'assists' ? b.assists - a.assists : b.goals - a.goals)
+      .slice(0, 10)
+      .map(p => ({
+        player: p.short || p.player,
+        team: p.team,
+        initials: (p.short || p.player).split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+        value: tab === 'assists' ? p.assists : p.goals
+      }));
+  }
 
   const rankClass = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-  const val       = p => tab === 'assists' ? p.assists : p.goals;
 
   const activeRows = document.querySelector(`.lb-rows[data-tab="${tab}"]`);
   if (!activeRows) return;
 
-  activeRows.innerHTML = sorted.slice(0, 8).map((p, i) => {
-    const initials = (p.short || p.player).split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-    return `<div class="lb-row">
+  activeRows.innerHTML = rows.slice(0, 10).map((p, i) => `<div class="lb-row">
       <div class="lb-rank ${rankClass(i)}">${i + 1}</div>
-      <div class="lb-avatar">${escapeHtml(initials)}</div>
+      <div class="lb-avatar">${escapeHtml(p.initials)}</div>
       <div class="lb-info">
-        <span class="lb-name">${escapeHtml(p.short || p.player)}</span>
+        <span class="lb-name">${escapeHtml(p.player)}</span>
         <span class="lb-country">${escapeHtml(p.team)}</span>
       </div>
-      <div class="lb-value">${val(p)}</div>
-    </div>`;
-  }).join('');
+      <div class="lb-value">${escapeHtml(String(p.value))}</div>
+    </div>`).join('');
 
   const label = document.getElementById('lb-stat-label');
-  if (label) label.textContent = tab === 'assists' ? 'Assists' : 'Goals';
+  const tabMeta = PLAYER_STAT_TABS.find(item => item.key === tab);
+  if (label) label.textContent = tabMeta ? tabMeta.label : 'Goals';
 
   const noteEl = document.querySelector('.data-note');
   if (noteEl && LIVE_DATA.isLive) {
@@ -698,6 +755,8 @@ function renderLeaderboardTab(tab) {
 }
 
 // ── LIVE MATCHES hub view ─────────────────────────────────────
+initPlayerLeaderboard();
+
 function renderLiveView() {
   const active   = LIVE_DATA.matches.filter(m => m.status === 'IN_PLAY' || m.status === 'PAUSED' || m.status === 'FINISHED');
   const upcoming = LIVE_DATA.matches.filter(m => m.status === 'SCHEDULED').slice(0, 6);

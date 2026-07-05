@@ -51,7 +51,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+SC:wght@300;400;500&family=Barlow+Condensed:wght@200;300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=20260702-audit2">
+<link rel="stylesheet" href="css/styles.css?v=20260705-stats-top10b">
 <script src="https://unpkg.com/globe.gl"></script>
 <script src="https://unpkg.com/topojson-client@3"></script>
 </head>
@@ -244,6 +244,9 @@
       <div class="lb-tabs" role="tablist">
         <button class="lb-tab active" data-lb="goals">Goals</button>
         <button class="lb-tab" data-lb="assists">Assists</button>
+        <button class="lb-tab" data-lb="clean">Clean Sheets</button>
+        <button class="lb-tab" data-lb="saves">Saves</button>
+        <button class="lb-tab" data-lb="motm">MOTM</button>
         <button class="lb-tab" data-lb="yellow">Yellow Cards</button>
         <button class="lb-tab" data-lb="red">Red Cards</button>
       </div>
@@ -351,6 +354,153 @@
       </div>
     </div>
 
+    <!-- Clean Sheets -->
+    <div class="lb-rows" data-tab="clean" style="display:none">
+      <div class="lb-row">
+        <div class="lb-rank gold">1</div>
+        <div class="lb-avatar">EM</div>
+        <div class="lb-info">
+          <span class="lb-name">Emiliano Martinez</span>
+          <span class="lb-country"><span class="lb-flag">ðŸ‡¦ðŸ‡·</span>Argentina</span>
+        </div>
+        <div class="lb-value">4</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank silver">2</div>
+        <div class="lb-avatar">MU</div>
+        <div class="lb-info">
+          <span class="lb-name">Manuel Neuer</span>
+          <span class="lb-country"><span class="lb-flag">ðŸ‡©ðŸ‡ª</span>Germany</span>
+        </div>
+        <div class="lb-value">3</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank silver">2</div>
+        <div class="lb-avatar">AC</div>
+        <div class="lb-info">
+          <span class="lb-name">Alisson Becker</span>
+          <span class="lb-country"><span class="lb-flag">ðŸ‡§ðŸ‡·</span>Brazil</span>
+        </div>
+        <div class="lb-value">3</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank bronze">4</div>
+        <div class="lb-avatar">MS</div>
+        <div class="lb-info">
+          <span class="lb-name">Mike Maignan</span>
+          <span class="lb-country"><span class="lb-flag">ðŸ‡«ðŸ‡·</span>France</span>
+        </div>
+        <div class="lb-value">2</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank bronze">4</div>
+        <div class="lb-avatar">UP</div>
+        <div class="lb-info">
+          <span class="lb-name">Unai Simon</span>
+          <span class="lb-country"><span class="lb-flag">ðŸ‡ªðŸ‡¸</span>Spain</span>
+        </div>
+        <div class="lb-value">2</div>
+      </div>
+    </div>
+
+    <!-- Saves -->
+    <div class="lb-rows" data-tab="saves" style="display:none">
+      <div class="lb-row">
+        <div class="lb-rank gold">1</div>
+        <div class="lb-avatar">ON</div>
+        <div class="lb-info">
+          <span class="lb-name">Andre Onana</span>
+          <span class="lb-country"><span class="lb-flag">ðŸ‡¨ðŸ‡²</span>Cameroon</span>
+        </div>
+        <div class="lb-value">24</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank silver">2</div>
+        <div class="lb-avatar">EM</div>
+        <div class="lb-info">
+          <span class="lb-name">Emiliano Martinez</span>
+          <span class="lb-country"><span class="lb-flag">ðŸ‡¦ðŸ‡·</span>Argentina</span>
+        </div>
+        <div class="lb-value">19</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank bronze">3</div>
+        <div class="lb-avatar">AS</div>
+        <div class="lb-info">
+          <span class="lb-name">Alisson Becker</span>
+          <span class="lb-country"><span class="lb-flag">ðŸ‡§ðŸ‡·</span>Brazil</span>
+        </div>
+        <div class="lb-value">17</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank bronze">4</div>
+        <div class="lb-avatar">KO</div>
+        <div class="lb-info">
+          <span class="lb-name">Koen Casteels</span>
+          <span class="lb-country"><span class="lb-flag">ðŸ‡§ðŸ‡ª</span>Belgium</span>
+        </div>
+        <div class="lb-value">15</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank bronze">5</div>
+        <div class="lb-avatar">ZS</div>
+        <div class="lb-info">
+          <span class="lb-name">Zack Steffen</span>
+          <span class="lb-country"><span class="lb-flag">ðŸ‡ºðŸ‡¸</span>USA</span>
+        </div>
+        <div class="lb-value">14</div>
+      </div>
+    </div>
+
+    <!-- Man of the Match -->
+    <div class="lb-rows" data-tab="motm" style="display:none">
+      <div class="lb-row">
+        <div class="lb-rank gold">1</div>
+        <div class="lb-avatar">LM</div>
+        <div class="lb-info">
+          <span class="lb-name">Lionel Messi</span>
+          <span class="lb-country"><span class="lb-flag">ðŸ‡¦ðŸ‡·</span>Argentina</span>
+        </div>
+        <div class="lb-value">4</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank silver">2</div>
+        <div class="lb-avatar">KM</div>
+        <div class="lb-info">
+          <span class="lb-name">Kylian Mbappe</span>
+          <span class="lb-country"><span class="lb-flag">ðŸ‡«ðŸ‡·</span>France</span>
+        </div>
+        <div class="lb-value">3</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank bronze">3</div>
+        <div class="lb-avatar">VJ</div>
+        <div class="lb-info">
+          <span class="lb-name">Vinicius Junior</span>
+          <span class="lb-country"><span class="lb-flag">ðŸ‡§ðŸ‡·</span>Brazil</span>
+        </div>
+        <div class="lb-value">2</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank bronze">3</div>
+        <div class="lb-avatar">JB</div>
+        <div class="lb-info">
+          <span class="lb-name">Jude Bellingham</span>
+          <span class="lb-country"><span class="lb-flag">ðŸ´ó §ó ¢ó ¥ó ®ó §ó ¿</span>England</span>
+        </div>
+        <div class="lb-value">2</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-rank bronze">3</div>
+        <div class="lb-avatar">CP</div>
+        <div class="lb-info">
+          <span class="lb-name">Christian Pulisic</span>
+          <span class="lb-country"><span class="lb-flag">ðŸ‡ºðŸ‡¸</span>USA</span>
+        </div>
+        <div class="lb-value">2</div>
+      </div>
+    </div>
+
     <!-- Yellow Cards -->
     <div class="lb-rows" data-tab="yellow" style="display:none">
       <div class="lb-row">
@@ -451,14 +601,27 @@
   </div>
 </section>
 
-<script src="js/app.js?v=20260702-audit2"></script>
+<script src="js/app.js?v=20260705-stats-top10b"></script>
 <script>
 // ── LEADERBOARD TABS ─────────────────────────────────────────
 (function(){
   var tabs   = document.querySelectorAll('.lb-tab');
   var rows   = document.querySelectorAll('.lb-rows');
   var label  = document.getElementById('lb-stat-label');
-  var labels = { goals:'Goals', assists:'Assists', yellow:'Yellow Cards', red:'Red Cards' };
+  var labels = {
+    goals:'Goals',
+    assists:'Assists',
+    xg:'xG',
+    shots:'Shots on Target',
+    chances:'Key Passes',
+    clean:'Clean Sheets',
+    saves:'Saves',
+    tackles:'Tackles Won',
+    interceptions:'Interceptions',
+    motm:'MOTM',
+    yellow:'Yellow Cards',
+    red:'Red Cards'
+  };
   tabs.forEach(function(tab){
     tab.addEventListener('click', function(){
       var key = this.dataset.lb;
