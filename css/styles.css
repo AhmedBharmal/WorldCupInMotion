@@ -385,8 +385,8 @@ body.light-cursor #cur-ring { border-color:rgba(10,10,10,.2); }
   position:absolute; top:50%; right:clamp(18px,3vw,32px);
   transform:translateY(-50%) translateX(20px);
   z-index:29;
-  width:min(400px,calc(100vw - 36px));
-  max-height:min(75vh,720px);
+  width:min(520px,calc(100vw - 36px));
+  max-height:min(86vh,820px);
   overflow:hidden; padding:0;
   border-radius:20px;
   border:1.5px solid var(--border);
@@ -443,7 +443,7 @@ body.light-cursor #cur-ring { border-color:rgba(10,10,10,.2); }
   font-size:14px; line-height:1.45; letter-spacing:.04em; color:var(--ink2);
 }
 .panel-metrics {
-  display:grid; grid-template-columns:repeat(3,1fr);
+  display:grid; grid-template-columns:.8fr 1fr 1.2fr;
   gap:8px; margin:0 20px 14px; padding:0;
 }
 .panel-metrics div {
@@ -455,20 +455,21 @@ body.light-cursor #cur-ring { border-color:rgba(10,10,10,.2); }
 .panel-metrics div:nth-child(3) { border-top:3px solid var(--orange); }
 .panel-metrics span {
   display:block; font-family:'Bebas Neue',sans-serif;
-  font-size:26px; line-height:1; color:var(--ink);
+  font-size:clamp(20px,2.2vw,26px); line-height:1; color:var(--ink);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 .panel-metrics small {
   display:block; margin-top:4px; font-family:'Barlow Condensed',sans-serif;
   font-size:9px; letter-spacing:.24em; text-transform:uppercase; color:var(--ink3);
 }
 .panel-tabs {
-  display:grid; grid-template-columns:repeat(3,1fr);
+  display:grid; grid-template-columns:repeat(4,1fr);
   gap:6px; margin:0 20px 12px;
 }
 .panel-tab { min-height:32px; border-radius:10px; }
 #panel-content {
   display:grid; gap:7px;
-  max-height:220px; overflow:auto;
+  max-height:min(46vh,420px); overflow:auto;
   padding:0 20px 20px;
 }
 #panel-content::-webkit-scrollbar { width:3px; }
@@ -485,6 +486,59 @@ body.light-cursor #cur-ring { border-color:rgba(10,10,10,.2); }
 .detail-row span, .venue-chip span {
   display:block; margin-top:3px; font-family:'Barlow Condensed',sans-serif;
   font-size:12px; letter-spacing:.10em; color:var(--ink3);
+}
+.team-hero {
+  position:relative; overflow:hidden; min-height:132px;
+  border:1.5px solid var(--border); border-radius:16px;
+  background:linear-gradient(135deg,rgba(0,204,110,.12),rgba(77,166,255,.12) 52%,rgba(255,95,31,.08));
+  display:grid; grid-template-columns:1fr auto; gap:12px; align-items:end;
+  padding:18px;
+}
+.team-hero::after {
+  content:''; position:absolute; inset:auto -28px -48px auto;
+  width:170px; height:170px; border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.72),rgba(255,255,255,0));
+}
+.team-hero strong {
+  display:block; font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(34px,4vw,52px); line-height:.9; letter-spacing:.06em; color:var(--ink);
+}
+.team-hero span {
+  display:block; margin-top:8px; font-family:'Barlow Condensed',sans-serif;
+  font-size:13px; letter-spacing:.13em; color:var(--ink2);
+}
+.team-flag-art {
+  position:relative; z-index:1; width:86px; height:60px; object-fit:cover;
+  border-radius:8px; border:2px solid var(--white);
+  box-shadow:0 8px 22px rgba(0,0,0,.14);
+}
+.panel-link-row { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+.profile-link {
+  display:block; border:1.5px solid var(--border); border-radius:12px;
+  background:var(--white); padding:10px 12px;
+  font-family:'Barlow Condensed',sans-serif; text-transform:uppercase;
+  font-size:11px; letter-spacing:.16em; color:var(--ink2); text-decoration:none;
+}
+.profile-link:hover { border-color:var(--green); color:var(--ink); }
+.squad-pos-label {
+  font-family:'Barlow Condensed',sans-serif; font-size:10px;
+  letter-spacing:.32em; text-transform:uppercase; color:var(--green);
+  padding:8px 2px 0;
+}
+.squad-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+.squad-chip {
+  border:1.5px solid var(--border); border-radius:12px; background:var(--surface);
+  padding:9px 10px; min-width:0;
+}
+.squad-chip strong {
+  display:block; font-family:'Bebas Neue',sans-serif; font-size:16px;
+  letter-spacing:.06em; color:var(--ink); font-weight:400;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.squad-chip span {
+  display:block; margin-top:2px; font-family:'Barlow Condensed',sans-serif;
+  font-size:11px; letter-spacing:.10em; color:var(--ink3);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 
 /* ── PLATFORM DECK (overview card bottom-left) ───────────────── */

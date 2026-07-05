@@ -391,6 +391,63 @@ const PLATFORM_PROFILES = {
   }
 };
 
+const TEAM_DOSSIERS = {
+  USA: {
+    manager:'Mauricio Pochettino', star:'Christian Pulisic', nickname:'The Stars and Stripes', confed:'CONCACAF', titles:'0 World Cups', best:'1930 semifinal',
+    managerWiki:'https://en.wikipedia.org/wiki/Mauricio_Pochettino', starWiki:'https://en.wikipedia.org/wiki/Christian_Pulisic',
+    identity:'Vertical wide attacks, athletic midfield pressure, and home-crowd speed built for North American venues.',
+    squad:['Matt Turner|GK|Nottingham Forest', 'Zack Steffen|GK|Colorado Rapids', 'Antonee Robinson|DEF|Fulham', 'Tim Ream|DEF|Charlotte FC', 'Chris Richards|DEF|Crystal Palace', 'Sergino Dest|DEF|PSV', 'Tyler Adams|MID|Bournemouth', 'Weston McKennie|MID|Juventus', 'Yunus Musah|MID|AC Milan', 'Gio Reyna|MID|Borussia Dortmund', 'Christian Pulisic|FWD|AC Milan', 'Tim Weah|FWD|Juventus', 'Folarin Balogun|FWD|Monaco', 'Ricardo Pepi|FWD|PSV', 'Brenden Aaronson|MID|Leeds United']
+  },
+  ARG: {
+    manager:'Lionel Scaloni', star:'Lionel Messi', nickname:'La Albiceleste', confed:'CONMEBOL', titles:'3 World Cups', best:'Champions 1978, 1986, 2022',
+    managerWiki:'https://en.wikipedia.org/wiki/Lionel_Scaloni', starWiki:'https://en.wikipedia.org/wiki/Lionel_Messi',
+    identity:'Possession craft, final-third patience, and brutal transition quality around a veteran core.',
+    squad:['Emiliano Martinez|GK|Aston Villa', 'Cristian Romero|DEF|Tottenham', 'Nicolas Otamendi|DEF|Benfica', 'Nahuel Molina|DEF|Atletico Madrid', 'Lisandro Martinez|DEF|Manchester United', 'Rodrigo De Paul|MID|Atletico Madrid', 'Enzo Fernandez|MID|Chelsea', 'Alexis Mac Allister|MID|Liverpool', 'Lionel Messi|FWD|Inter Miami', 'Julian Alvarez|FWD|Atletico Madrid', 'Lautaro Martinez|FWD|Inter Milan', 'Angel Di Maria|FWD|Benfica', 'Leandro Paredes|MID|Roma', 'Giovani Lo Celso|MID|Real Betis', 'Nicolas Gonzalez|FWD|Juventus']
+  },
+  BRA: {
+    manager:'Carlo Ancelotti', star:'Vinicius Junior', nickname:'Selecao', confed:'CONMEBOL', titles:'5 World Cups', best:'Record five-time champions',
+    managerWiki:'https://en.wikipedia.org/wiki/Carlo_Ancelotti', starWiki:'https://en.wikipedia.org/wiki/Vin%C3%ADcius_J%C3%BAnior',
+    identity:'Explosive wingers, aggressive fullbacks, and chance creation through individual chaos.',
+    squad:['Alisson Becker|GK|Liverpool', 'Ederson|GK|Manchester City', 'Marquinhos|DEF|Paris Saint-Germain', 'Eder Militao|DEF|Real Madrid', 'Gabriel Magalhaes|DEF|Arsenal', 'Danilo|DEF|Juventus', 'Bruno Guimaraes|MID|Newcastle United', 'Casemiro|MID|Manchester United', 'Lucas Paqueta|MID|West Ham', 'Rodrygo|FWD|Real Madrid', 'Vinicius Junior|FWD|Real Madrid', 'Raphinha|FWD|Barcelona', 'Endrick|FWD|Real Madrid', 'Richarlison|FWD|Tottenham', 'Gabriel Martinelli|FWD|Arsenal']
+  },
+  FRA: {
+    manager:'Didier Deschamps', star:'Kylian Mbappe', nickname:'Les Bleus', confed:'UEFA', titles:'2 World Cups', best:'Champions 1998, 2018',
+    managerWiki:'https://en.wikipedia.org/wiki/Didier_Deschamps', starWiki:'https://en.wikipedia.org/wiki/Kylian_Mbapp%C3%A9',
+    identity:'Elite depth, vertical speed, and a tournament-tested defensive spine.',
+    squad:['Mike Maignan|GK|AC Milan', 'Jules Kounde|DEF|Barcelona', 'William Saliba|DEF|Arsenal', 'Dayot Upamecano|DEF|Bayern Munich', 'Theo Hernandez|DEF|AC Milan', 'Aurelien Tchouameni|MID|Real Madrid', 'Eduardo Camavinga|MID|Real Madrid', 'Adrien Rabiot|MID|Marseille', 'Antoine Griezmann|MID|Atletico Madrid', 'Kylian Mbappe|FWD|Real Madrid', 'Ousmane Dembele|FWD|Paris Saint-Germain', 'Marcus Thuram|FWD|Inter Milan', 'Randal Kolo Muani|FWD|Paris Saint-Germain', 'Kingsley Coman|FWD|Bayern Munich', 'Ibrahima Konate|DEF|Liverpool']
+  },
+  ESP: {
+    manager:'Luis de la Fuente', star:'Lamine Yamal', nickname:'La Roja', confed:'UEFA', titles:'1 World Cup', best:'Champions 2010',
+    managerWiki:'https://en.wikipedia.org/wiki/Luis_de_la_Fuente_(football_manager)', starWiki:'https://en.wikipedia.org/wiki/Lamine_Yamal',
+    identity:'Control-heavy possession, wide overloads, and fast switches into young attackers.',
+    squad:['Unai Simon|GK|Athletic Club', 'Dani Carvajal|DEF|Real Madrid', 'Robin Le Normand|DEF|Atletico Madrid', 'Aymeric Laporte|DEF|Al Nassr', 'Marc Cucurella|DEF|Chelsea', 'Rodri|MID|Manchester City', 'Pedri|MID|Barcelona', 'Gavi|MID|Barcelona', 'Fabian Ruiz|MID|Paris Saint-Germain', 'Lamine Yamal|FWD|Barcelona', 'Nico Williams|FWD|Athletic Club', 'Alvaro Morata|FWD|AC Milan', 'Dani Olmo|MID|Barcelona', 'Mikel Merino|MID|Arsenal', 'Ferran Torres|FWD|Barcelona']
+  },
+  DEU: {
+    manager:'Julian Nagelsmann', star:'Jamal Musiala', nickname:'Die Mannschaft', confed:'UEFA', titles:'4 World Cups', best:'Champions 1954, 1974, 1990, 2014',
+    managerWiki:'https://en.wikipedia.org/wiki/Julian_Nagelsmann', starWiki:'https://en.wikipedia.org/wiki/Jamal_Musiala',
+    identity:'Structured possession, central overloads, and quick attacking rotations between creators.',
+    squad:['Manuel Neuer|GK|Bayern Munich', 'Marc-Andre ter Stegen|GK|Barcelona', 'Antonio Rudiger|DEF|Real Madrid', 'Jonathan Tah|DEF|Bayer Leverkusen', 'Joshua Kimmich|DEF|Bayern Munich', 'David Raum|DEF|RB Leipzig', 'Toni Kroos|MID|Real Madrid', 'Ilkay Gundogan|MID|Barcelona', 'Florian Wirtz|MID|Bayer Leverkusen', 'Jamal Musiala|MID|Bayern Munich', 'Kai Havertz|FWD|Arsenal', 'Niclas Fullkrug|FWD|West Ham', 'Leroy Sane|FWD|Bayern Munich', 'Serge Gnabry|FWD|Bayern Munich', 'Robert Andrich|MID|Bayer Leverkusen']
+  },
+  PRT: {
+    manager:'Roberto Martinez', star:'Cristiano Ronaldo', nickname:'A Selecao', confed:'UEFA', titles:'0 World Cups', best:'1966 third place',
+    managerWiki:'https://en.wikipedia.org/wiki/Roberto_Mart%C3%ADnez', starWiki:'https://en.wikipedia.org/wiki/Cristiano_Ronaldo',
+    identity:'Technical midfield control, elite creators, and penalty-box gravity from multiple forwards.',
+    squad:['Diogo Costa|GK|Porto', 'Ruben Dias|DEF|Manchester City', 'Pepe|DEF|Porto', 'Joao Cancelo|DEF|Barcelona', 'Nuno Mendes|DEF|Paris Saint-Germain', 'Joao Palhinha|MID|Bayern Munich', 'Vitinha|MID|Paris Saint-Germain', 'Bruno Fernandes|MID|Manchester United', 'Bernardo Silva|MID|Manchester City', 'Cristiano Ronaldo|FWD|Al Nassr', 'Rafael Leao|FWD|AC Milan', 'Goncalo Ramos|FWD|Paris Saint-Germain', 'Diogo Jota|FWD|Liverpool', 'Joao Felix|FWD|Barcelona', 'Pedro Neto|FWD|Chelsea']
+  },
+  ENG: {
+    manager:'Thomas Tuchel', star:'Jude Bellingham', nickname:'Three Lions', confed:'UEFA', titles:'1 World Cup', best:'Champions 1966',
+    managerWiki:'https://en.wikipedia.org/wiki/Thomas_Tuchel', starWiki:'https://en.wikipedia.org/wiki/Jude_Bellingham',
+    identity:'Powerful attacking options, set-piece threat, and a midfield built to arrive late in the box.',
+    squad:['Jordan Pickford|GK|Everton', 'John Stones|DEF|Manchester City', 'Marc Guehi|DEF|Crystal Palace', 'Kyle Walker|DEF|Manchester City', 'Luke Shaw|DEF|Manchester United', 'Declan Rice|MID|Arsenal', 'Kobbie Mainoo|MID|Manchester United', 'Jude Bellingham|MID|Real Madrid', 'Phil Foden|MID|Manchester City', 'Bukayo Saka|FWD|Arsenal', 'Harry Kane|FWD|Bayern Munich', 'Cole Palmer|FWD|Chelsea', 'Ollie Watkins|FWD|Aston Villa', 'Anthony Gordon|FWD|Newcastle United', 'Trent Alexander-Arnold|DEF|Liverpool']
+  },
+  GBR: {
+    manager:'Thomas Tuchel', star:'Jude Bellingham', nickname:'Three Lions', confed:'UEFA', titles:'1 World Cup', best:'Champions 1966',
+    managerWiki:'https://en.wikipedia.org/wiki/Thomas_Tuchel', starWiki:'https://en.wikipedia.org/wiki/Jude_Bellingham',
+    identity:'Powerful attacking options, set-piece threat, and a midfield built to arrive late in the box.',
+    squad:['Jordan Pickford|GK|Everton', 'John Stones|DEF|Manchester City', 'Marc Guehi|DEF|Crystal Palace', 'Kyle Walker|DEF|Manchester City', 'Luke Shaw|DEF|Manchester United', 'Declan Rice|MID|Arsenal', 'Kobbie Mainoo|MID|Manchester United', 'Jude Bellingham|MID|Real Madrid', 'Phil Foden|MID|Manchester City', 'Bukayo Saka|FWD|Arsenal', 'Harry Kane|FWD|Bayern Munich', 'Cole Palmer|FWD|Chelsea', 'Ollie Watkins|FWD|Aston Villa', 'Anthony Gordon|FWD|Newcastle United', 'Trent Alexander-Arnold|DEF|Liverpool']
+  }
+};
+
 const HOST_STADIUMS = [
   { name:'Estadio Azteca', city:'Mexico City', capacity:'87,523', matches:'Opening match, group stage', note:'Opening-night mythology' },
   { name:'SoFi Stadium', city:'Los Angeles', capacity:'70,240', matches:'Group stage, knockout path', note:'Host spotlight bowl' },
@@ -875,88 +932,7 @@ function renderStatsView() {
   ).join('')}</div>`;
 }
 
-// ── NATION PANEL — squad & fixtures from live API ─────────────
-async function renderPanelContent(profile, nation) {
-  const panelContent = document.getElementById('panel-content');
-  if (!panelContent) return;
-
-  if (activePanel === 'fixtures') {
-    // Try live fixtures first
-    const matches = LIVE_DATA.matches.filter(m => {
-      const n = normalizeName(nation.name);
-      return normalizeName(m.homeTeam.name).includes(n.split(' ')[0]) ||
-             normalizeName(m.awayTeam.name).includes(n.split(' ')[0]);
-    });
-
-    if (matches.length) {
-      panelContent.innerHTML = matches.map(m => {
-        const d   = new Date(m.utcDate);
-        const ds  = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
-        const isHome = normalizeName(m.homeTeam.name).includes(normalizeName(nation.name).split(' ')[0]);
-        const opp = isHome ? m.awayTeam.name : m.homeTeam.name;
-        const loc = isHome ? 'Home' : 'Away';
-        const scoreStr = m.status !== 'SCHEDULED'
-          ? ` · ${m.score.home ?? '?'}–${m.score.away ?? '?'} ${m.status === 'FINISHED' ? 'FT' : 'LIVE'}`
-          : '';
-        return `<div class="detail-row">
-          <strong>${loc} vs ${escapeHtml(opp)}${scoreStr}</strong>
-          <span>${escapeHtml(ds)}${m.group ? ` · Group ${escapeHtml(m.group)}` : ''}${m.venue ? ` · ${escapeHtml(m.venue)}` : ''}</span>
-        </div>`;
-      }).join('');
-      return;
-    }
-    // Fall back to static
-    panelContent.innerHTML = profile.fixtures.map(item => {
-      const [title, detail] = splitDetailItem(item);
-      return `<div class="detail-row"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(detail || '')}</span></div>`;
-    }).join('');
-    return;
-  }
-
-  if (activePanel === 'story') {
-    panelContent.innerHTML = profile.story.map(item =>
-      `<div class="detail-row"><strong>${escapeHtml(item)}</strong></div>`
-    ).join('');
-    return;
-  }
-
-  // Squad tab — try live API
-  panelContent.innerHTML = '<div class="detail-row"><strong>Loading squad…</strong></div>';
-  const squadData = await fetchSquad(nation.iso);
-
-  if (squadData && squadData.squad.length) {
-    const byPos = {};
-    squadData.squad.forEach(p => {
-      const pos = p.position?.includes('Goalkeeper') ? 'GK'
-                : p.position?.includes('Defender')   ? 'DEF'
-                : p.position?.includes('Midfielder')  ? 'MID'
-                : 'FWD';
-      (byPos[pos] = byPos[pos] || []).push(p);
-    });
-
-    let html = squadData.coach
-      ? `<div class="detail-row"><strong>Coach</strong><span>${escapeHtml(squadData.coach)}</span></div>`
-      : '';
-
-    const posOrder = ['GK','DEF','MID','FWD'];
-    posOrder.forEach(pos => {
-      if (!byPos[pos]?.length) return;
-      html += `<div class="squad-pos-label">${{ GK:'Goalkeepers', DEF:'Defenders', MID:'Midfielders', FWD:'Forwards' }[pos]}</div>`;
-      html += byPos[pos].map(p =>
-        `<div class="detail-row"><strong>${escapeHtml(p.short || p.name)}</strong><span>${p.number ? `#${p.number} · ` : ''}${escapeHtml(p.club || '—')}${p.age ? ` · ${p.age}y` : ''}</span></div>`
-      ).join('');
-    });
-    panelContent.innerHTML = html;
-  } else {
-    // Fallback to static profile
-    panelContent.innerHTML = profile.players.map(item => {
-      const [title, detail] = splitDetailItem(item);
-      return `<div class="detail-row"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(detail || 'Data unavailable')}</span></div>`;
-    }).join('');
-  }
-}
-
-// ── STATIC FALLBACK DATA ──────────────────────────────────────
+// STATIC FALLBACK DATA ──────────────────────────────────────
 const BRACKET_PATH = [
   { round:'Round of 32', matches:['Mexico vs Turkey', 'France vs Japan', 'Brazil vs Croatia'] },
   { round:'Round of 16', matches:['Argentina vs Portugal', 'Spain vs Germany', 'USA vs Netherlands'] },
@@ -990,7 +966,7 @@ function profileForNation(n) {
     rank: 'TBC',
     form: 'TBC',
     model: 'TBC',
-    summary: `${n.name} · Group ${n.group}. Full squad, rankings, form, and fixture data will load from the live feed once tournament data is available.`,
+    summary: `${n.name} · Group ${n.group}. Team profile, squad, manager, and fixtures will load from the live feed once tournament data is available.`,
     players: [
       `${n.name} captain · Data unavailable`,
       `Key forward · Data unavailable`,
@@ -1009,7 +985,7 @@ function profileForNation(n) {
   };
 }
 
-let activePanel = 'squad';
+let activePanel = 'overview';
 
 function splitDetailItem(item) {
   const divider = item.includes(' - ') ? ' - ' : ': ';
@@ -1017,40 +993,135 @@ function splitDetailItem(item) {
   return [title, rest.join(divider)];
 }
 
-function renderPanelContent(profile) {
+function nationDossier(n, profile) {
+  const base = TEAM_DOSSIERS[n.iso] || {};
+  const iso2 = ISO3_TO_ISO2[n.iso] || '';
+  const wikiName = `${n.name} national football team`.replaceAll(' ', '_');
+  return {
+    manager: base.manager || 'Manager TBC',
+    star: base.star || (profile.players?.[0]?.split(' - ')[0] || 'Key player TBC'),
+    nickname: base.nickname || `${n.name} national team`,
+    confed: base.confed || 'World football',
+    titles: base.titles || 'World Cup record TBC',
+    best: base.best || 'Tournament history loading',
+    identity: base.identity || profile.summary,
+    managerWiki: base.managerWiki || `https://en.wikipedia.org/wiki/${encodeURIComponent(wikiName)}`,
+    starWiki: base.starWiki || `https://en.wikipedia.org/wiki/${encodeURIComponent(wikiName)}`,
+    teamWiki: `https://en.wikipedia.org/wiki/${encodeURIComponent(wikiName)}`,
+    flagSrc: iso2 ? `https://flagcdn.com/w320/${iso2}.png` : '',
+    squad: base.squad || profile.players.map(item => {
+      const [name, role] = splitDetailItem(item);
+      return `${name}|Player|${role || 'Squad profile'}`;
+    })
+  };
+}
+
+function renderSquadGrid(squadItems) {
+  const byRole = {};
+  squadItems.forEach(item => {
+    const [name, role = 'Player', club = 'Club TBC'] = item.split('|');
+    const key = role === 'GK' ? 'Goalkeepers'
+      : role === 'DEF' ? 'Defenders'
+      : role === 'MID' ? 'Midfielders'
+      : role === 'FWD' ? 'Forwards'
+      : 'Key Players';
+    (byRole[key] = byRole[key] || []).push({ name, role, club });
+  });
+
+  return Object.entries(byRole).map(([label, players]) => `
+    <div class="squad-pos-label">${escapeHtml(label)}</div>
+    <div class="squad-grid">${players.map(player => `
+      <div class="squad-chip">
+        <strong>${escapeHtml(player.name)}</strong>
+        <span>${escapeHtml(player.role)} · ${escapeHtml(player.club)}</span>
+      </div>`).join('')}</div>
+  `).join('');
+}
+
+async function renderPanelContent(profile, nation) {
   const panelContent = document.getElementById('panel-content');
   if (!panelContent) return;
+  const dossier = nationDossier(nation, profile);
+
+  if (activePanel === 'overview') {
+    panelContent.innerHTML = `
+      <div class="team-hero">
+        <div>
+          <strong>${escapeHtml(dossier.nickname)}</strong>
+          <span>${escapeHtml(dossier.identity)}</span>
+        </div>
+        ${dossier.flagSrc ? `<img class="team-flag-art" src="${dossier.flagSrc}" alt="${escapeHtml(nation.name)} flag">` : ''}
+      </div>
+      <div class="panel-link-row">
+        <a class="profile-link" href="${escapeHtml(dossier.managerWiki)}" target="_blank" rel="noreferrer">Manager wiki</a>
+        <a class="profile-link" href="${escapeHtml(dossier.starWiki)}" target="_blank" rel="noreferrer">Star player wiki</a>
+      </div>
+      <div class="detail-row"><strong>Manager</strong><span>${escapeHtml(dossier.manager)}</span></div>
+      <div class="detail-row"><strong>Top player</strong><span>${escapeHtml(dossier.star)}</span></div>
+      <div class="detail-row"><strong>World Cup profile</strong><span>${escapeHtml(dossier.titles)} · ${escapeHtml(dossier.best)} · ${escapeHtml(dossier.confed)}</span></div>
+      <a class="profile-link" href="${escapeHtml(dossier.teamWiki)}" target="_blank" rel="noreferrer">National team Wikipedia</a>
+    `;
+    return;
+  }
+
   if (activePanel === 'fixtures') {
     panelContent.innerHTML = profile.fixtures.map(item => {
       const [title, detail] = splitDetailItem(item);
-      return `<div class="detail-row"><strong>${title}</strong><span>${detail || 'Connected fixture intelligence'}</span></div>`;
+      return `<div class="detail-row"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(detail || 'Connected fixture intelligence')}</span></div>`;
     }).join('');
     return;
   }
   if (activePanel === 'story') {
-    const storyItems = profile.story.map(item =>
-      `<div class="detail-row"><strong>${escapeHtml(item)}</strong></div>`
-    ).join('');
-    panelContent.innerHTML = storyItems;
+    panelContent.innerHTML = `
+      <div class="detail-row"><strong>${escapeHtml(dossier.titles)}</strong><span>${escapeHtml(dossier.best)}</span></div>
+      ${profile.story.map(item => `<div class="detail-row"><strong>${escapeHtml(item)}</strong></div>`).join('')}
+      <a class="profile-link" href="${escapeHtml(dossier.teamWiki)}" target="_blank" rel="noreferrer">Read team history</a>
+    `;
     return;
   }
-  panelContent.innerHTML = profile.players.map(item => {
-    const [title, detail] = splitDetailItem(item);
-    return `<div class="detail-row"><strong>${title}</strong><span>${detail || 'Player intelligence'}</span></div>`;
-  }).join('');
+
+  panelContent.innerHTML = '<div class="detail-row"><strong>Loading squad</strong><span>Checking live team roster first.</span></div>';
+  const liveSquad = await fetchSquad(nation.iso);
+  if (activePanel !== 'squad') return;
+  if (liveSquad?.squad?.length) {
+    const squad = liveSquad.squad.map(player => {
+      const pos = player.position?.includes('Goalkeeper') ? 'GK'
+        : player.position?.includes('Defender') ? 'DEF'
+        : player.position?.includes('Midfielder') ? 'MID'
+        : 'FWD';
+      const meta = [
+        player.club || 'Club TBC',
+        player.number ? `#${player.number}` : '',
+        player.age ? `${player.age}y` : ''
+      ].filter(Boolean).join(' / ');
+      return `${player.short || player.name}|${pos}|${meta}`;
+    });
+    panelContent.innerHTML = `
+      <div class="detail-row"><strong>Manager</strong><span>${escapeHtml(liveSquad.coach || dossier.manager)}</span></div>
+      ${renderSquadGrid(squad)}
+    `;
+    return;
+  }
+
+  panelContent.innerHTML = `
+    <div class="detail-row"><strong>Manager</strong><span>${escapeHtml(dossier.manager)}</span></div>
+    ${renderSquadGrid(dossier.squad)}
+  `;
 }
 
 function renderNationPanel(n) {
   const profile = profileForNation(n);
+  const dossier = nationDossier(n, profile);
   const panel = document.getElementById('nation-panel');
   document.getElementById('panel-kicker').textContent = `${n.iso} selected`;
   document.getElementById('panel-title').textContent = n.name;
   document.getElementById('panel-group').textContent = `GROUP ${n.group}`;
   document.getElementById('panel-summary').textContent = profile.summary;
   document.getElementById('metric-rank').textContent = profile.rank;
-  document.getElementById('metric-form').textContent = profile.form;
-  document.getElementById('metric-odds').textContent = profile.model;
-  renderPanelContent(profile);
+  document.getElementById('metric-form').textContent = dossier.manager;
+  document.getElementById('metric-odds').textContent = dossier.star;
+  document.querySelectorAll('.panel-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.panel === activePanel));
+  renderPanelContent(profile, n);
   panel.classList.add('visible');
 }
 
@@ -1080,11 +1151,10 @@ function renderCountriesView(filterGroup = '') {
     </div>`;
 
   const cards = nations.map(n => {
-    const profile = PLATFORM_PROFILES[n.iso];
-    const rank  = profile ? `#${profile.rank}` : 'Rank TBC';
-    const form  = profile ? profile.form : 'Data soon';
-    const model = profile ? profile.model : '—';
-    const iso2  = ISO3_TO_ISO2[n.iso] || '';
+    const profile = profileForNation(n);
+    const dossier = nationDossier(n, profile);
+    const rank = profile.rank !== 'TBC' ? `#${profile.rank}` : 'Rank TBC';
+    const iso2 = ISO3_TO_ISO2[n.iso] || '';
     const flagSrc = iso2 ? `https://flagcdn.com/w80/${iso2}.png` : '';
     return `
       <article class="hub-card country-card" data-iso="${escapeHtml(n.iso)}" tabindex="0" role="button" aria-label="${escapeHtml(n.name)}, Group ${n.group}">
@@ -1095,15 +1165,14 @@ function renderCountriesView(filterGroup = '') {
         <strong>${escapeHtml(n.name)}</strong>
         <div class="country-card-meta">
           <span class="country-card-rank">${escapeHtml(rank)}</span>
-          <span class="country-card-form">${escapeHtml(form)}</span>
-          ${model !== '—' ? `<span class="country-card-model">${escapeHtml(model)}</span>` : ''}
+          <span class="country-card-form">${escapeHtml(dossier.manager)}</span>
+          <span class="country-card-model">${escapeHtml(dossier.star)}</span>
         </div>
       </article>`;
   }).join('');
 
   return filterBar + `<div class="hub-grid three country-grid">${cards}</div>`;
 }
-
 function renderLiveView() {
   return LIVE_MATCHES.map(match => `
     <article class="match-card">
@@ -1181,7 +1250,10 @@ function searchItems(query) {
   const players = Object.entries(PLATFORM_PROFILES).flatMap(([iso, profile]) =>
     profile.players.map(player => ({ type:'Player', title:player.split(' - ')[0], body:`${nationByIso[iso]?.name || iso} - ${player.split(' - ')[1] || 'profile'}`, iso }))
   );
-  const countries = WC_NATIONS.map(n => ({ type:'Country', title:n.name, body:`Group ${n.group} - ${profileForNation(n).form} form`, iso:n.iso }));
+  const countries = WC_NATIONS.map(n => {
+    const dossier = nationDossier(n, profileForNation(n));
+    return { type:'Country', title:n.name, body:`Group ${n.group} - ${dossier.manager} - ${dossier.star}`, iso:n.iso };
+  });
   const stadiums = HOST_STADIUMS.map(s => ({ type:'Stadium', title:s.name, body:`${s.city} - ${s.matches}` }));
   const all = [...countries, ...players, ...stadiums];
   if (!normalized) return all.slice(0, 8);
@@ -1250,6 +1322,7 @@ function closeHub() {
 function openNationPanel(n) {
   // Collapse hub first — one surface at a time
   closeHub();
+  activePanel = 'overview';
   renderNationPanel(n);
 }
 
@@ -1399,10 +1472,9 @@ document.getElementById('feature-panel')?.addEventListener('click', event => {
       if (grid) {
         const nations = group ? WC_NATIONS.filter(n => n.group === group) : WC_NATIONS;
         grid.innerHTML = nations.map(n => {
-          const profile = PLATFORM_PROFILES[n.iso];
-          const rank  = profile ? `#${profile.rank}` : 'Rank TBC';
-          const form  = profile ? profile.form : 'Data soon';
-          const model = profile ? profile.model : '—';
+          const profile = profileForNation(n);
+          const dossier = nationDossier(n, profile);
+          const rank = profile.rank !== 'TBC' ? `#${profile.rank}` : 'Rank TBC';
           const iso2  = ISO3_TO_ISO2[n.iso] || '';
           const flagSrc = iso2 ? `https://flagcdn.com/w80/${iso2}.png` : '';
           return `
@@ -1414,8 +1486,8 @@ document.getElementById('feature-panel')?.addEventListener('click', event => {
               <strong>${escapeHtml(n.name)}</strong>
               <div class="country-card-meta">
                 <span class="country-card-rank">${escapeHtml(rank)}</span>
-                <span class="country-card-form">${escapeHtml(form)}</span>
-                ${model !== '—' ? `<span class="country-card-model">${escapeHtml(model)}</span>` : ''}
+                <span class="country-card-form">${escapeHtml(dossier.manager)}</span>
+                <span class="country-card-model">${escapeHtml(dossier.star)}</span>
               </div>
             </article>`;
         }).join('');
