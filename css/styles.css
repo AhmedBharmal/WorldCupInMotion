@@ -1253,10 +1253,11 @@ body.stats-active .flag-pin {
   box-shadow:inset 0 0 0 18px rgba(255,255,255,.20), inset 0 0 0 42px rgba(0,204,110,.12);
 }
 .stadium-card img {
-  display:none; position:absolute; inset:0; z-index:1; width:100%; height:100%; object-fit:cover;
+  display:block; opacity:0; position:absolute; inset:0; z-index:1; width:100%; height:100%; object-fit:cover;
   filter:saturate(.96) contrast(1.02);
+  transition:opacity .28s ease;
 }
-.stadium-card img.loaded { display:block; }
+.stadium-card img.loaded { opacity:1; }
 .stadium-card::after {
   content:''; position:absolute; inset:0; z-index:2;
   background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.94) 62%,var(--white));
@@ -1281,9 +1282,10 @@ body.stats-active .flag-pin {
     linear-gradient(135deg,rgba(77,166,255,.14),rgba(0,204,110,.12),rgba(255,95,31,.12));
 }
 .history-card img {
-  display:none; grid-column:1; grid-row:1; width:100%; height:100%; object-fit:cover; background:var(--surface);
+  display:block; opacity:0; grid-column:1; grid-row:1; width:100%; height:100%; object-fit:cover; background:var(--surface);
+  transition:opacity .28s ease;
 }
-.history-card img.loaded { display:block; }
+.history-card img.loaded { opacity:1; }
 .history-card img + div { grid-column:2; }
 .history-card:not(:has(img)) { grid-template-columns:1fr; }
 .history-card div { padding:13px; }
