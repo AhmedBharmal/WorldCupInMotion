@@ -1270,26 +1270,49 @@ body.stats-active .flag-pin {
 }
 .history-card small { display:block; margin-top:8px; color:var(--ink3); letter-spacing:.12em; }
 .predictions-hero { background:linear-gradient(135deg,rgba(0,204,110,.12),rgba(77,166,255,.12),rgba(255,95,31,.12)); }
-.prediction-stack { display:grid; grid-template-columns:1.15fr .85fr; gap:10px; }
-.prediction-bars { display:grid; gap:8px; }
-.prediction-row {
-  position:relative; overflow:hidden; min-height:82px; padding:13px 56px 13px 13px;
+.prediction-stack { display:grid; grid-template-columns:1.25fr .75fr; gap:10px; }
+.prediction-market-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.prediction-market-card {
+  position:relative; overflow:hidden; min-height:214px; padding:13px;
   border:1.5px solid var(--border); border-radius:14px; background:var(--white);
+  border-top:3px solid var(--green); box-shadow:0 4px 16px rgba(0,0,0,.05);
 }
-.prediction-row b {
-  position:absolute; right:14px; top:12px; font-family:'Bebas Neue',sans-serif;
-  font-size:30px; line-height:1; color:var(--orange); font-weight:400;
+.prediction-market-card:nth-child(4n+2) { border-top-color:var(--blue); }
+.prediction-market-card:nth-child(4n+3) { border-top-color:var(--orange); }
+.prediction-market-card:nth-child(4n+4) { border-top-color:var(--gold); }
+.market-top { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+.market-top span, .market-pick span {
+  font-family:'Barlow Condensed',sans-serif; text-transform:uppercase;
+  letter-spacing:.18em; color:var(--green); font-size:10px;
 }
-.prediction-row small {
-  display:block; font-family:'Barlow Condensed',sans-serif; text-transform:uppercase;
-  letter-spacing:.24em; color:var(--green); font-size:9px; margin-bottom:4px;
+.market-top b {
+  font-family:'Bebas Neue',sans-serif; font-size:30px; line-height:1;
+  color:var(--orange); font-weight:400;
 }
-.prediction-row span {
-  display:block; margin-top:5px; color:var(--ink2); text-transform:none;
-  letter-spacing:.05em; font-size:13px; line-height:1.3;
+.prediction-market-card strong {
+  display:block; margin-top:8px; font-family:'Bebas Neue',sans-serif;
+  font-weight:400; font-size:30px; line-height:.94; letter-spacing:.06em; color:var(--ink);
 }
-.prediction-row i {
-  position:absolute; left:0; right:0; bottom:0; height:4px;
+.prediction-market-card p {
+  margin-top:6px; font-family:'Barlow Condensed',sans-serif;
+  color:var(--ink2); font-size:13px; line-height:1.35; letter-spacing:.04em;
+}
+.market-picks { display:grid; gap:6px; margin-top:12px; }
+.market-pick {
+  position:relative; display:grid; grid-template-columns:1fr auto; gap:8px;
+  padding:8px 9px 10px; border-radius:10px; background:var(--surface);
+  border:1px solid var(--border); overflow:hidden;
+}
+.market-pick.leader { background:rgba(0,204,110,.07); border-color:rgba(0,204,110,.24); }
+.market-pick span {
+  color:var(--ink2); letter-spacing:.08em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.market-pick em {
+  font-family:'Bebas Neue',sans-serif; font-style:normal; font-size:18px;
+  line-height:1; color:var(--ink);
+}
+.market-pick i {
+  position:absolute; left:0; right:0; bottom:0; height:3px;
   background:linear-gradient(90deg,var(--green) calc(var(--pct) * 1%),rgba(0,0,0,.08) 0);
 }
 .live-link-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; align-content:start; }
@@ -1310,6 +1333,7 @@ body.stats-active .flag-pin {
   #feature-hub { width:calc(100vw - 32px); left:16px; right:16px; }
   .group-board { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .prediction-stack { grid-template-columns:1fr; }
+  .prediction-market-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .history-wall, .stadium-grid { grid-template-columns:1fr; }
 }
 
@@ -1317,6 +1341,7 @@ body.stats-active .flag-pin {
   .stage-hero { grid-template-columns:1fr; min-height:0; }
   .stage-stat { width:100%; aspect-ratio:auto; min-height:82px; }
   .group-board { grid-template-columns:1fr; }
+  .prediction-market-grid { grid-template-columns:1fr; }
   .history-card { grid-template-columns:1fr; }
   .history-card img { height:150px; }
   .live-link-grid { grid-template-columns:1fr; }

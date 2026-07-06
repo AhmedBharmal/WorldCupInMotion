@@ -911,19 +911,55 @@ const HISTORY_TIMELINE = [
   { year:'2022', host:'Qatar', winner:'Argentina', moment:'Messi vs Mbappe final', final:'Argentina 3-3 France', fact:'Messi and Mbappe trade destiny for 120 minutes before Argentina wins the penalty epic.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Lionel_Messi_WC2022.jpg?width=700', caption:'The final that felt scripted.' }
 ];
 
-const PREDICTION_FAVORITES = [
-  { type:'Winner', pick:'Argentina', pct:18, note:'Defending champion profile, elite control, and proven knockout temperament.' },
-  { type:'Finalist', pick:'France', pct:16, note:'Depth, pace, and tournament experience make France the cleanest final route.' },
-  { type:'Golden Ball', pick:'Kylian Mbappe', pct:14, note:'Best blend of star power, minutes, goals, and deep-run probability.' },
-  { type:'Golden Boot', pick:'Harry Kane', pct:13, note:'Penalty share plus England\'s chance volume keeps him in the scoring race.' },
-  { type:'Golden Glove', pick:'Mike Maignan', pct:11, note:'France\'s defensive floor gives him a strong clean-sheet path.' },
-  { type:'Best Young Player', pick:'Lamine Yamal', pct:12, note:'If Spain goes deep, his wide creation is the headline story.' },
-  { type:'Assist Leader', pick:'Bruno Fernandes', pct:10, note:'Set pieces, chance volume, and Portugal\'s creator-heavy squad help the case.' },
-  { type:'Breakout Star', pick:'Jamal Musiala', pct:9, note:'Germany\'s run depends on line-breaking moments around him.' },
-  { type:'Dark Horse Team', pick:'USA', pct:7, note:'Host energy, travel comfort, and athletic midfield pressure create upset upside.' },
-  { type:'Shock Quarterfinalist', pick:'Morocco', pct:6, note:'Recent tournament proof plus defensive structure can travel again.' },
-  { type:'Most Watchable Attack', pick:'Brazil', pct:15, note:'Vinicius, Rodrygo, Raphinha, and Endrick can turn games into chaos.' },
-  { type:'Upset Watch', pick:'Japan over a European seed', pct:8, note:'Pressing discipline and transition speed make Japan a bracket problem.' }
+const PREDICTION_MARKETS = [
+  {
+    type:'Champion',
+    headline:'Who lifts it?',
+    note:'Trophy model blends squad depth, route pressure, knockout experience, and attacking ceiling.',
+    picks:[['Argentina',18],['France',16],['Brazil',15],['England',13]]
+  },
+  {
+    type:'Golden Ball',
+    headline:'Best player race',
+    note:'Needs star output plus a deep run, so creators on finalists get the strongest pull.',
+    picks:[['Kylian Mbappe',14],['Lionel Messi',12],['Jude Bellingham',11],['Vinicius Junior',10]]
+  },
+  {
+    type:'Golden Boot',
+    headline:'Goal king',
+    note:'Penalty share, group draw, and minutes matter as much as pure finishing quality.',
+    picks:[['Harry Kane',13],['Kylian Mbappe',12],['Lautaro Martinez',9],['Cristiano Ronaldo',8]]
+  },
+  {
+    type:'Golden Glove',
+    headline:'Keeper path',
+    note:'Clean sheets usually follow defensive structure and semifinal-level team strength.',
+    picks:[['Mike Maignan',11],['Emiliano Martinez',10],['Alisson Becker',9],['Jordan Pickford',7]]
+  },
+  {
+    type:'Young Player',
+    headline:'Next face of the cup',
+    note:'A breakout award needs minutes, highlight moments, and a team that survives the early noise.',
+    picks:[['Lamine Yamal',12],['Endrick',9],['Jamal Musiala',9],['Kobbie Mainoo',7]]
+  },
+  {
+    type:'Assist Leader',
+    headline:'Chance machine',
+    note:'Set pieces and high-volume creators dominate this market more than pure dribblers.',
+    picks:[['Bruno Fernandes',10],['Antoine Griezmann',9],['Kevin De Bruyne',8],['Pedri',7]]
+  },
+  {
+    type:'Dark Horse',
+    headline:'Chaos bracket team',
+    note:'Host energy, tactical structure, and travel comfort can bend the tournament path.',
+    picks:[['USA',7],['Morocco',6],['Japan',6],['Colombia',5]]
+  },
+  {
+    type:'Upset Watch',
+    headline:'Danger fixtures',
+    note:'These are matchup traps: pressing teams, hot climates, travel swings, and set-piece margins.',
+    picks:[['Japan over a European seed',8],['Morocco quarterfinal run',6],['USA extra-time win',6],['Uruguay bracket shock',5]]
+  }
 ];
 
 const LIVE_LINKS = [
@@ -1216,7 +1252,7 @@ function renderStadiumsView() {
   return `
     <div class="stadium-grid">${HOST_STADIUMS.map(stadium => `
       <article class="stadium-card">
-        <img src="${escapeHtml(stadium.image)}" alt="${escapeHtml(stadium.name)}" loading="lazy" onerror="this.remove()">
+        <img src="${escapeHtml(stadium.image)}" alt="${escapeHtml(stadium.name)}" loading="lazy" onerror="this.onerror=null;this.src='wc3.webp'">
         <div>
           <span>${escapeHtml(stadium.city)}</span>
           <strong>${escapeHtml(stadium.name)}</strong>
@@ -1247,7 +1283,7 @@ function renderHistoryView() {
     </section>
     <div class="history-wall">${HISTORY_TIMELINE.map(item => `
       <article class="history-card">
-        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.caption)}" loading="lazy" onerror="this.remove()">
+        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.caption)}" loading="lazy" onerror="this.onerror=null;this.src='wc3.webp'">
         <div>
           <span>${escapeHtml(item.year)} / ${escapeHtml(item.host)}</span>
           <strong>${escapeHtml(item.moment)}</strong>
@@ -1266,16 +1302,28 @@ function renderPredictionsView() {
         <strong>Favorites, Signals, News</strong>
         <p>Percentages are pre-tournament model weights, kept separate from verified match data. Links jump to live news, fixtures, and odds trackers.</p>
       </div>
-      <div class="stage-stat"><b>${PREDICTION_FAVORITES.length}</b><small>markets tracked</small></div>
+      <div class="stage-stat"><b>${PREDICTION_MARKETS.length}</b><small>markets tracked</small></div>
     </section>
-    <div class="prediction-stack">
-      <div class="prediction-bars">${PREDICTION_FAVORITES.map(item => `
-        <article class="prediction-row">
-          <div><small>${escapeHtml(item.type)}</small><strong>${escapeHtml(item.pick)}</strong><span>${escapeHtml(item.note)}</span></div>
-          <b>${item.pct}%</b>
-          <i style="--pct:${item.pct}"></i>
-        </article>
-      `).join('')}</div>
+    <div class="prediction-stack prediction-dashboard">
+      <div class="prediction-market-grid">${PREDICTION_MARKETS.map(market => {
+        const leader = market.picks[0];
+        return `
+          <article class="prediction-market-card">
+            <div class="market-top">
+              <span>${escapeHtml(market.type)}</span>
+              <b>${leader[1]}%</b>
+            </div>
+            <strong>${escapeHtml(market.headline)}</strong>
+            <p>${escapeHtml(market.note)}</p>
+            <div class="market-picks">${market.picks.map(([pick, pct], index) => `
+              <div class="market-pick ${index === 0 ? 'leader' : ''}">
+                <span>${escapeHtml(pick)}</span>
+                <em>${pct}%</em>
+                <i style="--pct:${pct}"></i>
+              </div>
+            `).join('')}</div>
+          </article>`;
+      }).join('')}</div>
       <div class="live-link-grid">${LIVE_LINKS.map(link => `
         <a class="live-link-card" href="${escapeHtml(link.href)}" target="_blank" rel="noreferrer">
           <span>Live link</span><strong>${escapeHtml(link.label)}</strong><p>Open current World Cup 2026 updates in a new tab.</p>
