@@ -899,16 +899,16 @@ const BRACKET_PATH = [
 ];
 
 const HISTORY_TIMELINE = [
-  { year:'1950', host:'Brazil', winner:'Uruguay', moment:'Maracanazo', final:'Uruguay 2-1 Brazil', fact:'Brazil only needed a draw in Rio, but Uruguay stunned the Maracana and created football\'s original national heartbreak.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Maracanazo.jpg?width=700', caption:'A silence so famous it got its own name.' },
-  { year:'1958', host:'Sweden', winner:'Brazil', moment:'Pele arrives', final:'Brazil 5-2 Sweden', fact:'A 17-year-old Pele scores in the final and turns Brazil from contender into myth.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Pele_1958.jpg?width=700', caption:'The first global superstar moment.' },
-  { year:'1970', host:'Mexico', winner:'Brazil', moment:'Carlos Alberto team goal', final:'Brazil 4-1 Italy', fact:'Nine Brazilian outfield players touch the ball before Carlos Alberto smashes in the perfect final goal.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Brazil_national_team_1970.jpg?width=700', caption:'The beautiful game in one move.' },
-  { year:'1974', host:'West Germany', winner:'West Germany', moment:'The Cruyff Turn', final:'Netherlands 2-0 Sweden', fact:'Johan Cruyff drags the ball behind his standing leg and invents a move that still teaches defenders fear.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Johan_Cruyff_1974c.jpg?width=700', caption:'Skill becomes language.' },
-  { year:'1986', host:'Mexico', winner:'Argentina', moment:'Hand of God', final:'Argentina 2-1 England', fact:'Maradona punches in one goal, then scores the Goal of the Century minutes later. Controversy and genius, same match.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Maradona_1986.jpg?width=700', caption:'The most debated touch in World Cup history.' },
-  { year:'1998', host:'France', winner:'France', moment:'Zidane final headers', final:'France 3-0 Brazil', fact:'Two Zidane headers in Paris turn France from host nation into world champion.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Zinedine_Zidane_1998.jpg?width=700', caption:'A final owned in the air.' },
-  { year:'2006', host:'Germany', winner:'Italy', moment:'Zidane headbutt', final:'Italy 1-1 France', fact:'One of the greatest careers ends with a red card before Italy wins on penalties.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Zidane_2006_World_Cup_final.jpg?width=700', caption:'A genius exits in shock.' },
-  { year:'2010', host:'South Africa', winner:'Spain', moment:'Iniesta in extra time', final:'Spain 1-0 Netherlands', fact:'Iniesta finishes late, Spain completes its possession dynasty, and South Africa gets an unforgettable first African World Cup.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Andres_Iniesta_2010.jpg?width=700', caption:'One touch for an era.' },
-  { year:'2014', host:'Brazil', winner:'Germany', moment:'7-1 in Belo Horizonte', final:'Germany 7-1 Brazil', fact:'Germany scores five in 29 minutes and turns a semifinal into the most surreal scoreboard in modern football.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Brazil_vs_Germany_2014_World_Cup.jpg?width=700', caption:'The scoreline nobody believed.' },
-  { year:'2022', host:'Qatar', winner:'Argentina', moment:'Messi vs Mbappe final', final:'Argentina 3-3 France', fact:'Messi and Mbappe trade destiny for 120 minutes before Argentina wins the penalty epic.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Lionel_Messi_WC2022.jpg?width=700', caption:'The final that felt scripted.' }
+  { year:'1950', host:'Brazil', winner:'Uruguay', moment:'Maracanazo', final:'Uruguay 2-1 Brazil', fact:'Brazil only needed a draw in Rio, but Uruguay stunned the Maracana and created football\'s original national heartbreak.', wiki:'Maracanazo', caption:'A silence so famous it got its own name.' },
+  { year:'1958', host:'Sweden', winner:'Brazil', moment:'Pele arrives', final:'Brazil 5-2 Sweden', fact:'A 17-year-old Pele scores in the final and turns Brazil from contender into myth.', wiki:'Pel%C3%A9', caption:'The first global superstar moment.' },
+  { year:'1970', host:'Mexico', winner:'Brazil', moment:'Carlos Alberto team goal', final:'Brazil 4-1 Italy', fact:'Nine Brazilian outfield players touch the ball before Carlos Alberto smashes in the perfect final goal.', wiki:'Brazil_v_Italy_(1970_FIFA_World_Cup)', caption:'The beautiful game in one move.' },
+  { year:'1974', host:'West Germany', winner:'West Germany', moment:'The Cruyff Turn', final:'Netherlands 2-0 Sweden', fact:'Johan Cruyff drags the ball behind his standing leg and invents a move that still teaches defenders fear.', wiki:'Johan_Cruyff', caption:'Skill becomes language.' },
+  { year:'1986', host:'Mexico', winner:'Argentina', moment:'Hand of God', final:'Argentina 2-1 England', fact:'Maradona punches in one goal, then scores the Goal of the Century minutes later. Controversy and genius, same match.', wiki:'Argentina_v_England_(1986_FIFA_World_Cup)', caption:'The most debated touch in World Cup history.' },
+  { year:'1998', host:'France', winner:'France', moment:'Zidane final headers', final:'France 3-0 Brazil', fact:'Two Zidane headers in Paris turn France from host nation into world champion.', wiki:'1998_FIFA_World_Cup_final', caption:'A final owned in the air.' },
+  { year:'2006', host:'Germany', winner:'Italy', moment:'Zidane headbutt', final:'Italy 1-1 France', fact:'One of the greatest careers ends with a red card before Italy wins on penalties.', wiki:'2006_FIFA_World_Cup_final', caption:'A genius exits in shock.' },
+  { year:'2010', host:'South Africa', winner:'Spain', moment:'Iniesta in extra time', final:'Spain 1-0 Netherlands', fact:'Iniesta finishes late, Spain completes its possession dynasty, and South Africa gets an unforgettable first African World Cup.', wiki:'2010_FIFA_World_Cup_final', caption:'One touch for an era.' },
+  { year:'2014', host:'Brazil', winner:'Germany', moment:'7-1 in Belo Horizonte', final:'Germany 7-1 Brazil', fact:'Germany scores five in 29 minutes and turns a semifinal into the most surreal scoreboard in modern football.', wiki:'Brazil_v_Germany_(2014_FIFA_World_Cup)', caption:'The scoreline nobody believed.' },
+  { year:'2022', host:'Qatar', winner:'Argentina', moment:'Messi vs Mbappe final', final:'Argentina 3-3 France', fact:'Messi and Mbappe trade destiny for 120 minutes before Argentina wins the penalty epic.', wiki:'2022_FIFA_World_Cup_final', caption:'The final that felt scripted.' }
 ];
 
 const PREDICTION_MARKETS = [
@@ -1156,6 +1156,34 @@ function hubCard(kicker, title, body, extra = '') {
   return `<article class="hub-card ${extra}"><span>${escapeHtml(kicker)}</span><strong>${escapeHtml(title)}</strong><p>${escapeHtml(body)}</p></article>`;
 }
 
+const WIKI_IMAGE_CACHE = {};
+function wikiTitleFromUrl(url) {
+  const marker = '/wiki/';
+  const index = String(url || '').indexOf(marker);
+  return index >= 0 ? decodeURIComponent(String(url).slice(index + marker.length)) : String(url || '');
+}
+
+async function hydrateWikiPhotos(root = document) {
+  const imgs = [...root.querySelectorAll('img[data-wiki-title]')];
+  imgs.forEach(async img => {
+    let title = img.dataset.wikiTitle;
+    try { title = decodeURIComponent(title); } catch (error) {}
+    if (!title) return;
+    try {
+      if (!WIKI_IMAGE_CACHE[title]) {
+        const endpoint = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
+        WIKI_IMAGE_CACHE[title] = fetch(endpoint)
+          .then(res => res.ok ? res.json() : null)
+          .then(data => data?.originalimage?.source || data?.thumbnail?.source || '');
+      }
+      const src = await WIKI_IMAGE_CACHE[title];
+      if (src) img.src = src;
+    } catch (error) {
+      console.info('[WCIM] Wiki image unavailable:', title);
+    }
+  });
+}
+
 function renderCountriesView(filterGroup = '') {
   const nations = filterGroup
     ? WC_NATIONS.filter(n => n.group === filterGroup)
@@ -1252,8 +1280,8 @@ function renderStadiumsView() {
   return `
     <div class="stadium-grid">${HOST_STADIUMS.map(stadium => `
       <article class="stadium-card">
-        <div class="media-fallback"><span>${escapeHtml(stadium.city)}</span><strong>${escapeHtml(stadium.name)}</strong></div>
-        <img src="${escapeHtml(stadium.image)}" alt="${escapeHtml(stadium.name)}" loading="lazy" onerror="this.remove()">
+        <div class="media-fallback" aria-hidden="true"></div>
+        <img data-wiki-title="${escapeHtml(wikiTitleFromUrl(stadium.wiki))}" alt="${escapeHtml(stadium.name)}" loading="lazy" onload="this.classList.add('loaded')" onerror="this.remove()">
         <div>
           <span>${escapeHtml(stadium.city)}</span>
           <strong>${escapeHtml(stadium.name)}</strong>
@@ -1284,8 +1312,8 @@ function renderHistoryView() {
     </section>
     <div class="history-wall">${HISTORY_TIMELINE.map(item => `
       <article class="history-card">
-        <div class="moment-fallback"><span>${escapeHtml(item.year)}</span><strong>${escapeHtml(item.moment)}</strong></div>
-        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.caption)}" loading="lazy" onerror="this.remove()">
+        <div class="moment-fallback" aria-hidden="true"></div>
+        <img data-wiki-title="${escapeHtml(item.wiki)}" alt="${escapeHtml(item.caption)}" loading="lazy" onload="this.classList.add('loaded')" onerror="this.remove()">
         <div>
           <span>${escapeHtml(item.year)} / ${escapeHtml(item.host)}</span>
           <strong>${escapeHtml(item.moment)}</strong>
@@ -1384,6 +1412,7 @@ function renderFeatureView(view, query = '') {
   };
 
   panel.innerHTML = (views[view] || renderCountriesView)();
+  hydrateWikiPhotos(panel);
   hub.classList.toggle('visible', view !== 'overview');
 }
 

@@ -1252,14 +1252,11 @@ body.stats-active .flag-pin {
   border:2px solid rgba(255,255,255,.74);
   box-shadow:inset 0 0 0 18px rgba(255,255,255,.20), inset 0 0 0 42px rgba(0,204,110,.12);
 }
-.media-fallback strong, .moment-fallback strong {
-  font-family:'Bebas Neue',sans-serif; font-size:34px; line-height:.9;
-  letter-spacing:.06em; color:var(--ink); font-weight:400;
-}
 .stadium-card img {
-  position:absolute; inset:0; z-index:1; width:100%; height:100%; object-fit:cover;
+  display:none; position:absolute; inset:0; z-index:1; width:100%; height:100%; object-fit:cover;
   filter:saturate(.96) contrast(1.02);
 }
+.stadium-card img.loaded { display:block; }
 .stadium-card::after {
   content:''; position:absolute; inset:0; z-index:2;
   background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.94) 62%,var(--white));
@@ -1283,10 +1280,10 @@ body.stats-active .flag-pin {
     radial-gradient(circle at 80% 18%,rgba(255,209,0,.28),transparent 30%),
     linear-gradient(135deg,rgba(77,166,255,.14),rgba(0,204,110,.12),rgba(255,95,31,.12));
 }
-.moment-fallback strong { font-size:24px; }
 .history-card img {
-  grid-column:1; grid-row:1; width:100%; height:100%; object-fit:cover; background:var(--surface);
+  display:none; grid-column:1; grid-row:1; width:100%; height:100%; object-fit:cover; background:var(--surface);
 }
+.history-card img.loaded { display:block; }
 .history-card img + div { grid-column:2; }
 .history-card:not(:has(img)) { grid-template-columns:1fr; }
 .history-card div { padding:13px; }
