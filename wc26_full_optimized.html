@@ -51,7 +51,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+SC:wght@300;400;500&family=Barlow+Condensed:wght@200;300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=20260705-stats-top10b">
+<link rel="stylesheet" href="css/styles.css?v=20260705-country-dossier">
 <script src="https://unpkg.com/globe.gl"></script>
 <script src="https://unpkg.com/topojson-client@3"></script>
 </head>
@@ -122,14 +122,15 @@
       <h2 id="panel-title">World Cup Command</h2>
       <span id="panel-group">GLOBAL</span>
     </div>
-    <p id="panel-summary">Spin the globe and choose a country to reveal teams, players, form, fixtures, stadium routes, history, and prediction signals in one connected cinematic layer.</p>
+    <p id="panel-summary">Spin the globe and choose a country to reveal the manager, star player, squad shape, fixtures, and World Cup story in one connected team dossier.</p>
     <div class="panel-metrics">
       <div><span id="metric-rank">--</span><small>FIFA rank</small></div>
-      <div><span id="metric-form">--</span><small>Form</small></div>
-      <div><span id="metric-odds">--</span><small>Model</small></div>
+      <div><span id="metric-form">--</span><small>Manager</small></div>
+      <div><span id="metric-odds">--</span><small>Star player</small></div>
     </div>
     <div class="panel-tabs" role="tablist" aria-label="Nation detail sections">
-      <button class="panel-tab active" data-panel="squad">Squad</button>
+      <button class="panel-tab active" data-panel="overview">Overview</button>
+      <button class="panel-tab" data-panel="squad">Squad</button>
       <button class="panel-tab" data-panel="fixtures">Fixtures</button>
       <button class="panel-tab" data-panel="story">Story</button>
     </div>
@@ -601,7 +602,7 @@
   </div>
 </section>
 
-<script src="js/app.js?v=20260705-stats-top10b"></script>
+<script src="js/app.js?v=20260705-country-dossier"></script>
 <script>
 // ── LEADERBOARD TABS ─────────────────────────────────────────
 (function(){
