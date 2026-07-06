@@ -1252,7 +1252,8 @@ function renderStadiumsView() {
   return `
     <div class="stadium-grid">${HOST_STADIUMS.map(stadium => `
       <article class="stadium-card">
-        <img src="${escapeHtml(stadium.image)}" alt="${escapeHtml(stadium.name)}" loading="lazy" onerror="this.onerror=null;this.src='wc3.webp'">
+        <div class="media-fallback"><span>${escapeHtml(stadium.city)}</span><strong>${escapeHtml(stadium.name)}</strong></div>
+        <img src="${escapeHtml(stadium.image)}" alt="${escapeHtml(stadium.name)}" loading="lazy" onerror="this.remove()">
         <div>
           <span>${escapeHtml(stadium.city)}</span>
           <strong>${escapeHtml(stadium.name)}</strong>
@@ -1283,7 +1284,8 @@ function renderHistoryView() {
     </section>
     <div class="history-wall">${HISTORY_TIMELINE.map(item => `
       <article class="history-card">
-        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.caption)}" loading="lazy" onerror="this.onerror=null;this.src='wc3.webp'">
+        <div class="moment-fallback"><span>${escapeHtml(item.year)}</span><strong>${escapeHtml(item.moment)}</strong></div>
+        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.caption)}" loading="lazy" onerror="this.remove()">
         <div>
           <span>${escapeHtml(item.year)} / ${escapeHtml(item.host)}</span>
           <strong>${escapeHtml(item.moment)}</strong>
