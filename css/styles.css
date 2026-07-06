@@ -1280,6 +1280,10 @@ body.stats-active .flag-pin {
   position:absolute; right:14px; top:12px; font-family:'Bebas Neue',sans-serif;
   font-size:30px; line-height:1; color:var(--orange); font-weight:400;
 }
+.prediction-row small {
+  display:block; font-family:'Barlow Condensed',sans-serif; text-transform:uppercase;
+  letter-spacing:.24em; color:var(--green); font-size:9px; margin-bottom:4px;
+}
 .prediction-row span {
   display:block; margin-top:5px; color:var(--ink2); text-transform:none;
   letter-spacing:.05em; font-size:13px; line-height:1.3;

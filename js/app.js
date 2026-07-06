@@ -449,12 +449,22 @@ const TEAM_DOSSIERS = {
 };
 
 const HOST_STADIUMS = [
-  { name:'Estadio Azteca', city:'Mexico City', capacity:'87,523', matches:'Opening match, group stage', note:'Opening-night mythology', wiki:'https://en.wikipedia.org/wiki/Estadio_Azteca', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Estadio_Azteca_2022.jpg?width=800' },
-  { name:'SoFi Stadium', city:'Los Angeles', capacity:'70,240', matches:'Group stage, knockout path', note:'Host spotlight bowl', wiki:'https://en.wikipedia.org/wiki/SoFi_Stadium', image:'https://commons.wikimedia.org/wiki/Special:FilePath/SoFi_Stadium_2021.jpg?width=800' },
-  { name:'MetLife Stadium', city:'New York/New Jersey', capacity:'82,500', matches:'Knockouts, final path', note:'Final-scale pressure', wiki:'https://en.wikipedia.org/wiki/MetLife_Stadium', image:'https://commons.wikimedia.org/wiki/Special:FilePath/MetLife_Stadium_2014.jpg?width=800' },
-  { name:'BC Place', city:'Vancouver', capacity:'54,500', matches:'Group stage, round of 32', note:'Glass-roof theatre', wiki:'https://en.wikipedia.org/wiki/BC_Place', image:'https://commons.wikimedia.org/wiki/Special:FilePath/BC_Place_2016.jpg?width=800' },
-  { name:'AT&T Stadium', city:'Dallas', capacity:'80,000', matches:'Semifinal route, high-pressure nights', note:'Scale and spectacle', wiki:'https://en.wikipedia.org/wiki/AT%26T_Stadium', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Cowboys_Stadium_field.jpg?width=800' },
-  { name:'Mercedes-Benz Stadium', city:'Atlanta', capacity:'71,000', matches:'Group stage, knockout showcase', note:'Indoor theatre', wiki:'https://en.wikipedia.org/wiki/Mercedes-Benz_Stadium', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz_Stadium_2017.jpg?width=800' }
+  { name:'Estadio Azteca', city:'Mexico City, Mexico', capacity:'87,523', matches:'Opening match, group stage', note:'The only stadium set to host matches in three different World Cups.', wiki:'https://en.wikipedia.org/wiki/Estadio_Azteca', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Estadio_Azteca_2022.jpg?width=800' },
+  { name:'Estadio Akron', city:'Guadalajara, Mexico', capacity:'46,232', matches:'Group stage', note:'Compact, loud, and built into a green bowl outside Guadalajara.', wiki:'https://en.wikipedia.org/wiki/Estadio_Akron', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Estadio_Akron.jpg?width=800' },
+  { name:'Estadio BBVA', city:'Monterrey, Mexico', capacity:'53,500', matches:'Group stage, knockout path', note:'Mountain backdrop, steep bowl, and one of the tournament\'s sharpest silhouettes.', wiki:'https://en.wikipedia.org/wiki/Estadio_BBVA', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Estadio_BBVA_Bancomer_2015.jpg?width=800' },
+  { name:'BMO Field', city:'Toronto, Canada', capacity:'30,000+', matches:'Canada opener, group stage', note:'Downtown Toronto pressure cooker beside Lake Ontario.', wiki:'https://en.wikipedia.org/wiki/BMO_Field', image:'https://commons.wikimedia.org/wiki/Special:FilePath/BMO_Field_2016.jpg?width=800' },
+  { name:'BC Place', city:'Vancouver, Canada', capacity:'54,500', matches:'Group stage, round of 32', note:'Glass-roof theatre with a fast indoor feel.', wiki:'https://en.wikipedia.org/wiki/BC_Place', image:'https://commons.wikimedia.org/wiki/Special:FilePath/BC_Place_2016.jpg?width=800' },
+  { name:'Mercedes-Benz Stadium', city:'Atlanta, USA', capacity:'71,000', matches:'Group stage, knockout showcase', note:'Indoor theatre with a huge roof halo and fast pitch atmosphere.', wiki:'https://en.wikipedia.org/wiki/Mercedes-Benz_Stadium', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz_Stadium_2017.jpg?width=800' },
+  { name:'Gillette Stadium', city:'Boston/Foxborough, USA', capacity:'65,878', matches:'Group stage, knockout path', note:'New England route stop with late-tournament edge.', wiki:'https://en.wikipedia.org/wiki/Gillette_Stadium', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Gillette_Stadium_2023.jpg?width=800' },
+  { name:'AT&T Stadium', city:'Dallas, USA', capacity:'80,000', matches:'Semifinal route, high-pressure nights', note:'Scale, screens, and one of the biggest indoor stages in sport.', wiki:'https://en.wikipedia.org/wiki/AT%26T_Stadium', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Cowboys_Stadium_field.jpg?width=800' },
+  { name:'NRG Stadium', city:'Houston, USA', capacity:'72,220', matches:'Group stage, knockout path', note:'Indoor heat shield for one of the busiest host routes.', wiki:'https://en.wikipedia.org/wiki/NRG_Stadium', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Reliant_Stadium.jpg?width=800' },
+  { name:'Arrowhead Stadium', city:'Kansas City, USA', capacity:'76,416', matches:'Group stage', note:'Noise-first stadium culture built for tense group nights.', wiki:'https://en.wikipedia.org/wiki/Arrowhead_Stadium', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Arrowhead_Stadium_2021.jpg?width=800' },
+  { name:'SoFi Stadium', city:'Los Angeles, USA', capacity:'70,240', matches:'Group stage, knockout path', note:'Host spotlight bowl with a cinematic roof and boardwalk-scale energy.', wiki:'https://en.wikipedia.org/wiki/SoFi_Stadium', image:'https://commons.wikimedia.org/wiki/Special:FilePath/SoFi_Stadium_2021.jpg?width=800' },
+  { name:'Hard Rock Stadium', city:'Miami, USA', capacity:'64,767', matches:'Group stage, knockout path', note:'Latin American crossover energy and a potential Argentina-style home away from home.', wiki:'https://en.wikipedia.org/wiki/Hard_Rock_Stadium', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Hard_Rock_Stadium_2019.jpg?width=800' },
+  { name:'MetLife Stadium', city:'New York/New Jersey, USA', capacity:'82,500', matches:'Final, knockouts', note:'The final-scale pressure room for the 2026 champion.', wiki:'https://en.wikipedia.org/wiki/MetLife_Stadium', image:'https://commons.wikimedia.org/wiki/Special:FilePath/MetLife_Stadium_2014.jpg?width=800' },
+  { name:'Lincoln Financial Field', city:'Philadelphia, USA', capacity:'67,594', matches:'Group stage, round of 16', note:'East Coast intensity with a tight, vertical football bowl.', wiki:'https://en.wikipedia.org/wiki/Lincoln_Financial_Field', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Lincoln_Financial_Field_2012.jpg?width=800' },
+  { name:'Levi\'s Stadium', city:'San Francisco Bay Area, USA', capacity:'68,500', matches:'Group stage, knockout path', note:'West Coast route stop with tactical travel pressure.', wiki:'https://en.wikipedia.org/wiki/Levi%27s_Stadium', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Levi%27s_Stadium_2014.jpg?width=800' },
+  { name:'Lumen Field', city:'Seattle, USA', capacity:'68,740', matches:'Group stage, knockout path', note:'One of the loudest soccer atmospheres in North America.', wiki:'https://en.wikipedia.org/wiki/Lumen_Field', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Lumen_Field_2022.jpg?width=800' }
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -889,23 +899,31 @@ const BRACKET_PATH = [
 ];
 
 const HISTORY_TIMELINE = [
-  { year:'1930', host:'Uruguay', winner:'Uruguay', final:'Uruguay 4-2 Argentina', fact:'The first World Cup created the original international football theatre.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Estadio_Centenario_1930.jpg?width=700', caption:'Montevideo becomes the starting point.' },
-  { year:'1958', host:'Sweden', winner:'Brazil', final:'Brazil 5-2 Sweden', fact:'A 17-year-old Pele announces Brazil as the future of football.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Pele_1958.jpg?width=700', caption:'The birth of a global icon.' },
-  { year:'1970', host:'Mexico', winner:'Brazil', final:'Brazil 4-1 Italy', fact:'Pele, Jairzinho, Tostao, and Carlos Alberto turn the tournament into art.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Brazil_national_team_1970.jpg?width=700', caption:'The beautiful game, fully formed.' },
-  { year:'1986', host:'Mexico', winner:'Argentina', final:'Argentina 3-2 West Germany', fact:'Maradona delivers a tournament run that still bends football memory.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Maradona_1986.jpg?width=700', caption:'One player takes over the world.' },
-  { year:'1998', host:'France', winner:'France', final:'France 3-0 Brazil', fact:'A host-nation coronation turns Paris into the center of the game.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Zinedine_Zidane_1998.jpg?width=700', caption:'Zidane owns the final.' },
-  { year:'2010', host:'South Africa', winner:'Spain', final:'Spain 1-0 Netherlands', fact:'Tiki-taka reaches its peak and the first African World Cup gets its champion.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Soccer_City_2010.jpg?width=700', caption:'A new continent, a new rhythm.' },
-  { year:'2022', host:'Qatar', winner:'Argentina', final:'Argentina 3-3 France', fact:'Messi and Mbappe turn the final into a penalty epic for the ages.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Lionel_Messi_WC2022.jpg?width=700', caption:'The final that felt scripted.' },
-  { year:'2026', host:'Canada/Mexico/USA', winner:'TBD', final:'MetLife Stadium', fact:'The biggest World Cup ever: 48 teams, 104 matches, three host nations.', image:'wc3.webp', caption:'The tournament expands across North America.' }
+  { year:'1950', host:'Brazil', winner:'Uruguay', moment:'Maracanazo', final:'Uruguay 2-1 Brazil', fact:'Brazil only needed a draw in Rio, but Uruguay stunned the Maracana and created football\'s original national heartbreak.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Maracanazo.jpg?width=700', caption:'A silence so famous it got its own name.' },
+  { year:'1958', host:'Sweden', winner:'Brazil', moment:'Pele arrives', final:'Brazil 5-2 Sweden', fact:'A 17-year-old Pele scores in the final and turns Brazil from contender into myth.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Pele_1958.jpg?width=700', caption:'The first global superstar moment.' },
+  { year:'1970', host:'Mexico', winner:'Brazil', moment:'Carlos Alberto team goal', final:'Brazil 4-1 Italy', fact:'Nine Brazilian outfield players touch the ball before Carlos Alberto smashes in the perfect final goal.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Brazil_national_team_1970.jpg?width=700', caption:'The beautiful game in one move.' },
+  { year:'1974', host:'West Germany', winner:'West Germany', moment:'The Cruyff Turn', final:'Netherlands 2-0 Sweden', fact:'Johan Cruyff drags the ball behind his standing leg and invents a move that still teaches defenders fear.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Johan_Cruyff_1974c.jpg?width=700', caption:'Skill becomes language.' },
+  { year:'1986', host:'Mexico', winner:'Argentina', moment:'Hand of God', final:'Argentina 2-1 England', fact:'Maradona punches in one goal, then scores the Goal of the Century minutes later. Controversy and genius, same match.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Maradona_1986.jpg?width=700', caption:'The most debated touch in World Cup history.' },
+  { year:'1998', host:'France', winner:'France', moment:'Zidane final headers', final:'France 3-0 Brazil', fact:'Two Zidane headers in Paris turn France from host nation into world champion.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Zinedine_Zidane_1998.jpg?width=700', caption:'A final owned in the air.' },
+  { year:'2006', host:'Germany', winner:'Italy', moment:'Zidane headbutt', final:'Italy 1-1 France', fact:'One of the greatest careers ends with a red card before Italy wins on penalties.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Zidane_2006_World_Cup_final.jpg?width=700', caption:'A genius exits in shock.' },
+  { year:'2010', host:'South Africa', winner:'Spain', moment:'Iniesta in extra time', final:'Spain 1-0 Netherlands', fact:'Iniesta finishes late, Spain completes its possession dynasty, and South Africa gets an unforgettable first African World Cup.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Andres_Iniesta_2010.jpg?width=700', caption:'One touch for an era.' },
+  { year:'2014', host:'Brazil', winner:'Germany', moment:'7-1 in Belo Horizonte', final:'Germany 7-1 Brazil', fact:'Germany scores five in 29 minutes and turns a semifinal into the most surreal scoreboard in modern football.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Brazil_vs_Germany_2014_World_Cup.jpg?width=700', caption:'The scoreline nobody believed.' },
+  { year:'2022', host:'Qatar', winner:'Argentina', moment:'Messi vs Mbappe final', final:'Argentina 3-3 France', fact:'Messi and Mbappe trade destiny for 120 minutes before Argentina wins the penalty epic.', image:'https://commons.wikimedia.org/wiki/Special:FilePath/Lionel_Messi_WC2022.jpg?width=700', caption:'The final that felt scripted.' }
 ];
 
 const PREDICTION_FAVORITES = [
-  { team:'Argentina', pct:18, note:'Defending champions, elite tournament control, Messi-era aura still shapes the model.' },
-  { team:'France', pct:16, note:'Best depth profile in the field with knockout speed everywhere.' },
-  { team:'Brazil', pct:15, note:'Highest attacking ceiling if the winger group clicks.' },
-  { team:'England', pct:13, note:'Midfield power and final-third depth keep the route open.' },
-  { team:'Spain', pct:12, note:'Control team with young match-winners and strong possession floor.' },
-  { team:'Portugal', pct:11, note:'Deepest creator pool behind the favorites.' }
+  { type:'Winner', pick:'Argentina', pct:18, note:'Defending champion profile, elite control, and proven knockout temperament.' },
+  { type:'Finalist', pick:'France', pct:16, note:'Depth, pace, and tournament experience make France the cleanest final route.' },
+  { type:'Golden Ball', pick:'Kylian Mbappe', pct:14, note:'Best blend of star power, minutes, goals, and deep-run probability.' },
+  { type:'Golden Boot', pick:'Harry Kane', pct:13, note:'Penalty share plus England\'s chance volume keeps him in the scoring race.' },
+  { type:'Golden Glove', pick:'Mike Maignan', pct:11, note:'France\'s defensive floor gives him a strong clean-sheet path.' },
+  { type:'Best Young Player', pick:'Lamine Yamal', pct:12, note:'If Spain goes deep, his wide creation is the headline story.' },
+  { type:'Assist Leader', pick:'Bruno Fernandes', pct:10, note:'Set pieces, chance volume, and Portugal\'s creator-heavy squad help the case.' },
+  { type:'Breakout Star', pick:'Jamal Musiala', pct:9, note:'Germany\'s run depends on line-breaking moments around him.' },
+  { type:'Dark Horse Team', pick:'USA', pct:7, note:'Host energy, travel comfort, and athletic midfield pressure create upset upside.' },
+  { type:'Shock Quarterfinalist', pick:'Morocco', pct:6, note:'Recent tournament proof plus defensive structure can travel again.' },
+  { type:'Most Watchable Attack', pick:'Brazil', pct:15, note:'Vinicius, Rodrygo, Raphinha, and Endrick can turn games into chaos.' },
+  { type:'Upset Watch', pick:'Japan over a European seed', pct:8, note:'Pressing discipline and transition speed make Japan a bracket problem.' }
 ];
 
 const LIVE_LINKS = [
@@ -1208,7 +1226,7 @@ function renderStadiumsView() {
       </article>
     `).join('')}</div>
     <div class="route-strip">
-      ${HOST_STADIUMS.slice(0, 5).map((stadium, index) => `${index ? '<span class="route-line"></span>' : ''}<span class="route-dot" title="${escapeHtml(stadium.city)}"></span>`).join('')}
+      ${HOST_STADIUMS.map((stadium, index) => `${index ? '<span class="route-line"></span>' : ''}<span class="route-dot" title="${escapeHtml(stadium.city)}"></span>`).join('')}
     </div>
   `;
 }
@@ -1232,7 +1250,7 @@ function renderHistoryView() {
         <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.caption)}" loading="lazy" onerror="this.remove()">
         <div>
           <span>${escapeHtml(item.year)} / ${escapeHtml(item.host)}</span>
-          <strong>${escapeHtml(item.winner)}</strong>
+          <strong>${escapeHtml(item.moment)}</strong>
           <p>${escapeHtml(item.final)}. ${escapeHtml(item.fact)}</p>
           <small>${escapeHtml(item.caption)}</small>
         </div>
@@ -1248,12 +1266,12 @@ function renderPredictionsView() {
         <strong>Favorites, Signals, News</strong>
         <p>Percentages are pre-tournament model weights, kept separate from verified match data. Links jump to live news, fixtures, and odds trackers.</p>
       </div>
-      <div class="stage-stat"><b>${PREDICTION_FAVORITES[0].pct}%</b><small>top model edge</small></div>
+      <div class="stage-stat"><b>${PREDICTION_FAVORITES.length}</b><small>markets tracked</small></div>
     </section>
     <div class="prediction-stack">
       <div class="prediction-bars">${PREDICTION_FAVORITES.map(item => `
         <article class="prediction-row">
-          <div><strong>${escapeHtml(item.team)}</strong><span>${escapeHtml(item.note)}</span></div>
+          <div><small>${escapeHtml(item.type)}</small><strong>${escapeHtml(item.pick)}</strong><span>${escapeHtml(item.note)}</span></div>
           <b>${item.pct}%</b>
           <i style="--pct:${item.pct}"></i>
         </article>
