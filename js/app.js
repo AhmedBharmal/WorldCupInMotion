@@ -34,15 +34,22 @@ const cur=document.getElementById('cur');
 const curRing=document.getElementById('cur-ring');
 if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
   let ringX=0, ringY=0, mouseX=0, mouseY=0;
+  let cursorFrame=0;
+  function scheduleCursorFrame() {
+    if (cursorFrame) return;
+    cursorFrame = requestAnimationFrame(animRing);
+  }
+  function animRing(){
+    cursorFrame = 0;
+    ringX+=(mouseX-ringX)*.18; ringY+=(mouseY-ringY)*.18;
+    curRing.style.left=ringX+'px'; curRing.style.top=ringY+'px';
+    if (Math.abs(mouseX-ringX) > 0.2 || Math.abs(mouseY-ringY) > 0.2) scheduleCursorFrame();
+  }
   document.addEventListener('mousemove',e=>{
     mouseX=e.clientX; mouseY=e.clientY;
     cur.style.left=mouseX+'px'; cur.style.top=mouseY+'px';
+    scheduleCursorFrame();
   });
-  (function animRing(){
-    ringX+=(mouseX-ringX)*.18; ringY+=(mouseY-ringY)*.18;
-    curRing.style.left=ringX+'px'; curRing.style.top=ringY+'px';
-    requestAnimationFrame(animRing);
-  })();
 }
 
 const yrEl    = document.getElementById('yr');
@@ -219,13 +226,22 @@ function updateScrollReveal(scrollY = window.scrollY) {
 }
 
 let visualScrollY = window.scrollY;
-function animateScrollReveal() {
-  visualScrollY += (window.scrollY - visualScrollY) * 0.20;
-  if (Math.abs(window.scrollY - visualScrollY) < 0.35) visualScrollY = window.scrollY;
-  updateScrollReveal(visualScrollY);
-  requestAnimationFrame(animateScrollReveal);
+let scrollRevealFrame = 0;
+function scheduleScrollReveal() {
+  if (scrollRevealFrame) return;
+  scrollRevealFrame = requestAnimationFrame(animateScrollReveal);
 }
-requestAnimationFrame(animateScrollReveal);
+function animateScrollReveal() {
+  scrollRevealFrame = 0;
+  const targetScrollY = window.scrollY;
+  visualScrollY += (targetScrollY - visualScrollY) * 0.20;
+  if (Math.abs(targetScrollY - visualScrollY) < 0.35) visualScrollY = targetScrollY;
+  updateScrollReveal(visualScrollY);
+  if (visualScrollY !== targetScrollY) scheduleScrollReveal();
+}
+window.addEventListener('scroll', scheduleScrollReveal, { passive:true });
+window.addEventListener('resize', scheduleScrollReveal);
+scheduleScrollReveal();
 
 // ── REVISIT: skip intro if already seen this browser session ──
 const INTRO_SEEN_KEY = 'wcim-intro-seen';
