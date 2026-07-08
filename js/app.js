@@ -921,10 +921,10 @@ const HISTORY_TIMELINE = [
   { year:'1974', host:'West Germany', winner:'West Germany', moment:'Cruyff vs Beckenbauer', final:'West Germany 2-1 Netherlands', fact:'Cruyff\'s Total Football reached the final, but Beckenbauer\'s West Germany turned the great Dutch idea into heartbreak.', wiki:'Johan_Cruyff', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Beckenbauer_cruyff_alfieri.jpg/960px-Beckenbauer_cruyff_alfieri.jpg', caption:'Cruyff and Beckenbauer in the 1974 final.' },
   { year:'1986', host:'Mexico', winner:'Argentina', moment:'Hand of God', final:'Argentina 2-1 England', fact:'Maradona punches in one goal, then scores the Goal of the Century minutes later. Controversy and genius, same match.', wiki:'Argentina_v_England_(1986_FIFA_World_Cup)', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Maradona_shilton_mano_dios.jpg/960px-Maradona_shilton_mano_dios.jpg', caption:'Maradona and Shilton in the Hand of God moment.' },
   { year:'1998', host:'France', winner:'France', moment:'Stade de France coronation', final:'France 3-0 Brazil', fact:'Two Zidane headers in Paris turn France from host nation into world champion.', wiki:'1998_FIFA_World_Cup_final', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Euro_2016_stade_de_France_France-Roumanie_%2827307532960%29.jpg/960px-Euro_2016_stade_de_France_France-Roumanie_%2827307532960%29.jpg', caption:'Stade de France, the venue for Zidane\'s 1998 final.' },
-  { year:'2006', host:'Germany', winner:'Italy', moment:'Zidane headbutt', final:'Italy 1-1 France', fact:'Zidane\'s last match swings from Panenka penalty to red card before Italy wins the shootout.', wiki:'2006_FIFA_World_Cup_final', image:'history-zidane-headbutt.webp', caption:'Zidane and Materazzi in the 2006 final flashpoint.' },
+  { year:'2006', host:'Germany', winner:'Italy', moment:'Zidane headbutt', final:'Italy 1-1 France', fact:'Zidane\'s last match swings from Panenka penalty to red card before Italy wins the shootout.', wiki:'2006_FIFA_World_Cup_final', image:'assets/images/history/zidane-headbutt.webp', caption:'Zidane and Materazzi in the 2006 final flashpoint.' },
   { year:'2010', host:'South Africa', winner:'Spain', moment:'Spain lifts its first cup', final:'Spain 1-0 Netherlands', fact:'Iniesta finishes late, Spain completes its possession dynasty, and South Africa gets an unforgettable first African World Cup.', wiki:'2010_FIFA_World_Cup_final', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/FIFA_World_Cup_2010_Spain_with_cup.jpg/960px-FIFA_World_Cup_2010_Spain_with_cup.jpg', caption:'Spain with the trophy after the 2010 final.' },
-  { year:'2014', host:'Brazil', winner:'Germany', moment:'7-1 in Belo Horizonte', final:'Germany 7-1 Brazil', fact:'Germany scores five in 29 minutes and turns a semifinal into the most surreal scoreboard in modern football.', wiki:'Brazil_v_Germany_(2014_FIFA_World_Cup)', image:'history-brazil-7-1.jpg', caption:'Brazil players react after the 7-1 semifinal collapse.' },
-  { year:'2022', host:'Qatar', winner:'Argentina', moment:'Messi vs Mbappe final', final:'Argentina 3-3 France', fact:'Messi and Mbappe trade destiny for 120 minutes before Argentina wins the penalty epic.', wiki:'2022_FIFA_World_Cup_final', image:'history-wc-2022-messi.jpg', caption:'Messi finally lifts the trophy that completed his story.' }
+  { year:'2014', host:'Brazil', winner:'Germany', moment:'7-1 in Belo Horizonte', final:'Germany 7-1 Brazil', fact:'Germany scores five in 29 minutes and turns a semifinal into the most surreal scoreboard in modern football.', wiki:'Brazil_v_Germany_(2014_FIFA_World_Cup)', image:'assets/images/history/brazil-7-1.jpg', caption:'Brazil players react after the 7-1 semifinal collapse.' },
+  { year:'2022', host:'Qatar', winner:'Argentina', moment:'Messi vs Mbappe final', final:'Argentina 3-3 France', fact:'Messi and Mbappe trade destiny for 120 minutes before Argentina wins the penalty epic.', wiki:'2022_FIFA_World_Cup_final', image:'assets/images/history/wc-2022-messi.jpg', caption:'Messi finally lifts the trophy that completed his story.' }
 ];
 
 const PREDICTION_MARKETS = [
@@ -1493,7 +1493,7 @@ function nationForPolygon(props) {
   return WC_NATIONS.find(n => normalizeName(n.name) === name) || null;
 }
 
-function updateTournamentStatus() {
+function updateStaticTournamentStatus() {
   const start = new Date('2026-06-11T00:00:00');
   const end   = new Date('2026-07-19T23:59:59');
   const now   = new Date();
@@ -1512,7 +1512,7 @@ function updateTournamentStatus() {
   }
 }
 
-function buildTicker() {
+function buildStaticTicker() {
   const fixtures = [
     '<span class="live">● LIVE</span> 🇲🇽 Mexico 0–0 🇿🇦 South Africa · Group A',
     '🇫🇷 France vs 🇮🇶 Iraq · Jun 15 · Dallas',
@@ -1529,6 +1529,7 @@ function buildTicker() {
 
 updateTournamentStatus();
 buildTicker();
+refreshAll();
 
 document.querySelectorAll('.nav-pill').forEach(btn => {
   btn.addEventListener('click', () => setPlatformView(btn.dataset.view));
