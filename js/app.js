@@ -34,15 +34,22 @@ const cur=document.getElementById('cur');
 const curRing=document.getElementById('cur-ring');
 if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
   let ringX=0, ringY=0, mouseX=0, mouseY=0;
+  let cursorFrame=0;
+  function scheduleCursorFrame() {
+    if (cursorFrame) return;
+    cursorFrame = requestAnimationFrame(animRing);
+  }
+  function animRing(){
+    cursorFrame = 0;
+    ringX+=(mouseX-ringX)*.18; ringY+=(mouseY-ringY)*.18;
+    curRing.style.left=ringX+'px'; curRing.style.top=ringY+'px';
+    if (Math.abs(mouseX-ringX) > 0.2 || Math.abs(mouseY-ringY) > 0.2) scheduleCursorFrame();
+  }
   document.addEventListener('mousemove',e=>{
     mouseX=e.clientX; mouseY=e.clientY;
     cur.style.left=mouseX+'px'; cur.style.top=mouseY+'px';
+    scheduleCursorFrame();
   });
-  (function animRing(){
-    ringX+=(mouseX-ringX)*.18; ringY+=(mouseY-ringY)*.18;
-    curRing.style.left=ringX+'px'; curRing.style.top=ringY+'px';
-    requestAnimationFrame(animRing);
-  })();
 }
 
 const yrEl    = document.getElementById('yr');
@@ -219,13 +226,22 @@ function updateScrollReveal(scrollY = window.scrollY) {
 }
 
 let visualScrollY = window.scrollY;
-function animateScrollReveal() {
-  visualScrollY += (window.scrollY - visualScrollY) * 0.20;
-  if (Math.abs(window.scrollY - visualScrollY) < 0.35) visualScrollY = window.scrollY;
-  updateScrollReveal(visualScrollY);
-  requestAnimationFrame(animateScrollReveal);
+let scrollRevealFrame = 0;
+function scheduleScrollReveal() {
+  if (scrollRevealFrame) return;
+  scrollRevealFrame = requestAnimationFrame(animateScrollReveal);
 }
-requestAnimationFrame(animateScrollReveal);
+function animateScrollReveal() {
+  scrollRevealFrame = 0;
+  const targetScrollY = window.scrollY;
+  visualScrollY += (targetScrollY - visualScrollY) * 0.20;
+  if (Math.abs(targetScrollY - visualScrollY) < 0.35) visualScrollY = targetScrollY;
+  updateScrollReveal(visualScrollY);
+  if (visualScrollY !== targetScrollY) scheduleScrollReveal();
+}
+window.addEventListener('scroll', scheduleScrollReveal, { passive:true });
+window.addEventListener('resize', scheduleScrollReveal);
+scheduleScrollReveal();
 
 // ── REVISIT: skip intro if already seen this browser session ──
 const INTRO_SEEN_KEY = 'wcim-intro-seen';
@@ -449,12 +465,22 @@ const TEAM_DOSSIERS = {
 };
 
 const HOST_STADIUMS = [
-  { name:'Estadio Azteca', city:'Mexico City', capacity:'87,523', matches:'Opening match, group stage', note:'Opening-night mythology' },
-  { name:'SoFi Stadium', city:'Los Angeles', capacity:'70,240', matches:'Group stage, knockout path', note:'Host spotlight bowl' },
-  { name:'MetLife Stadium', city:'New York/New Jersey', capacity:'82,500', matches:'Knockouts, final path', note:'Final-scale pressure' },
-  { name:'BC Place', city:'Vancouver', capacity:'54,500', matches:'Group stage, round of 32', note:'Glass-roof theatre' },
-  { name:'AT&T Stadium', city:'Dallas', capacity:'80,000', matches:'Semifinal route, high-pressure nights', note:'Scale and spectacle' },
-  { name:'Mercedes-Benz Stadium', city:'Atlanta', capacity:'71,000', matches:'Group stage, knockout showcase', note:'Indoor theatre' }
+  { name:'Estadio Azteca', city:'Mexico City, Mexico', capacity:'87,523', matches:'Opening match, group stage', note:'The only stadium set to host matches in three different World Cups.', wiki:'https://en.wikipedia.org/wiki/Estadio_Azteca', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Vista_a%C3%A9rea_del_Estadio_Azteca_-_2026_-_02.jpg/960px-Vista_a%C3%A9rea_del_Estadio_Azteca_-_2026_-_02.jpg' },
+  { name:'Estadio Akron', city:'Guadalajara, Mexico', capacity:'46,232', matches:'Group stage', note:'Compact, loud, and built into a green bowl outside Guadalajara.', wiki:'https://en.wikipedia.org/wiki/Estadio_Akron', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Estadio_Akron_02-07-2022_cabecera_sur_lado_derecho_%283%29.jpg/960px-Estadio_Akron_02-07-2022_cabecera_sur_lado_derecho_%283%29.jpg' },
+  { name:'Estadio BBVA', city:'Monterrey, Mexico', capacity:'53,500', matches:'Group stage, knockout path', note:'Mountain backdrop, steep bowl, and one of the tournament\'s sharpest silhouettes.', wiki:'https://en.wikipedia.org/wiki/Estadio_BBVA', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Mexico_Guadalupe_Monterrey_Estadio_BBVA_Bancomer_fifa_world_cup_2026_6.JPG/960px-Mexico_Guadalupe_Monterrey_Estadio_BBVA_Bancomer_fifa_world_cup_2026_6.JPG' },
+  { name:'BMO Field', city:'Toronto, Canada', capacity:'30,000+', matches:'Canada opener, group stage', note:'Downtown Toronto pressure cooker beside Lake Ontario.', wiki:'https://en.wikipedia.org/wiki/BMO_Field', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Toronto_BMO_Field_in_2024.jpg/960px-Toronto_BMO_Field_in_2024.jpg' },
+  { name:'BC Place', city:'Vancouver, Canada', capacity:'54,500', matches:'Group stage, round of 32', note:'Glass-roof theatre with a fast indoor feel.', wiki:'https://en.wikipedia.org/wiki/BC_Place', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/BC_Place_2015_Women%27s_FIFA_World_Cup.jpg/960px-BC_Place_2015_Women%27s_FIFA_World_Cup.jpg' },
+  { name:'Mercedes-Benz Stadium', city:'Atlanta, USA', capacity:'71,000', matches:'Group stage, knockout showcase', note:'Indoor theatre with a huge roof halo and fast pitch atmosphere.', wiki:'https://en.wikipedia.org/wiki/Mercedes-Benz_Stadium', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Mercedes_Benz_Stadium_time_lapse_capture_2017-08-13.jpg/960px-Mercedes_Benz_Stadium_time_lapse_capture_2017-08-13.jpg' },
+  { name:'Gillette Stadium', city:'Boston/Foxborough, USA', capacity:'65,878', matches:'Group stage, knockout path', note:'New England route stop with late-tournament edge.', wiki:'https://en.wikipedia.org/wiki/Gillette_Stadium', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Gillette_Stadium_%28Top_View%29.jpg/960px-Gillette_Stadium_%28Top_View%29.jpg' },
+  { name:'AT&T Stadium', city:'Dallas, USA', capacity:'80,000', matches:'Semifinal route, high-pressure nights', note:'Scale, screens, and one of the biggest indoor stages in sport.', wiki:'https://en.wikipedia.org/wiki/AT%26T_Stadium', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Arlington_June_2020_4_%28AT%26T_Stadium%29.jpg/960px-Arlington_June_2020_4_%28AT%26T_Stadium%29.jpg' },
+  { name:'NRG Stadium', city:'Houston, USA', capacity:'72,220', matches:'Group stage, knockout path', note:'Indoor heat shield for one of the busiest host routes.', wiki:'https://en.wikipedia.org/wiki/NRG_Stadium', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Nrg_stadium.jpg/960px-Nrg_stadium.jpg' },
+  { name:'Arrowhead Stadium', city:'Kansas City, USA', capacity:'76,416', matches:'Group stage', note:'Noise-first stadium culture built for tense group nights.', wiki:'https://en.wikipedia.org/wiki/Arrowhead_Stadium', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Aerial_view_of_Arrowhead_Stadium_08-31-2013.jpg/960px-Aerial_view_of_Arrowhead_Stadium_08-31-2013.jpg' },
+  { name:'SoFi Stadium', city:'Los Angeles, USA', capacity:'70,240', matches:'Group stage, knockout path', note:'Host spotlight bowl with a cinematic roof and boardwalk-scale energy.', wiki:'https://en.wikipedia.org/wiki/SoFi_Stadium', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/SoFi_Stadium_2023.jpg/960px-SoFi_Stadium_2023.jpg' },
+  { name:'Hard Rock Stadium', city:'Miami, USA', capacity:'64,767', matches:'Group stage, knockout path', note:'Latin American crossover energy and a potential Argentina-style home away from home.', wiki:'https://en.wikipedia.org/wiki/Hard_Rock_Stadium', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Hard_Rock_Stadium_for_Super_Bowl_LIV_%2849606710103%29.jpg/960px-Hard_Rock_Stadium_for_Super_Bowl_LIV_%2849606710103%29.jpg' },
+  { name:'MetLife Stadium', city:'New York/New Jersey, USA', capacity:'82,500', matches:'Final, knockouts', note:'The final-scale pressure room for the 2026 champion.', wiki:'https://en.wikipedia.org/wiki/MetLife_Stadium', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Metlife_stadium_%28Aerial_view%29.jpg/960px-Metlife_stadium_%28Aerial_view%29.jpg' },
+  { name:'Lincoln Financial Field', city:'Philadelphia, USA', capacity:'67,594', matches:'Group stage, round of 16', note:'East Coast intensity with a tight, vertical football bowl.', wiki:'https://en.wikipedia.org/wiki/Lincoln_Financial_Field', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Lincoln_Financial_Field_%28Aerial_view%29.jpg/960px-Lincoln_Financial_Field_%28Aerial_view%29.jpg' },
+  { name:'Levi\'s Stadium', city:'San Francisco Bay Area, USA', capacity:'68,500', matches:'Group stage, knockout path', note:'West Coast route stop with tactical travel pressure.', wiki:'https://en.wikipedia.org/wiki/Levi%27s_Stadium', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Levi%27s_Stadium_in_February_2016_prior_to_Super_Bowl_50_%2824398261729%29.jpg/960px-Levi%27s_Stadium_in_February_2016_prior_to_Super_Bowl_50_%2824398261729%29.jpg' },
+  { name:'Lumen Field', city:'Seattle, USA', capacity:'68,740', matches:'Group stage, knockout path', note:'One of the loudest soccer atmospheres in North America.', wiki:'https://en.wikipedia.org/wiki/Lumen_Field', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/2026_FIFA_World_Cup_-_Belgium_v._Egypt_in_Seattle_-_04.jpg/960px-2026_FIFA_World_Cup_-_Belgium_v._Egypt_in_Seattle_-_04.jpg' }
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -879,86 +905,94 @@ function renderLiveView() {
 }
 
 // ── GROUP TABLES hub view ─────────────────────────────────────
-function renderGroupsView() {
-  const groups = LIVE_DATA.standings;
-  if (!Object.keys(groups).length) {
-    // Static fallback — 3 sample groups
-    const SAMPLE = {
-      A:[['Mexico',1,1,0,0,2,'+1'],['South Africa',1,0,1,0,1,'0'],['South Korea',0,0,0,0,0,'0'],['Czech Republic',0,0,0,0,0,'0']],
-      D:[['USA',0,0,0,0,0,'0'],['Paraguay',0,0,0,0,0,'0'],['Australia',0,0,0,0,0,'0'],['Turkey',0,0,0,0,0,'0']],
-      J:[['Argentina',0,0,0,0,0,'0'],['Algeria',0,0,0,0,0,'0'],['Austria',0,0,0,0,0,'0'],['Jordan',0,0,0,0,0,'0']],
-    };
-    return `<p class="hub-data-note">Pre-tournament standings — live once matches kick off.</p>
-    <div class="hub-grid">${Object.entries(SAMPLE).map(([grp, rows]) => `
-      <article class="group-card">
-        <h3>Group ${escapeHtml(grp)}</h3>
-        <table class="group-table">
-          <thead><tr><th>Team</th><th>MP</th><th>GD</th><th>Pts</th></tr></thead>
-          <tbody>${rows.map((r,i) => `<tr class="${i<2?'qualifying':''}"><td>${escapeHtml(r[0])}</td><td>${r[1]}</td><td>${escapeHtml(String(r[6]))}</td><td><strong>${r[4]}</strong></td></tr>`).join('')}</tbody>
-        </table>
-      </article>`).join('')}</div>`;
-  }
-
-  return `<div class="hub-grid">${Object.entries(groups).sort().map(([letter, rows]) => `
-    <article class="group-card">
-      <h3>Group ${escapeHtml(letter)}</h3>
-      <table class="group-table">
-        <thead><tr><th>Team</th><th>MP</th><th>GD</th><th>Pts</th></tr></thead>
-        <tbody>${rows.map((r, i) => `
-          <tr class="${i < 2 ? 'qualifying' : ''}">
-            <td>${escapeHtml(r.team)}</td>
-            <td>${r.mp}</td>
-            <td>${r.gd >= 0 ? '+' : ''}${r.gd}</td>
-            <td><strong>${r.pts}</strong></td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    </article>`).join('')}</div>`;
-}
-
-// ── STATS hub view (top scorers) ──────────────────────────────
-function renderStatsView() {
-  if (!LIVE_DATA.scorers.length) {
-    return `<p class="hub-data-note">Scorer data will appear once matches kick off.</p>
-    <div class="hub-grid three">
-      <article class="hub-card"><span>Top scorer</span><strong>TBC</strong><p>Live from football-data.org once the tournament begins.</p></article>
-      <article class="hub-card"><span>Most assists</span><strong>TBC</strong><p>Assist data updates in real-time during matches.</p></article>
-      <article class="hub-card"><span>Golden Boot race</span><strong>Live soon</strong><p>Scorer leaderboard available from matchday 1.</p></article>
-    </div>`;
-  }
-
-  return `<div class="hub-grid three">${LIVE_DATA.scorers.slice(0, 6).map((s, i) =>
-    hubCard(`#${i + 1} · ${escapeHtml(s.team)}`, escapeHtml(s.short || s.player), `${s.goals} goal${s.goals !== 1 ? 's' : ''}${s.assists ? ` · ${s.assists} assist${s.assists !== 1 ? 's' : ''}` : ''}`)
-  ).join('')}</div>`;
-}
-
-// STATIC FALLBACK DATA ──────────────────────────────────────
+// STATIC FALLBACK DATA
 const BRACKET_PATH = [
-  { round:'Round of 32', matches:['Mexico vs Turkey', 'France vs Japan', 'Brazil vs Croatia'] },
-  { round:'Round of 16', matches:['Argentina vs Portugal', 'Spain vs Germany', 'USA vs Netherlands'] },
-  { round:'Semifinals',  matches:['Brazil vs France', 'Argentina vs Spain'] },
-  { round:'Final',       matches:['Argentina vs France'] }
+  { round:'Round of 32', slots:['A1 vs 3rd B/E/F', 'C1 vs D2', 'I1 vs J2', 'K1 vs L2'], note:'48-team format opens the knockout with 32 survivors.' },
+  { round:'Round of 16', slots:['Winner 1 vs Winner 2', 'Winner 3 vs Winner 4', 'Best seeded route', 'Host-side route'], note:'Travel, rest days, and venue heat start to matter.' },
+  { round:'Quarterfinals', slots:['East coast lane', 'Central lane', 'West coast lane', 'Mexico/Canada lane'], note:'Eight teams, four pressure rooms.' },
+  { round:'Semifinals', slots:['Semifinal 1', 'Semifinal 2'], note:'Two matches decide the MetLife final.' },
+  { round:'Final', slots:['Final - MetLife Stadium'], note:'Champion crowned in New York/New Jersey.' }
 ];
 
 const HISTORY_TIMELINE = [
-  { year:'1930', host:'Uruguay',          winner:'Uruguay',   final:'Uruguay 4–2 Argentina',  fact:'The first World Cup — the mythic starting point.' },
-  { year:'1970', host:'Mexico',           winner:'Brazil',    final:'Brazil 4–1 Italy',        fact:'Pelé and Brazil defined the beautiful game.' },
-  { year:'1998', host:'France',           winner:'France',    final:'France 3–0 Brazil',       fact:'A host-nation coronation.' },
-  { year:'2022', host:'Qatar',            winner:'Argentina', final:'Argentina 3–3 France',    fact:'The penalty epic that closed Messi\'s era.' },
-  { year:'2026', host:'Canada/Mexico/USA',winner:'TBD',       final:'MetLife Stadium',         fact:'48 teams · 104 matches · 3 nations.' }
+  { year:'1950', host:'Brazil', winner:'Uruguay', moment:'Maracanazo', final:'Uruguay 2-1 Brazil', fact:'Brazil only needed a draw in Rio, but Alcides Ghiggia\'s late winner stunned the Maracana and created football\'s original national heartbreak.', wiki:'Maracanazo', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Gol_ghiggia_vs_brasil.jpg/960px-Gol_ghiggia_vs_brasil.jpg', caption:'Ghiggia scores the goal that silenced Rio.' },
+  { year:'1958', host:'Sweden', winner:'Brazil', moment:'Pele arrives', final:'Brazil 5-2 Sweden', fact:'A 17-year-old Pele scores in the final and turns Brazil from contender into myth.', wiki:'Pel%C3%A9', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Pel%C3%A9_goal_1958_WC_final.jpg/960px-Pel%C3%A9_goal_1958_WC_final.jpg', caption:'Pele scoring in the 1958 World Cup final.' },
+  { year:'1970', host:'Mexico', winner:'Brazil', moment:'Carlos Alberto team goal', final:'Brazil 4-1 Italy', fact:'Nine Brazilian outfield players touch the ball before Carlos Alberto smashes in the perfect final goal.', wiki:'Brazil_v_Italy_(1970_FIFA_World_Cup)', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Brazil_v_italy_1970_06.jpg/960px-Brazil_v_italy_1970_06.jpg', caption:'The beautiful game in one move.' },
+  { year:'1974', host:'West Germany', winner:'West Germany', moment:'Cruyff vs Beckenbauer', final:'West Germany 2-1 Netherlands', fact:'Cruyff\'s Total Football reached the final, but Beckenbauer\'s West Germany turned the great Dutch idea into heartbreak.', wiki:'Johan_Cruyff', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Beckenbauer_cruyff_alfieri.jpg/960px-Beckenbauer_cruyff_alfieri.jpg', caption:'Cruyff and Beckenbauer in the 1974 final.' },
+  { year:'1986', host:'Mexico', winner:'Argentina', moment:'Hand of God', final:'Argentina 2-1 England', fact:'Maradona punches in one goal, then scores the Goal of the Century minutes later. Controversy and genius, same match.', wiki:'Argentina_v_England_(1986_FIFA_World_Cup)', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Maradona_shilton_mano_dios.jpg/960px-Maradona_shilton_mano_dios.jpg', caption:'Maradona and Shilton in the Hand of God moment.' },
+  { year:'1998', host:'France', winner:'France', moment:'Stade de France coronation', final:'France 3-0 Brazil', fact:'Two Zidane headers in Paris turn France from host nation into world champion.', wiki:'1998_FIFA_World_Cup_final', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Euro_2016_stade_de_France_France-Roumanie_%2827307532960%29.jpg/960px-Euro_2016_stade_de_France_France-Roumanie_%2827307532960%29.jpg', caption:'Stade de France, the venue for Zidane\'s 1998 final.' },
+  { year:'2006', host:'Germany', winner:'Italy', moment:'Zidane headbutt', final:'Italy 1-1 France', fact:'Zidane\'s last match swings from Panenka penalty to red card before Italy wins the shootout.', wiki:'2006_FIFA_World_Cup_final', image:'history-zidane-headbutt.webp', caption:'Zidane and Materazzi in the 2006 final flashpoint.' },
+  { year:'2010', host:'South Africa', winner:'Spain', moment:'Spain lifts its first cup', final:'Spain 1-0 Netherlands', fact:'Iniesta finishes late, Spain completes its possession dynasty, and South Africa gets an unforgettable first African World Cup.', wiki:'2010_FIFA_World_Cup_final', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/FIFA_World_Cup_2010_Spain_with_cup.jpg/960px-FIFA_World_Cup_2010_Spain_with_cup.jpg', caption:'Spain with the trophy after the 2010 final.' },
+  { year:'2014', host:'Brazil', winner:'Germany', moment:'7-1 in Belo Horizonte', final:'Germany 7-1 Brazil', fact:'Germany scores five in 29 minutes and turns a semifinal into the most surreal scoreboard in modern football.', wiki:'Brazil_v_Germany_(2014_FIFA_World_Cup)', image:'history-brazil-7-1.jpg', caption:'Brazil players react after the 7-1 semifinal collapse.' },
+  { year:'2022', host:'Qatar', winner:'Argentina', moment:'Messi vs Mbappe final', final:'Argentina 3-3 France', fact:'Messi and Mbappe trade destiny for 120 minutes before Argentina wins the penalty epic.', wiki:'2022_FIFA_World_Cup_final', image:'history-wc-2022-messi.jpg', caption:'Messi finally lifts the trophy that completed his story.' }
+];
+
+const PREDICTION_MARKETS = [
+  {
+    type:'Champion',
+    headline:'Who lifts it?',
+    note:'Trophy model blends squad depth, route pressure, knockout experience, and attacking ceiling.',
+    picks:[['Argentina',18],['France',16],['Brazil',15],['England',13]]
+  },
+  {
+    type:'Golden Ball',
+    headline:'Best player race',
+    note:'Needs star output plus a deep run, so creators on finalists get the strongest pull.',
+    picks:[['Kylian Mbappe',14],['Lionel Messi',12],['Jude Bellingham',11],['Vinicius Junior',10]]
+  },
+  {
+    type:'Golden Boot',
+    headline:'Goal king',
+    note:'Penalty share, group draw, and minutes matter as much as pure finishing quality.',
+    picks:[['Harry Kane',13],['Kylian Mbappe',12],['Lautaro Martinez',9],['Cristiano Ronaldo',8]]
+  },
+  {
+    type:'Golden Glove',
+    headline:'Keeper path',
+    note:'Clean sheets usually follow defensive structure and semifinal-level team strength.',
+    picks:[['Mike Maignan',11],['Emiliano Martinez',10],['Alisson Becker',9],['Jordan Pickford',7]]
+  },
+  {
+    type:'Young Player',
+    headline:'Next face of the cup',
+    note:'A breakout award needs minutes, highlight moments, and a team that survives the early noise.',
+    picks:[['Lamine Yamal',12],['Endrick',9],['Jamal Musiala',9],['Kobbie Mainoo',7]]
+  },
+  {
+    type:'Assist Leader',
+    headline:'Chance machine',
+    note:'Set pieces and high-volume creators dominate this market more than pure dribblers.',
+    picks:[['Bruno Fernandes',10],['Antoine Griezmann',9],['Kevin De Bruyne',8],['Pedri',7]]
+  },
+  {
+    type:'Dark Horse',
+    headline:'Chaos bracket team',
+    note:'Host energy, tactical structure, and travel comfort can bend the tournament path.',
+    picks:[['USA',7],['Morocco',6],['Japan',6],['Colombia',5]]
+  },
+  {
+    type:'Upset Watch',
+    headline:'Danger fixtures',
+    note:'These are matchup traps: pressing teams, hot climates, travel swings, and set-piece margins.',
+    picks:[['Japan over a European seed',8],['Morocco quarterfinal run',6],['USA extra-time win',6],['Uruguay bracket shock',5]]
+  }
+];
+
+const LIVE_LINKS = [
+  { label:'FIFA news', href:'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/news' },
+  { label:'Google news', href:'https://news.google.com/search?q=FIFA%20World%20Cup%202026' },
+  { label:'Odds tracker', href:'https://www.oddschecker.com/football/world-cup/winner' },
+  { label:'Fixtures', href:'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/fixtures-results' }
 ];
 
 const FEATURE_TITLES = {
-  overview:['Platform layer',    'World Cup Command'],
-  countries:['Countries',        'Country Pages'],
-  live:['Live match center',     'Match Control'],
-  groups:['Group stage',         'Qualification Tables'],
-  bracket:['Knockout stage',     'Interactive Bracket'],
-  stadiums:['Stadium explorer',  'Host Routes'],
-  stats:['Statistics',           'Top Scorers'],
-  history:['World Cup history',  '1930 To 2026'],
-  predictions:['Predictions',    'Probability Engine'],
-  search:['Global search',       'Find Anything']
+  overview:['Platform layer', 'World Cup Command'],
+  groups:['Group stage', 'Tables & Routes'],
+  bracket:['Knockout stage', 'Road To The Final'],
+  stadiums:['Stadium explorer', 'Host Venues'],
+  history:['World Cup history', 'Iconic Eras'],
+  predictions:['Predictions', 'Odds & News'],
+  search:['Global search', 'Find Anything']
 };
 
 function profileForNation(n) {
@@ -966,21 +1000,21 @@ function profileForNation(n) {
     rank: 'TBC',
     form: 'TBC',
     model: 'TBC',
-    summary: `${n.name} · Group ${n.group}. Team profile, squad, manager, and fixtures will load from the live feed once tournament data is available.`,
+    summary: `${n.name} - Group ${n.group}. Team profile, squad, manager, and fixtures will load from the live feed once tournament data is available.`,
     players: [
-      `${n.name} captain · Data unavailable`,
-      `Key forward · Data unavailable`,
-      `Tactical key · Data unavailable`
+      `${n.name} captain - Data unavailable`,
+      `Key forward - Data unavailable`,
+      `Tactical key - Data unavailable`
     ],
     fixtures: [
-      `Group ${n.group} opener · Schedule pending`,
-      `Second group match · Schedule pending`,
-      `Third group match · Schedule pending`
+      `Group ${n.group} opener - Schedule pending`,
+      `Second group match - Schedule pending`,
+      `Third group match - Schedule pending`
     ],
     story: [
-      `${n.name} World Cup history · Data soon`,
-      'Tournament records · Data soon',
-      'Qualification route · Data soon'
+      `${n.name} World Cup history - Data soon`,
+      'Tournament records - Data soon',
+      'Qualification route - Data soon'
     ]
   };
 }
@@ -1033,7 +1067,7 @@ function renderSquadGrid(squadItems) {
     <div class="squad-grid">${players.map(player => `
       <div class="squad-chip">
         <strong>${escapeHtml(player.name)}</strong>
-        <span>${escapeHtml(player.role)} · ${escapeHtml(player.club)}</span>
+        <span>${escapeHtml(player.role)} / ${escapeHtml(player.club)}</span>
       </div>`).join('')}</div>
   `).join('');
 }
@@ -1058,7 +1092,7 @@ async function renderPanelContent(profile, nation) {
       </div>
       <div class="detail-row"><strong>Manager</strong><span>${escapeHtml(dossier.manager)}</span></div>
       <div class="detail-row"><strong>Top player</strong><span>${escapeHtml(dossier.star)}</span></div>
-      <div class="detail-row"><strong>World Cup profile</strong><span>${escapeHtml(dossier.titles)} · ${escapeHtml(dossier.best)} · ${escapeHtml(dossier.confed)}</span></div>
+      <div class="detail-row"><strong>World Cup profile</strong><span>${escapeHtml(dossier.titles)} / ${escapeHtml(dossier.best)} / ${escapeHtml(dossier.confed)}</span></div>
       <a class="profile-link" href="${escapeHtml(dossier.teamWiki)}" target="_blank" rel="noreferrer">National team Wikipedia</a>
     `;
     return;
@@ -1154,8 +1188,7 @@ function renderCountriesView(filterGroup = '') {
     const profile = profileForNation(n);
     const dossier = nationDossier(n, profile);
     const rank = profile.rank !== 'TBC' ? `#${profile.rank}` : 'Rank TBC';
-    const iso2 = ISO3_TO_ISO2[n.iso] || '';
-    const flagSrc = iso2 ? `https://flagcdn.com/w80/${iso2}.png` : '';
+    const flagSrc = flagImgUrl(n.iso);
     return `
       <article class="hub-card country-card" data-iso="${escapeHtml(n.iso)}" tabindex="0" role="button" aria-label="${escapeHtml(n.name)}, Group ${n.group}">
         <div class="country-card-head">
@@ -1173,53 +1206,80 @@ function renderCountriesView(filterGroup = '') {
 
   return filterBar + `<div class="hub-grid three country-grid">${cards}</div>`;
 }
-function renderLiveView() {
-  return LIVE_MATCHES.map(match => `
-    <article class="match-card">
-      <div class="match-meta">${escapeHtml(match.status)} - ${escapeHtml(match.meta)}</div>
-      <div class="match-row">
-        <span class="match-team">${escapeHtml(match.home)}</span>
-        <strong class="match-score">${escapeHtml(match.score)}</strong>
-        <span class="match-team">${escapeHtml(match.away)}</span>
-      </div>
-      <p>${escapeHtml(match.stats)}</p>
-      <ul class="event-list">${match.events.map(event => `<li><span>${escapeHtml(event)}</span><span>Timeline</span></li>`).join('')}</ul>
-    </article>
-  `).join('');
-}
-
 function renderGroupsView() {
-  return `<div class="hub-grid">${Object.entries(GROUP_TABLES).map(([group, rows]) => `
-    <article class="group-card">
-      <h3>Group ${escapeHtml(group)}</h3>
-      <table class="group-table">
-        <thead><tr><th>Team</th><th>Pts</th><th>GD</th><th>Q</th></tr></thead>
-        <tbody>${rows.map(row => `<tr><td>${escapeHtml(row[0])}</td><td>${row[4]}</td><td>${escapeHtml(row[6])}</td><td>${escapeHtml(row[7])}</td></tr>`).join('')}</tbody>
-      </table>
-    </article>
-  `).join('')}</div>`;
+  const groups = [...new Set(WC_NATIONS.map(n => n.group))].sort();
+  return `
+    <section class="stage-hero">
+      <div>
+        <span>12 groups / 48 nations</span>
+        <strong>Group Stage Control Room</strong>
+        <p>Top two qualify automatically. The best third-place teams enter the round of 32, so every goal difference swing matters.</p>
+      </div>
+      <div class="stage-stat"><b>104</b><small>total matches</small></div>
+    </section>
+    <div class="group-board">${groups.map(group => {
+      const nations = WC_NATIONS.filter(n => n.group === group);
+      return `
+        <article class="group-card pro-table" style="--accent:${GROUP_COLORS[group] || '#00cc6e'}">
+          <div class="group-card-head">
+            <h3>Group ${escapeHtml(group)}</h3>
+            <span>${nations.length} teams</span>
+          </div>
+          <table class="group-table">
+            <thead><tr><th>Club</th><th>P</th><th>GD</th><th>Pts</th></tr></thead>
+            <tbody>${nations.map((n, i) => {
+              const profile = profileForNation(n);
+              const seedPts = i < 2 ? 'Q' : i === 2 ? '3rd' : '-';
+              const rank = profile.rank !== 'TBC' ? `#${profile.rank}` : 'TBC';
+              const flag = flagImgUrl(n.iso);
+              return `<tr>
+                <td><span class="table-rank">${i + 1}</span>${flag ? `<img src="${flag}" alt="" loading="lazy">` : ''}<strong>${escapeHtml(n.name)}</strong></td>
+                <td>0</td><td>0</td><td>${escapeHtml(seedPts)}</td>
+              </tr><tr class="table-sub"><td colspan="4">${escapeHtml(rank)} FIFA rank / ${escapeHtml(nationDossier(n, profile).star)}</td></tr>`;
+            }).join('')}</tbody>
+          </table>
+        </article>`;
+    }).join('')}</div>`;
 }
 
 function renderBracketView() {
-  return `<div class="bracket-track">${BRACKET_PATH.map(round => `
-    <div class="bracket-column">
-      <div class="bracket-round">${escapeHtml(round.round)}</div>
-      ${round.matches.map(match => `<article class="bracket-match"><strong>${escapeHtml(match)}</strong><em>Projected path · updates live</em></article>`).join('')}
-    </div>
-  `).join('')}</div>`;
+  return `
+    <section class="stage-hero bracket-hero">
+      <div>
+        <span>Knockout map</span>
+        <strong>Road To MetLife</strong>
+        <p>Round of 32 to final, built for quick scanning like a live bracket but styled for this site instead of a plain table.</p>
+      </div>
+      <div class="stage-stat"><b>32</b><small>knockout teams</small></div>
+    </section>
+    <div class="bracket-track">${BRACKET_PATH.map((round, index) => `
+      <div class="bracket-column" style="--round:${index + 1}">
+        <div class="bracket-round">${escapeHtml(round.round)}</div>
+        ${round.slots.map((slot, slotIndex) => `<article class="bracket-match">
+          <span>Match ${index + 1}.${slotIndex + 1}</span>
+          <strong>${escapeHtml(slot)}</strong>
+          <em>${escapeHtml(round.note)}</em>
+        </article>`).join('')}
+      </div>
+    `).join('')}</div>`;
 }
 
 function renderStadiumsView() {
   return `
-    <div class="hub-grid">${HOST_STADIUMS.map(stadium => `
-      <article class="hub-card stadium-card">
-        <span>${escapeHtml(stadium.city)}</span>
-        <strong>${escapeHtml(stadium.name)}</strong>
-        <p>${escapeHtml(stadium.capacity)} seats - ${escapeHtml(stadium.matches)} - ${escapeHtml(stadium.note)}</p>
+    <div class="stadium-grid">${HOST_STADIUMS.map(stadium => `
+      <article class="stadium-card">
+        <div class="media-fallback" aria-hidden="true"></div>
+        <img src="${escapeHtml(stadium.image)}" alt="${escapeHtml(stadium.name)}" loading="lazy" onload="this.classList.add('loaded')" onerror="this.remove()">
+        <div>
+          <span>${escapeHtml(stadium.city)}</span>
+          <strong>${escapeHtml(stadium.name)}</strong>
+          <p>${escapeHtml(stadium.capacity)} seats / ${escapeHtml(stadium.matches)} / ${escapeHtml(stadium.note)}</p>
+          <a class="profile-link" href="${escapeHtml(stadium.wiki)}" target="_blank" rel="noreferrer">Wikipedia</a>
+        </div>
       </article>
     `).join('')}</div>
     <div class="route-strip">
-      ${HOST_STADIUMS.slice(0, 5).map((stadium, index) => `${index ? '<span class="route-line"></span>' : ''}<span class="route-dot" title="${escapeHtml(stadium.city)}"></span>`).join('')}
+      ${HOST_STADIUMS.map((stadium, index) => `${index ? '<span class="route-line"></span>' : ''}<span class="route-dot" title="${escapeHtml(stadium.city)}"></span>`).join('')}
     </div>
   `;
 }
@@ -1229,22 +1289,66 @@ function renderStatsView() {
 }
 
 function renderHistoryView() {
-  return `<div class="hub-grid">${HISTORY_TIMELINE.map(item => hubCard(`${item.year} - ${item.host}`, item.winner, `${item.final}. ${item.fact}`)).join('')}</div>`;
+  return `
+    <section class="stage-hero history-hero">
+      <div>
+        <span>1930 to 2026</span>
+        <strong>World Cup Memory Wall</strong>
+        <p>Big moments, host eras, iconic finals, and the emotional thread that makes this tournament bigger than the bracket.</p>
+      </div>
+      <div class="stage-stat"><b>23</b><small>editions by 2026</small></div>
+    </section>
+    <div class="history-wall">${HISTORY_TIMELINE.map(item => `
+      <article class="history-card">
+        <div class="moment-fallback" aria-hidden="true"></div>
+        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.caption)}" loading="lazy" onload="this.classList.add('loaded')" onerror="this.remove()">
+        <div>
+          <span>${escapeHtml(item.year)} / ${escapeHtml(item.host)}</span>
+          <strong>${escapeHtml(item.moment)}</strong>
+          <p>${escapeHtml(item.final)}. ${escapeHtml(item.fact)}</p>
+          <small>${escapeHtml(item.caption)}</small>
+        </div>
+      </article>
+    `).join('')}</div>`;
 }
 
 function renderPredictionsView() {
   return `
-    <p class="hub-data-note">Model outputs — not verified match data. Updated pre-tournament.</p>
-    <div class="hub-grid three">
-      ${hubCard('Winner model', 'Argentina 18%', 'Defending champions lead the current pre-tournament probability model.')}
-      ${hubCard('Dark horse', 'USA 7%', 'Host boost, young squad profile, and favorable home atmosphere factor.')}
-      ${hubCard('Projected final', 'France vs Argentina', 'Model-driven bracket simulation — updates live once knockout stage begins.')}
-      ${hubCard('Team xG leader', 'Brazil +2.4 xG', 'Expected goals model based on squad depth, recent form, and opposition quality.')}
-      ${hubCard('Player to watch', 'Mbappé vs Vinícius', 'Head-to-head model comparison ready for goals, assists, and pressure metrics.')}
-      ${hubCard('Model confidence', 'Pre-tournament', 'All projections are separated from verified facts. Confidence scores attach once group stage completes.')}
+    <section class="stage-hero predictions-hero">
+      <div>
+        <span>Market pulse</span>
+        <strong>Favorites, Signals, News</strong>
+        <p>Percentages are pre-tournament model weights, kept separate from verified match data. Links jump to live news, fixtures, and odds trackers.</p>
+      </div>
+      <div class="stage-stat"><b>${PREDICTION_MARKETS.length}</b><small>markets tracked</small></div>
+    </section>
+    <div class="prediction-stack prediction-dashboard">
+      <div class="prediction-market-grid">${PREDICTION_MARKETS.map(market => {
+        const leader = market.picks[0];
+        return `
+          <article class="prediction-market-card">
+            <div class="market-top">
+              <span>${escapeHtml(market.type)}</span>
+              <b>${leader[1]}%</b>
+            </div>
+            <strong>${escapeHtml(market.headline)}</strong>
+            <p>${escapeHtml(market.note)}</p>
+            <div class="market-picks">${market.picks.map(([pick, pct], index) => `
+              <div class="market-pick ${index === 0 ? 'leader' : ''}">
+                <span>${escapeHtml(pick)}</span>
+                <em>${pct}%</em>
+                <i style="--pct:${pct}"></i>
+              </div>
+            `).join('')}</div>
+          </article>`;
+      }).join('')}</div>
+      <div class="live-link-grid">${LIVE_LINKS.map(link => `
+        <a class="live-link-card" href="${escapeHtml(link.href)}" target="_blank" rel="noreferrer">
+          <span>Live link</span><strong>${escapeHtml(link.label)}</strong><p>Open current World Cup 2026 updates in a new tab.</p>
+        </a>
+      `).join('')}</div>
     </div>`;
 }
-
 function searchItems(query) {
   const normalized = normalizeName(query);
   const players = Object.entries(PLATFORM_PROFILES).flatMap(([iso, profile]) =>
