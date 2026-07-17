@@ -170,6 +170,32 @@ const decorEls  = ['trophy-sharp','trophy-halo','glass','orb1','orb2','glass-swe
   .filter(Boolean);
 
 let revealLocked = false;
+let previousStatsActive = null;
+const styleCache = new WeakMap();
+
+function setStyleValue(el, prop, value) {
+  if (!el) return;
+  let cache = styleCache.get(el);
+  if (!cache) {
+    cache = {};
+    styleCache.set(el, cache);
+  }
+  if (cache[prop] === value) return;
+  cache[prop] = value;
+  el.style[prop] = value;
+}
+
+function setCssVar(el, prop, value) {
+  if (!el) return;
+  let cache = styleCache.get(el);
+  if (!cache) {
+    cache = {};
+    styleCache.set(el, cache);
+  }
+  if (cache[prop] === value) return;
+  cache[prop] = value;
+  el.style.setProperty(prop, value);
+}
 
 function isAtScrollBottom() {
   const doc = document.documentElement;
@@ -190,38 +216,42 @@ function updateScrollReveal(scrollY = window.scrollY) {
   const boardOpacity = Math.max(0, Math.min((statsProgress - 0.38) / 0.24, 1));
 
   const radius   = progress * 200;
-  globeWrap.style.clipPath   = `circle(${radius}% at 50% 50%)`;
-  globeWrap.style.transition = 'none';
-  globeWrap.style.opacity    = String(1 - statsProgress * 0.42);
-  globeWrap.style.transform  = `scale(${1 - statsProgress * 0.035}) translateY(${-statsProgress * 10}px)`;
-  globeWrap.style.pointerEvents = statsActive ? 'none' : 'auto';
-  revealEl.style.opacity     = String(Math.max(0, 1 - progress * 1.2));
-  if (progress >= 0.83) revealEl.style.pointerEvents = 'none';
+  setStyleValue(globeWrap, 'clipPath', `circle(${radius.toFixed(2)}% at 50% 50%)`);
+  setStyleValue(globeWrap, 'transition', 'none');
+  setStyleValue(globeWrap, 'opacity', (1 - statsProgress * 0.42).toFixed(3));
+  setStyleValue(globeWrap, 'transform', `scale(${(1 - statsProgress * 0.035).toFixed(4)}) translateY(${(-statsProgress * 10).toFixed(2)}px)`);
+  setStyleValue(globeWrap, 'pointerEvents', statsActive ? 'none' : 'auto');
+  setStyleValue(revealEl, 'opacity', Math.max(0, 1 - progress * 1.2).toFixed(3));
+  if (progress >= 0.83) setStyleValue(revealEl, 'pointerEvents', 'none');
   document.body.classList.toggle('stats-active', statsActive);
+  if (previousStatsActive !== statsActive) {
+    previousStatsActive = statsActive;
+    window.__WCIM_SET_GLOBE_ACTIVE?.(!statsActive);
+  }
 
   if (progress > 0.12) {
-    globeUi.style.display = 'flex';
-    globeUi.style.opacity = String(Math.min(1, (progress - 0.12) * 2.2) * (1 - statsProgress));
+    setStyleValue(globeUi, 'display', 'flex');
+    setStyleValue(globeUi, 'opacity', (Math.min(1, (progress - 0.12) * 2.2) * (1 - statsProgress)).toFixed(3));
   }
   if (globeZoom) {
-    globeZoom.style.opacity = String(1 - Math.min(statsProgress * 2.5, 1));
-    globeZoom.style.pointerEvents = statsActive ? 'none' : 'auto';
+    setStyleValue(globeZoom, 'opacity', (1 - Math.min(statsProgress * 2.5, 1)).toFixed(3));
+    setStyleValue(globeZoom, 'pointerEvents', statsActive ? 'none' : 'auto');
   }
   if (progress > 0.35) {
     document.body.classList.add('globe-active');
-    globeHint.style.opacity = String(Math.min(1, (progress - 0.35) * 2.5) * (1 - statsProgress));
+    setStyleValue(globeHint, 'opacity', (Math.min(1, (progress - 0.35) * 2.5) * (1 - statsProgress)).toFixed(3));
   }
   decorEls.forEach(el => {
-    el.style.opacity = String(Math.max(0, 1 - progress * 1.35));
+    setStyleValue(el, 'opacity', Math.max(0, 1 - progress * 1.35).toFixed(3));
   });
 
   if (statsScene) {
-    statsScene.style.setProperty('--stats-progress', statsProgress.toFixed(3));
-    statsScene.style.setProperty('--stats-enter', statsEnter.toFixed(3));
-    statsScene.style.setProperty('--stats-board-lift', `${Math.round(boardPhase * 460)}px`);
-    statsScene.style.setProperty('--stats-rail-lift', `${Math.round(boardPhase * 180)}px`);
-    statsScene.style.setProperty('--stats-facts-opacity', factsFade.toFixed(3));
-    statsScene.style.setProperty('--stats-board-opacity', boardOpacity.toFixed(3));
+    setCssVar(statsScene, '--stats-progress', statsProgress.toFixed(3));
+    setCssVar(statsScene, '--stats-enter', statsEnter.toFixed(3));
+    setCssVar(statsScene, '--stats-board-lift', `${Math.round(boardPhase * 460)}px`);
+    setCssVar(statsScene, '--stats-rail-lift', `${Math.round(boardPhase * 180)}px`);
+    setCssVar(statsScene, '--stats-facts-opacity', factsFade.toFixed(3));
+    setCssVar(statsScene, '--stats-board-opacity', boardOpacity.toFixed(3));
   }
 }
 
@@ -341,6 +371,34 @@ const WC_NATIONS = [
 ];
 const nationByIso = Object.fromEntries(WC_NATIONS.map(n => [n.iso, n]));
 
+const FIFA_RANKS = {
+  ARG:1, FRA:2, ESP:3, GBR:4, ENG:4, BRA:5, PRT:6, NLD:7, BEL:8, DEU:9,
+  HRV:10, USA:11, MEX:12, URY:13, COL:14, CAN:15, MAR:16, CHE:17, JPN:18, SEN:19,
+  IRN:20, KOR:21, AUS:22, TUR:23, NOR:24, ECU:25, EGY:26, SWE:27, QAT:28, ZAF:29,
+  CPV:30, CIV:31, SAU:32, TUN:33, GHA:34, PAN:35, NZL:36, PRY:37, DZA:38, BIH:39,
+  CZE:40, AUT:41, HTI:42, IRQ:43, JOR:44, UZB:45, CUW:46, COD:47, SCO:48
+};
+
+function rankForNation(n) {
+  return FIFA_RANKS[n?.iso] ? `#${FIFA_RANKS[n.iso]}` : 'Rank TBC';
+}
+
+const TEAM_CODE_ALIASES = {
+  CHE: ['SUI'],
+  HTI: ['HAI'],
+  PRY: ['PAR'],
+  ZAF: ['RSA'],
+  GBR: ['ENG'],
+  SAU: ['KSA'],
+  DZA: ['ALG'],
+  PRT: ['POR']
+};
+
+const MANAGER_OVERRIDES = {
+  SEN: 'Pape Thiaw',
+  JOR: 'Jamal Sellami'
+};
+
 const PLATFORM_PROFILES = {
   ARG: {
     rank: '1', form: 'Elite', model: '18%',
@@ -442,7 +500,7 @@ const TEAM_DOSSIERS = {
     manager:'Julian Nagelsmann', star:'Jamal Musiala', nickname:'Die Mannschaft', confed:'UEFA', titles:'4 World Cups', best:'Champions 1954, 1974, 1990, 2014',
     managerWiki:'https://en.wikipedia.org/wiki/Julian_Nagelsmann', starWiki:'https://en.wikipedia.org/wiki/Jamal_Musiala',
     identity:'Structured possession, central overloads, and quick attacking rotations between creators.',
-    squad:['Manuel Neuer|GK|Bayern Munich', 'Marc-Andre ter Stegen|GK|Barcelona', 'Antonio Rudiger|DEF|Real Madrid', 'Jonathan Tah|DEF|Bayer Leverkusen', 'Joshua Kimmich|DEF|Bayern Munich', 'David Raum|DEF|RB Leipzig', 'Toni Kroos|MID|Real Madrid', 'Ilkay Gundogan|MID|Barcelona', 'Florian Wirtz|MID|Bayer Leverkusen', 'Jamal Musiala|MID|Bayern Munich', 'Kai Havertz|FWD|Arsenal', 'Niclas Fullkrug|FWD|West Ham', 'Leroy Sane|FWD|Bayern Munich', 'Serge Gnabry|FWD|Bayern Munich', 'Robert Andrich|MID|Bayer Leverkusen']
+    squad:['Manuel Neuer|GK|Bayern Munich', 'Marc-Andre ter Stegen|GK|Barcelona', 'Antonio Rudiger|DEF|Real Madrid', 'Jonathan Tah|DEF|Bayer Leverkusen', 'Joshua Kimmich|DEF|Bayern Munich', 'David Raum|DEF|RB Leipzig', 'Ilkay Gundogan|MID|Barcelona', 'Florian Wirtz|MID|Bayer Leverkusen', 'Jamal Musiala|MID|Bayern Munich', 'Aleksandar Pavlovic|MID|Bayern Munich', 'Kai Havertz|FWD|Arsenal', 'Niclas Fullkrug|FWD|West Ham', 'Leroy Sane|FWD|Bayern Munich', 'Serge Gnabry|FWD|Bayern Munich', 'Robert Andrich|MID|Bayer Leverkusen']
   },
   PRT: {
     manager:'Roberto Martinez', star:'Cristiano Ronaldo', nickname:'A Selecao', confed:'UEFA', titles:'0 World Cups', best:'1966 third place',
@@ -479,8 +537,8 @@ const HOST_STADIUMS = [
   { name:'Hard Rock Stadium', city:'Miami, USA', capacity:'64,767', matches:'Group stage, knockout path', note:'Latin American crossover energy and a potential Argentina-style home away from home.', wiki:'https://en.wikipedia.org/wiki/Hard_Rock_Stadium', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Hard_Rock_Stadium_for_Super_Bowl_LIV_%2849606710103%29.jpg/960px-Hard_Rock_Stadium_for_Super_Bowl_LIV_%2849606710103%29.jpg' },
   { name:'MetLife Stadium', city:'New York/New Jersey, USA', capacity:'82,500', matches:'Final, knockouts', note:'The final-scale pressure room for the 2026 champion.', wiki:'https://en.wikipedia.org/wiki/MetLife_Stadium', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Metlife_stadium_%28Aerial_view%29.jpg/960px-Metlife_stadium_%28Aerial_view%29.jpg' },
   { name:'Lincoln Financial Field', city:'Philadelphia, USA', capacity:'67,594', matches:'Group stage, round of 16', note:'East Coast intensity with a tight, vertical football bowl.', wiki:'https://en.wikipedia.org/wiki/Lincoln_Financial_Field', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Lincoln_Financial_Field_%28Aerial_view%29.jpg/960px-Lincoln_Financial_Field_%28Aerial_view%29.jpg' },
-  { name:'Levi\'s Stadium', city:'San Francisco Bay Area, USA', capacity:'68,500', matches:'Group stage, knockout path', note:'West Coast route stop with tactical travel pressure.', wiki:'https://en.wikipedia.org/wiki/Levi%27s_Stadium', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Levi%27s_Stadium_in_February_2016_prior_to_Super_Bowl_50_%2824398261729%29.jpg/960px-Levi%27s_Stadium_in_February_2016_prior_to_Super_Bowl_50_%2824398261729%29.jpg' },
-  { name:'Lumen Field', city:'Seattle, USA', capacity:'68,740', matches:'Group stage, knockout path', note:'One of the loudest soccer atmospheres in North America.', wiki:'https://en.wikipedia.org/wiki/Lumen_Field', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/2026_FIFA_World_Cup_-_Belgium_v._Egypt_in_Seattle_-_04.jpg/960px-2026_FIFA_World_Cup_-_Belgium_v._Egypt_in_Seattle_-_04.jpg' }
+  { name:'Levi\'s Stadium', city:'San Francisco Bay Area, USA', capacity:'68,500', matches:'Group stage, knockout path', note:'West Coast route stop with tactical travel pressure.', wiki:'https://en.wikipedia.org/wiki/Levi%27s_Stadium', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Levi%27s_Stadium_in_February_2016_prior_to_Super_Bowl_50_%2824398261729%29.jpg/250px-Levi%27s_Stadium_in_February_2016_prior_to_Super_Bowl_50_%2824398261729%29.jpg' },
+  { name:'Lumen Field', city:'Seattle, USA', capacity:'68,740', matches:'Group stage, knockout path', note:'One of the loudest soccer atmospheres in North America.', wiki:'https://en.wikipedia.org/wiki/Lumen_Field', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/2026_FIFA_World_Cup_-_Belgium_v._Egypt_in_Seattle_-_04.jpg/250px-2026_FIFA_World_Cup_-_Belgium_v._Egypt_in_Seattle_-_04.jpg' }
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -500,18 +558,32 @@ const LIVE_DATA = {
   matches:     [],      // normalised match objects
   standings:   {},      // { [groupLetter]: [{pos,team,mp,w,d,l,gf,ga,gd,pts},...] }
   scorers:     [],      // [{rank,player,short,team,goals,assists}]
+  teams:       [],
+  teamsByIso:  {},
   squads:      {},      // { [ISO3]: {coach, squad:[{name,short,position,number,age,club}]} }
   totalGoals:  0,
   topScorer:   '—',
   matchday:    'Pre-tournament',
+  lastError:   '',
+  lastErrorStatus: null,
 };
+window.__WCIM_DATA = () => ({ ...LIVE_DATA });
 
 // ── proxy fetch helper ────────────────────────────────────────
 async function fdFetch(fdPath, params = {}) {
   const qs  = new URLSearchParams({ path: fdPath, ...params });
   const res = await fetch(`${FD_PROXY}?${qs}`, { signal: AbortSignal.timeout(FD_TIMEOUT) });
-  if (!res.ok) throw new Error(`FD ${res.status} ${fdPath}`);
-  return res.json();
+  const text = await res.text();
+  let body = {};
+  try { body = text ? JSON.parse(text) : {}; } catch { body = { message: text }; }
+  if (!res.ok) {
+    const msg = body.message || body.error || `football-data returned ${res.status}`;
+    const err = new Error(msg);
+    err.status = res.status;
+    err.path = fdPath;
+    throw err;
+  }
+  return body;
 }
 
 // ── normalise a raw football-data match object ────────────────
@@ -524,10 +596,16 @@ function normaliseMatch(m) {
     group:    (m.group || '').replace('GROUP_',''),
     stage:    m.stage || '',
     venue:    m.venue || '',
-    homeTeam: { id: m.homeTeam?.id, name: m.homeTeam?.shortName || m.homeTeam?.name || '?', tla: m.homeTeam?.tla || '' },
-    awayTeam: { id: m.awayTeam?.id, name: m.awayTeam?.shortName || m.awayTeam?.name || '?', tla: m.awayTeam?.tla || '' },
-    score:    { home: m.score?.fullTime?.home ?? m.score?.halfTime?.home ?? null,
-                away: m.score?.fullTime?.away ?? m.score?.halfTime?.away ?? null },
+    homeTeam: { id: m.homeTeam?.id, name: m.homeTeam?.name || m.homeTeam?.shortName || '?', tla: m.homeTeam?.tla || '' },
+    awayTeam: { id: m.awayTeam?.id, name: m.awayTeam?.name || m.awayTeam?.shortName || '?', tla: m.awayTeam?.tla || '' },
+    score:    {
+      home: m.score?.fullTime?.home ?? m.score?.halfTime?.home ?? null,
+      away: m.score?.fullTime?.away ?? m.score?.halfTime?.away ?? null,
+      halfTime: {
+        home: m.score?.halfTime?.home ?? null,
+        away: m.score?.halfTime?.away ?? null
+      }
+    },
   };
 }
 
@@ -551,7 +629,7 @@ async function fetchStandings() {
   const groups = {};
   (data.standings || []).forEach(s => {
     if (s.type !== 'TOTAL') return;
-    const letter = (s.group || s.stage || '').replace('GROUP_','') || '?';
+    const letter = (s.group || s.stage || '').replace('GROUP_','').replace(/^Group\s+/i, '') || '?';
     groups[letter] = (s.table || []).map(r => ({
       pos:  r.position,
       team: r.team?.shortName || r.team?.name || '?',
@@ -577,8 +655,11 @@ async function fetchScorers() {
     player:  s.player?.name || '?',
     short:   s.player?.shortName || s.player?.name || '?',
     team:    s.team?.shortName   || s.team?.name   || '?',
+    tla:     s.team?.tla || '',
     goals:   s.goals   ?? s.numberOfGoals ?? 0,
     assists: s.assists  ?? 0,
+    played:  s.playedMatches ?? 0,
+    penalties: s.penalties ?? 0,
   }));
   LIVE_DATA.totalGoals = LIVE_DATA.scorers.reduce((t, s) => t + s.goals, 0);
   LIVE_DATA.topScorer  = LIVE_DATA.scorers[0]?.short || '—';
@@ -586,30 +667,75 @@ async function fetchScorers() {
 
 // ── fetch squad on demand (when nation panel opens) ───────────
 // football-data.org team IDs for WC2026 squads
-const FD_TEAM_IDS = {
-  ARG:762,  BRA:1630, FRA:773,  DEU:759,  ESP:760,  PRT:765,  NLD:1920,
-  BEL:1396, ENG:66,   URY:788,  MEX:758,  USA:762,  CAN:7578, MAR:1938,
-  JPN:1777, KOR:2612, SEN:825,  GHA:1700, ECU:1773, QAT:172,  AUS:737,
-  NOR:1631, CHE:1646, HRV:799,  TUR:1572, IRN:2000, EGY:60,
-};
+function normaliseTeam(t) {
+  const iso = t.area?.code || t.tla || '';
+  return {
+    id: t.id,
+    iso,
+    tla: t.tla || iso,
+    name: t.shortName || t.name || '?',
+    fullName: t.name || t.shortName || '?',
+    crest: t.crest || t.area?.flag || '',
+    founded: t.founded || null,
+    colors: t.clubColors || '',
+    website: t.website || '',
+    coach: t.coach?.name || '',
+    squad: (t.squad || []).map(p => ({
+      id: p.id,
+      name: p.name || '?',
+      short: p.shortName || p.name || '?',
+      position: p.position || 'Player',
+      age: p.dateOfBirth
+        ? Math.floor((Date.now() - new Date(p.dateOfBirth)) / (365.25 * 86400000))
+        : null,
+      nationality: p.nationality || '',
+    }))
+  };
+}
+
+async function fetchTeams() {
+  const data = await fdFetch(`/v4/competitions/${FD_COMP}/teams`);
+  LIVE_DATA.teams = (data.teams || []).map(normaliseTeam);
+  LIVE_DATA.teamsByIso = {};
+  LIVE_DATA.teams.forEach(team => {
+    if (team.iso) LIVE_DATA.teamsByIso[team.iso] = team;
+    if (team.tla) LIVE_DATA.teamsByIso[team.tla] = team;
+  });
+}
+
+function liveTeamForNation(n) {
+  if (!n) return null;
+  return LIVE_DATA.teamsByIso[n.iso]
+    || (TEAM_CODE_ALIASES[n.iso] || []).map(code => LIVE_DATA.teamsByIso[code]).find(Boolean)
+    || LIVE_DATA.teams.find(team => normalizeName(team.name) === normalizeName(n.name))
+    || LIVE_DATA.teams.find(team => normalizeName(team.fullName) === normalizeName(n.name))
+    || null;
+}
+
+function managerForNation(n, liveTeam = null) {
+  return liveTeam?.coach || MANAGER_OVERRIDES[n?.iso] || null;
+}
+
+function nationMatchesLiveCode(n, code) {
+  if (!n || !code) return false;
+  return n.iso === code || (TEAM_CODE_ALIASES[n.iso] || []).includes(code);
+}
+
+function nationForLiveRow(row) {
+  const code = row?.tla || row?.iso || '';
+  const rowName = row?.team || row?.name || '';
+  return WC_NATIONS.find(n => nationMatchesLiveCode(n, code))
+    || WC_NATIONS.find(n => normalizeName(n.name) === normalizeName(rowName))
+    || { name: rowName || '?', iso: code, group: row?.group || '' };
+}
 
 async function fetchSquad(iso3) {
   if (LIVE_DATA.squads[iso3]) return LIVE_DATA.squads[iso3];
-  const teamId = FD_TEAM_IDS[iso3];
-  if (!teamId) return null;
+  if (!LIVE_DATA.teams.length) await fetchTeams();
+  const team = liveTeamForNation(WC_NATIONS.find(n => n.iso === iso3));
+  if (!team) return null;
   try {
-    const data  = await fdFetch(`/v4/teams/${teamId}`);
-    const squad = (data.squad || []).map(p => ({
-      name:     p.name || '?',
-      short:    p.shortName || p.name || '?',
-      position: p.position || '?',
-      number:   p.shirtNumber ?? null,
-      age:      p.dateOfBirth
-        ? Math.floor((Date.now() - new Date(p.dateOfBirth)) / (365.25 * 86400000))
-        : null,
-      club:     p.currentTeam?.shortName || p.currentTeam?.name || '',
-    }));
-    const result = { coach: data.coach?.name || null, squad };
+    const result = { coach: team.coach || MANAGER_OVERRIDES[iso3] || null, squad: team.squad };
     LIVE_DATA.squads[iso3] = result;
     return result;
   } catch (e) {
@@ -622,28 +748,41 @@ async function fetchSquad(iso3) {
 let _refreshTimer = null;
 
 async function refreshAll() {
-  const results = await Promise.allSettled([fetchMatches(), fetchStandings(), fetchScorers()]);
+  const results = await Promise.allSettled([fetchMatches(), fetchStandings(), fetchScorers(), fetchTeams()]);
   const anyOk   = results.some(r => r.status === 'fulfilled');
 
   if (anyOk) {
     LIVE_DATA.isLive   = true;
     LIVE_DATA.fetchedAt = new Date().toISOString();
+    LIVE_DATA.lastError = '';
+    LIVE_DATA.lastErrorStatus = null;
+  } else {
+    const reason = results.find(r => r.status === 'rejected')?.reason;
+    LIVE_DATA.isLive = false;
+    LIVE_DATA.lastError = reason?.message || 'Live feed unavailable';
+    LIVE_DATA.lastErrorStatus = reason?.status || null;
   }
 
   results.forEach((r, i) => {
     if (r.status === 'rejected')
-      console.info('[WCIM]', ['matches','standings','scorers'][i], 'unavailable:', r.reason?.message);
+      console.info('[WCIM]', ['matches','standings','scorers','teams'][i], 'unavailable:', r.reason?.message);
   });
 
   // Update all live surfaces
   updateGlobeStats();
   updateTickerFromLive();
+  updateSmallLiveBar();
   updateLeaderboard();
   if (document.getElementById('feature-hub')?.classList.contains('visible')) {
     const active = document.querySelector('.nav-pill.active')?.dataset.view;
     if (active === 'live')   document.getElementById('feature-panel').innerHTML = renderLiveView();
     if (active === 'groups') document.getElementById('feature-panel').innerHTML = renderGroupsView();
     if (active === 'stats')  document.getElementById('feature-panel').innerHTML = renderStatsView();
+  }
+  if (document.getElementById('nation-panel')?.classList.contains('visible')) {
+    const iso = document.getElementById('globe-container')?.dataset.selectedIso;
+    const nation = WC_NATIONS.find(n => n.iso === iso);
+    if (nation) renderNationPanel(nation);
   }
 
   // Schedule next — 45s if live, 5min otherwise
@@ -743,6 +882,121 @@ function updateTickerFromLive() {
 }
 
 // ── leaderboard in stats scene ────────────────────────────────
+function matchScoreText(match) {
+  const home = match?.score?.home;
+  const away = match?.score?.away;
+  return home == null || away == null ? 'vs' : `${home}-${away}`;
+}
+
+function liveTeamName(team) {
+  const name = team?.name || team?.shortName || '';
+  return !name || name === '?' ? 'TBC' : name;
+}
+
+function matchStageText(match) {
+  const bits = [
+    matchStatusLabel(match?.status),
+    match?.stage ? titleCaseWords(String(match.stage).replaceAll('_', ' ')) : '',
+    match?.group ? `Group ${match.group}` : ''
+  ].filter(Boolean);
+  return bits.join(' / ');
+}
+
+function liveMinuteText(match) {
+  if (!match) return '';
+  if (match.minute) return `${match.minute}'`;
+  if (match.status === 'IN_PLAY' && match.utcDate) {
+    const elapsed = Math.max(1, Math.floor((Date.now() - new Date(match.utcDate).getTime()) / 60000) + 1);
+    if (elapsed <= 45) return `${elapsed}'`;
+    if (elapsed <= 60) return '45+';
+    if (elapsed <= 120) return `${Math.min(90, elapsed - 15)}'`;
+  }
+  if (match.status === 'PAUSED') return 'HT';
+  if (match.status === 'IN_PLAY') return 'Live';
+  return matchStatusLabel(match.status);
+}
+
+function scorerSummary(match) {
+  if (!match) return '';
+  const home = match.homeTeam?.name || 'Home';
+  const away = match.awayTeam?.name || 'Away';
+  const htHome = match.score?.halfTime?.home;
+  const htAway = match.score?.halfTime?.away;
+  const ftHome = match.score?.home;
+  const ftAway = match.score?.away;
+  if (ftHome == null || ftAway == null || (ftHome === 0 && ftAway === 0)) return 'No goals yet';
+  if (htHome == null || htAway == null) {
+    const parts = [];
+    if (ftHome) parts.push(`${home}: ${ftHome} goal${ftHome === 1 ? '' : 's'}`);
+    if (ftAway) parts.push(`${away}: ${ftAway} goal${ftAway === 1 ? '' : 's'}`);
+    return parts.join(' / ');
+  }
+  const parts = [];
+  if (htHome) parts.push(`${home}: ${htHome} first-half goal${htHome === 1 ? '' : 's'}`);
+  if (ftHome - htHome > 0) parts.push(`${home}: ${ftHome - htHome} second-half goal${ftHome - htHome === 1 ? '' : 's'}`);
+  if (htAway) parts.push(`${away}: ${htAway} first-half goal${htAway === 1 ? '' : 's'}`);
+  if (ftAway - htAway > 0) parts.push(`${away}: ${ftAway - htAway} second-half goal${ftAway - htAway === 1 ? '' : 's'}`);
+  return parts.join(' / ') || 'No goal event names in feed';
+}
+
+function isStaleLiveMatch(match) {
+  if (!match || (match.status !== 'IN_PLAY' && match.status !== 'PAUSED') || !match.utcDate) return false;
+  return Date.now() - new Date(match.utcDate).getTime() > 150 * 60 * 1000;
+}
+
+function matchWinnerText(match) {
+  const home = match?.score?.home;
+  const away = match?.score?.away;
+  if (home == null || away == null || home === away) return 'Result';
+  return `${home > away ? match.homeTeam?.name : match.awayTeam?.name} advance`;
+}
+
+function updateSmallLiveBar() {
+  const bar = document.getElementById('live-match-bar');
+  if (!bar) return;
+  const active = LIVE_DATA.matches.find(m => (m.status === 'IN_PLAY' || m.status === 'PAUSED') && !isStaleLiveMatch(m));
+  const result = [...LIVE_DATA.matches]
+    .filter(m => m.status === 'FINISHED' || isStaleLiveMatch(m))
+    .sort((a, b) => new Date(b.utcDate || 0) - new Date(a.utcDate || 0))[0];
+  const next = LIVE_DATA.matches.find(m => m.status === 'TIMED' || m.status === 'SCHEDULED');
+  const match = active || result || next;
+  if (!match) {
+    bar.classList.add('is-hidden');
+    return;
+  }
+
+  const isLive = !!active;
+  const isResult = !isLive && !!result;
+  const state = bar.querySelector('.live-state');
+  const title = bar.querySelector('.live-match-title');
+  const score = bar.querySelector('.live-scoreline');
+  const stage = bar.querySelector('.live-stage');
+  const homeName = bar.querySelector('.live-team.home');
+  const awayName = bar.querySelector('.live-team.away');
+  const nextLabel = bar.querySelector('.live-next-row strong');
+  const scorers = bar.querySelector('.live-scorers');
+  const date = match.utcDate ? new Date(match.utcDate) : null;
+  const time = date ? date.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '';
+  const nextDate = next?.utcDate ? new Date(next.utcDate) : null;
+  const nextTime = nextDate ? nextDate.toLocaleDateString('en-US', { month:'short', day:'numeric' }) + ' ' + nextDate.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '';
+
+  bar.classList.toggle('is-upcoming', !isLive && !isResult);
+  bar.classList.toggle('is-result', isResult);
+  bar.classList.remove('is-hidden');
+  if (state) state.textContent = isLive ? liveMinuteText(match) : isResult ? 'FT' : 'Next';
+  if (title) title.textContent = `${liveTeamName(match.homeTeam)} vs ${liveTeamName(match.awayTeam)}`;
+  if (score) score.textContent = (isLive || isResult) ? matchScoreText(match) : time;
+  if (stage) stage.textContent = isResult ? `${matchWinnerText(match)} / ${match.stage ? titleCaseWords(String(match.stage).replaceAll('_', ' ')) : 'Result'}` : matchStageText(match);
+  if (homeName) homeName.textContent = liveTeamName(match.homeTeam);
+  if (awayName) awayName.textContent = liveTeamName(match.awayTeam);
+  if (scorers) scorers.textContent = (isLive || isResult) ? scorerSummary(match) : 'Goal details on kickoff';
+  if (nextLabel) {
+    nextLabel.textContent = next
+      ? `${liveTeamName(next.homeTeam)} vs ${liveTeamName(next.awayTeam)}${nextTime ? ` / ${nextTime}` : ''}`
+      : 'Final path pending';
+  }
+}
+
 const PLAYER_STAT_TABS = [
   { key:'goals', label:'Goals' }, { key:'assists', label:'Assists' },
   { key:'xg', label:'xG' }, { key:'shots', label:'Shots on Target' },
@@ -751,20 +1005,37 @@ const PLAYER_STAT_TABS = [
   { key:'interceptions', label:'Interceptions' }, { key:'motm', label:'MOTM' },
   { key:'yellow', label:'Yellow Cards' }, { key:'red', label:'Red Cards' }
 ];
+const PLAYER_STAT_LABELS = {
+  goals: 'Goals',
+  assists: 'Assists',
+  played: 'Matches',
+  penalties: 'Penalties',
+  xg: 'xG',
+  shots: 'Shots',
+  chances: 'Key Passes',
+  clean: 'Clean Sheets',
+  saves: 'Saves',
+  tackles: 'Tackles',
+  interceptions: 'Interceptions',
+  motm: 'MOTM',
+  yellow: 'Yellow Cards',
+  red: 'Red Cards'
+};
+const LIVE_PLAYER_STAT_KEYS = new Set(['goals']);
 
 const PLAYER_STATS = {
-  goals: [['Lionel Messi','Argentina','LM',6], ['Kylian Mbappe','France','KM',5], ['Erling Haaland','Norway','EH',5], ['Vinicius Junior','Brazil','VJ',4], ['Ousmane Dembele','France','OD',4], ['Harry Kane','England','HK',4], ['Cristiano Ronaldo','Portugal','CR',3], ['Julian Alvarez','Argentina','JA',3], ['Lamine Yamal','Spain','LY',3], ['Christian Pulisic','USA','CP',3]],
-  assists: [['Toni Kroos','Germany','TK',5], ['Lionel Messi','Argentina','LM',4], ['Kevin De Bruyne','Belgium','KD',4], ['Bruno Fernandes','Portugal','BF',4], ['Antoine Griezmann','France','AG',3], ['Lamine Yamal','Spain','LY',3], ['Phil Foden','England','PF',3], ['Jamal Musiala','Germany','JM',3], ['Christian Pulisic','USA','CP',2], ['Pedri','Spain','PD',2]],
-  xg: [['Erling Haaland','Norway','EH','5.9'], ['Kylian Mbappe','France','KM','5.4'], ['Lionel Messi','Argentina','LM','4.8'], ['Harry Kane','England','HK','4.6'], ['Cristiano Ronaldo','Portugal','CR','4.1'], ['Vinicius Junior','Brazil','VJ','3.8'], ['Julian Alvarez','Argentina','JA','3.5'], ['Randal Kolo Muani','France','RK','3.2'], ['Rodrygo','Brazil','RD','3.1'], ['Alvaro Morata','Spain','AM','2.9']],
-  shots: [['Kylian Mbappe','France','KM',18], ['Erling Haaland','Norway','EH',17], ['Lionel Messi','Argentina','LM',15], ['Vinicius Junior','Brazil','VJ',14], ['Cristiano Ronaldo','Portugal','CR',13], ['Harry Kane','England','HK',12], ['Rafael Leao','Portugal','RL',11], ['Lamine Yamal','Spain','LY',10], ['Jude Bellingham','England','JB',10], ['Christian Pulisic','USA','CP',9]],
-  chances: [['Kevin De Bruyne','Belgium','KD',19], ['Lionel Messi','Argentina','LM',18], ['Bruno Fernandes','Portugal','BF',17], ['Antoine Griezmann','France','AG',15], ['Toni Kroos','Germany','TK',14], ['Pedri','Spain','PD',13], ['Jude Bellingham','England','JB',12], ['Christian Pulisic','USA','CP',11], ['Lamine Yamal','Spain','LY',11], ['Jamal Musiala','Germany','JM',10]],
-  clean: [['Emiliano Martinez','Argentina','EM',5], ['Mike Maignan','France','MM',4], ['Alisson Becker','Brazil','AB',4], ['Manuel Neuer','Germany','MN',3], ['Unai Simon','Spain','US',3], ['Jordan Pickford','England','JP',3], ['Diogo Costa','Portugal','DC',2], ['Matt Turner','USA','MT',2], ['Yann Sommer','Switzerland','YS',2], ['Koen Casteels','Belgium','KC',2]],
-  saves: [['Andre Onana','Cameroon','AO',29], ['Emiliano Martinez','Argentina','EM',26], ['Matt Turner','USA','MT',24], ['Alisson Becker','Brazil','AB',22], ['Koen Casteels','Belgium','KC',21], ['Diogo Costa','Portugal','DC',20], ['Yann Sommer','Switzerland','YS',19], ['Unai Simon','Spain','US',18], ['Manuel Neuer','Germany','MN',17], ['Mike Maignan','France','MM',16]],
-  tackles: [['N Golo Kante','France','NK',31], ['Declan Rice','England','DR',29], ['Casemiro','Brazil','CE',27], ['Tyler Adams','USA','TA',25], ['Aurelien Tchouameni','France','AT',24], ['Joshua Kimmich','Germany','JK',23], ['Rodri','Spain','RD',22], ['Weston McKennie','USA','WM',21], ['Bruno Guimaraes','Brazil','BG',20], ['Sofyan Amrabat','Morocco','SA',20]],
-  interceptions: [['Virgil van Dijk','Netherlands','VD',18], ['William Saliba','France','WS',17], ['Marquinhos','Brazil','MQ',16], ['John Stones','England','JS',15], ['Antonio Rudiger','Germany','AR',15], ['Cristian Romero','Argentina','CR',14], ['Achraf Hakimi','Morocco','AH',13], ['Sergio Busquets','Spain','SB',13], ['Tim Ream','USA','TR',12], ['Pepe','Portugal','PP',12]],
-  motm: [['Lionel Messi','Argentina','LM',4], ['Kylian Mbappe','France','KM',3], ['Vinicius Junior','Brazil','VJ',3], ['Jude Bellingham','England','JB',3], ['Kevin De Bruyne','Belgium','KD',2], ['Christian Pulisic','USA','CP',2], ['Bruno Fernandes','Portugal','BF',2], ['Lamine Yamal','Spain','LY',2], ['Jamal Musiala','Germany','JM',2], ['Emiliano Martinez','Argentina','EM',2]],
-  yellow: [['Casemiro','Brazil','CE',3], ['Mario Gila','Spain','MG',3], ['Declan Rice','England','DR',2], ['Frenkie de Jong','Netherlands','FD',2], ['Robert Gum','Poland','RG',2], ['Sofyan Amrabat','Morocco','SA',2], ['Weston McKennie','USA','WM',2], ['Rodri','Spain','RD',2], ['Nicolas Otamendi','Argentina','NO',1], ['Pepe','Portugal','PP',1]],
-  red: [['Achraf Hakimi','Morocco','AH',1], ['Robin Gosens','Germany','RG',1], ['Bruno Fernandes','Portugal','BF',1], ['John Brooks','USA','JB',1], ['Milan Skriniar','Slovakia','MS',1], ['Nicolas Otamendi','Argentina','NO',1], ['Casemiro','Brazil','CE',1], ['Sergio Ramos','Spain','SR',1], ['Pepe','Portugal','PP',1], ['Granit Xhaka','Switzerland','GX',1]]
+  goals: [['Kylian Mbappe','France','KM',8], ['Lionel Messi','Argentina','LM',8], ['Erling Haaland','Norway','EH',7], ['Harry Kane','England','HK',6], ['Jude Bellingham','England','JB',6], ['Mikel Oyarzabal','Spain','MO',5], ['Ousmane Dembele','France','OD',5], ['Julian Quinones','Mexico','JQ',4], ['Vinicius Junior','Brazil','VJ',4], ['Ismaila Sarr','Senegal','IS',4]],
+  assists: [['Michael Olise','France','MO',5], ['Lionel Messi','Argentina','LM',4], ['Bruno Guimaraes','Brazil','BG',4], ['Brahim Diaz','Morocco','BD',4], ['Martin Odegaard','Norway','MO',4], ['Kylian Mbappe','France','KM',3], ['Andreas Schjelderup','Norway','AS',3], ['Roberto Alvarado','Mexico','RA',3], ['Alexander Isak','Sweden','AI',3], ['Florian Wirtz','Germany','FW',3]],
+  xg: [['Kylian Mbappe','France','KM','5.48'], ['Lionel Messi','Argentina','LM','5.26'], ['Erling Haaland','Norway','EH','4.43'], ['Ismaila Sarr','Senegal','IS','3.68'], ['Mikel Oyarzabal','Spain','MO','2.78'], ['Harry Kane','England','HK','2.66'], ['Jude Bellingham','England','JB','2.62'], ['Julian Quinones','Mexico','JQ','1.61'], ['Ousmane Dembele','France','OD','1.58'], ['Romelu Lukaku','Belgium','RL','1.01']],
+  shots: [['Lionel Messi','Argentina','LM',34], ['Kylian Mbappe','France','KM',33], ['Erling Haaland','Norway','EH',20], ['Harry Kane','England','HK',18], ['Ousmane Dembele','France','OD',18], ['Jude Bellingham','England','JB',17], ['Mikel Oyarzabal','Spain','MO',17], ['Ismaila Sarr','Senegal','IS',17], ['Julian Quinones','Mexico','JQ',14], ['Vinicius Junior','Brazil','VJ',14]],
+  chances: [['Michael Olise','France','MO',23], ['Lionel Messi','Argentina','LM',22], ['Lamine Yamal','Spain','LY',18], ['Dani Olmo','Spain','DO',16], ['Brahim Diaz','Morocco','BD',15], ['Martin Odegaard','Norway','MO',15], ['Bruno Guimaraes','Brazil','BG',14], ['Alexis Mac Allister','Argentina','AM',13], ['Kylian Mbappe','France','KM',12], ['Anthony Gordon','England','AG',12]],
+  clean: [['Unai Simon','Spain','US',6], ['Emiliano Martinez','Argentina','EM',4], ['Mike Maignan','France','MM',4], ['Jordan Pickford','England','JP',4], ['Orlando Gill','Paraguay','OG',3], ['Yassine Bounou','Morocco','YB',3], ['Gregor Kobel','Switzerland','GK',3], ['Yann Sommer','Switzerland','YS',3], ['Diogo Costa','Portugal','DC',2], ['Alisson Becker','Brazil','AB',2]],
+  saves: [['Orlando Gill','Paraguay','OG',23], ['Eloy Room','Curacao','ER',20], ['Gregor Kobel','Switzerland','GK',20], ['Diogo Costa','Portugal','DC',19], ['Vozinha','Cape Verde','VZ',18], ['Emiliano Martinez','Argentina','EM',18], ['Jordan Pickford','England','JP',17], ['Mike Maignan','France','MM',16], ['Unai Simon','Spain','US',15], ['Yassine Bounou','Morocco','YB',15]],
+  tackles: [['Declan Rice','England','DR',33], ['Rodri','Spain','RD',32], ['Cristian Romero','Argentina','CR',29], ['Aurelien Tchouameni','France','AT',28], ['Alexis Mac Allister','Argentina','AM',27], ['Pau Cubarsi','Spain','PC',26], ['John Stones','England','JS',25], ['Marc Cucurella','Spain','MC',24], ['Leandro Paredes','Argentina','LP',23], ['Sofyan Amrabat','Morocco','SA',22]],
+  interceptions: [['Pau Cubarsi','Spain','PC',21], ['Cristian Romero','Argentina','CR',20], ['John Stones','England','JS',19], ['William Saliba','France','WS',17], ['Rodri','Spain','RD',17], ['Nicolas Otamendi','Argentina','NO',16], ['Marc Cucurella','Spain','MC',16], ['Declan Rice','England','DR',15], ['Jules Kounde','France','JK',15], ['Achraf Hakimi','Morocco','AH',14]],
+  motm: [['Lionel Messi','Argentina','LM',5], ['Jude Bellingham','England','JB',4], ['Lamine Yamal','Spain','LY',4], ['Michael Olise','France','MO',3], ['Kylian Mbappe','France','KM',3], ['Rodri','Spain','RD',3], ['Mikel Oyarzabal','Spain','MO',3], ['Dani Olmo','Spain','DO',2], ['Ousmane Dembele','France','OD',2], ['Jordan Pickford','England','JP',2]],
+  yellow: [['Nicolas Tagliafico','Argentina','NT',3], ['Cristian Romero','Argentina','CR',3], ['Lamine Yamal','Spain','LY',2], ['Rodri','Spain','RD',2], ['Leandro Paredes','Argentina','LP',2], ['Declan Rice','England','DR',2], ['Breel Embolo','Switzerland','BE',2], ['Michael Olise','France','MO',2], ['Granit Xhaka','Switzerland','GX',2], ['Sofyan Amrabat','Morocco','SA',2]],
+  red: [['Jarell Quansah','England','JQ',1], ['Nathan Ngoy','Belgium','NN',1], ['Tarik Muharemovic','Bosnia','TM',1], ['Agustin Canobbio','Uruguay','AC',1], ['Piero Hincapie','Ecuador','PH',1], ['Folarin Balogun','USA','FB',1], ['Breel Embolo','Switzerland','BE',1], ['Miguel Almiron','Paraguay','MA',1], ['Achraf Hakimi','Morocco','AH',1], ['Robin Gosens','Germany','RG',1]]
 };
 
 function initPlayerLeaderboard() {
@@ -797,18 +1068,21 @@ function renderLeaderboardTab(tab) {
   const allRows = document.querySelectorAll('.lb-rows');
   allRows.forEach(r => { r.style.display = r.dataset.tab === tab ? 'block' : 'none'; });
 
-  const staticRows = PLAYER_STATS[tab] || PLAYER_STATS.goals;
-  let rows = staticRows.map(([player, team, initials, value]) => ({ player, team, initials, value }));
-  if (LIVE_DATA.scorers.length && (tab === 'goals' || tab === 'assists')) {
+  let rows = [];
+  const isLiveStat = LIVE_DATA.scorers.length && LIVE_PLAYER_STAT_KEYS.has(tab);
+  if (isLiveStat) {
     rows = [...LIVE_DATA.scorers]
-      .sort((a, b) => tab === 'assists' ? b.assists - a.assists : b.goals - a.goals)
+      .sort((a, b) => (b[tab] || 0) - (a[tab] || 0))
       .slice(0, 10)
       .map(p => ({
         player: p.short || p.player,
         team: p.team,
         initials: (p.short || p.player).split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
-        value: tab === 'assists' ? p.assists : p.goals
+        value: p[tab] ?? 0
       }));
+  } else {
+    const staticRows = PLAYER_STATS[tab] || PLAYER_STATS.goals;
+    rows = staticRows.map(([player, team, initials, value]) => ({ player, team, initials, value }));
   }
 
   const rankClass = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
@@ -827,28 +1101,44 @@ function renderLeaderboardTab(tab) {
     </div>`).join('');
 
   const label = document.getElementById('lb-stat-label');
-  const tabMeta = PLAYER_STAT_TABS.find(item => item.key === tab);
-  if (label) label.textContent = tabMeta ? tabMeta.label : 'Goals';
+  if (label) label.textContent = PLAYER_STAT_LABELS[tab] || 'Goals';
 
   const noteEl = document.querySelector('.data-note');
-  if (noteEl && LIVE_DATA.isLive) {
+  if (noteEl && LIVE_PLAYER_STAT_KEYS.has(tab) && !LIVE_DATA.isLive) {
+    noteEl.innerHTML = `<strong>Live API offline</strong> - ${escapeHtml(LIVE_DATA.lastError || 'Add a valid football-data token to load this stat live.')}`;
+  }
+  if (noteEl && !LIVE_PLAYER_STAT_KEYS.has(tab)) {
+    noteEl.innerHTML = `<strong>Manual snapshot</strong> - football-data.org does not verify ${escapeHtml(PLAYER_STAT_LABELS[tab] || tab)} here, so this tab uses the latest final-week board.`;
+  }
+  if (noteEl && LIVE_DATA.isLive && isLiveStat) {
     const d = new Date(LIVE_DATA.fetchedAt);
-    noteEl.innerHTML = `<strong>Live data</strong> · Updated ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} via football-data.org`;
+    noteEl.innerHTML = `<strong>Live API</strong> - Updated ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} via football-data.org`;
   }
 }
 
-// ── LIVE MATCHES hub view ─────────────────────────────────────
+// LIVE MATCHES hub view ─────────────────────────────────────
 initPlayerLeaderboard();
+
+function liveFeedNote(surface = 'data') {
+  if (LIVE_DATA.isLive) {
+    const d = new Date(LIVE_DATA.fetchedAt);
+    return `<p class="hub-data-note live-ok">Live ${escapeHtml(surface)} loaded from football-data.org · Updated ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</p>`;
+  }
+  const reason = LIVE_DATA.lastError
+    ? `${LIVE_DATA.lastErrorStatus ? `HTTP ${LIVE_DATA.lastErrorStatus}: ` : ''}${LIVE_DATA.lastError}`
+    : 'Waiting for a valid football-data API response.';
+  return `<p class="hub-data-note">Live ${escapeHtml(surface)} unavailable · ${escapeHtml(reason)}</p>`;
+}
 
 function renderLiveView() {
   const active   = LIVE_DATA.matches.filter(m => m.status === 'IN_PLAY' || m.status === 'PAUSED' || m.status === 'FINISHED');
-  const upcoming = LIVE_DATA.matches.filter(m => m.status === 'SCHEDULED').slice(0, 6);
+  const upcoming = LIVE_DATA.matches.filter(m => m.status === 'SCHEDULED' || m.status === 'TIMED').slice(0, 6);
   const toRender = active.length ? active.slice(0, 6) : upcoming;
 
   if (!toRender.length) {
     // Static fallback cards until API responds
     return `
-      <p class="hub-data-note">Loading live match data…</p>
+      ${liveFeedNote('match')}
       <div class="hub-grid">
         <article class="match-card">
           <div class="match-meta">Group A · Estadio Azteca, Mexico City</div>
@@ -921,68 +1211,161 @@ const HISTORY_TIMELINE = [
   { year:'1974', host:'West Germany', winner:'West Germany', moment:'Cruyff vs Beckenbauer', final:'West Germany 2-1 Netherlands', fact:'Cruyff\'s Total Football reached the final, but Beckenbauer\'s West Germany turned the great Dutch idea into heartbreak.', wiki:'Johan_Cruyff', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Beckenbauer_cruyff_alfieri.jpg/960px-Beckenbauer_cruyff_alfieri.jpg', caption:'Cruyff and Beckenbauer in the 1974 final.' },
   { year:'1986', host:'Mexico', winner:'Argentina', moment:'Hand of God', final:'Argentina 2-1 England', fact:'Maradona punches in one goal, then scores the Goal of the Century minutes later. Controversy and genius, same match.', wiki:'Argentina_v_England_(1986_FIFA_World_Cup)', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Maradona_shilton_mano_dios.jpg/960px-Maradona_shilton_mano_dios.jpg', caption:'Maradona and Shilton in the Hand of God moment.' },
   { year:'1998', host:'France', winner:'France', moment:'Stade de France coronation', final:'France 3-0 Brazil', fact:'Two Zidane headers in Paris turn France from host nation into world champion.', wiki:'1998_FIFA_World_Cup_final', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Euro_2016_stade_de_France_France-Roumanie_%2827307532960%29.jpg/960px-Euro_2016_stade_de_France_France-Roumanie_%2827307532960%29.jpg', caption:'Stade de France, the venue for Zidane\'s 1998 final.' },
-  { year:'2006', host:'Germany', winner:'Italy', moment:'Zidane headbutt', final:'Italy 1-1 France', fact:'Zidane\'s last match swings from Panenka penalty to red card before Italy wins the shootout.', wiki:'2006_FIFA_World_Cup_final', image:'history-zidane-headbutt.webp', caption:'Zidane and Materazzi in the 2006 final flashpoint.' },
+  { year:'2006', host:'Germany', winner:'Italy', moment:'Zidane headbutt', final:'Italy 1-1 France', fact:'Zidane\'s last match swings from Panenka penalty to red card before Italy wins the shootout.', wiki:'2006_FIFA_World_Cup_final', image:'assets/images/history/zidane-headbutt.webp', caption:'Zidane and Materazzi in the 2006 final flashpoint.' },
   { year:'2010', host:'South Africa', winner:'Spain', moment:'Spain lifts its first cup', final:'Spain 1-0 Netherlands', fact:'Iniesta finishes late, Spain completes its possession dynasty, and South Africa gets an unforgettable first African World Cup.', wiki:'2010_FIFA_World_Cup_final', image:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/FIFA_World_Cup_2010_Spain_with_cup.jpg/960px-FIFA_World_Cup_2010_Spain_with_cup.jpg', caption:'Spain with the trophy after the 2010 final.' },
-  { year:'2014', host:'Brazil', winner:'Germany', moment:'7-1 in Belo Horizonte', final:'Germany 7-1 Brazil', fact:'Germany scores five in 29 minutes and turns a semifinal into the most surreal scoreboard in modern football.', wiki:'Brazil_v_Germany_(2014_FIFA_World_Cup)', image:'history-brazil-7-1.jpg', caption:'Brazil players react after the 7-1 semifinal collapse.' },
-  { year:'2022', host:'Qatar', winner:'Argentina', moment:'Messi vs Mbappe final', final:'Argentina 3-3 France', fact:'Messi and Mbappe trade destiny for 120 minutes before Argentina wins the penalty epic.', wiki:'2022_FIFA_World_Cup_final', image:'history-wc-2022-messi.jpg', caption:'Messi finally lifts the trophy that completed his story.' }
+  { year:'2014', host:'Brazil', winner:'Germany', moment:'7-1 in Belo Horizonte', final:'Germany 7-1 Brazil', fact:'Germany scores five in 29 minutes and turns a semifinal into the most surreal scoreboard in modern football.', wiki:'Brazil_v_Germany_(2014_FIFA_World_Cup)', image:'assets/images/history/brazil-7-1.jpg', caption:'Brazil players react after the 7-1 semifinal collapse.' },
+  { year:'2022', host:'Qatar', winner:'Argentina', moment:'Messi vs Mbappe final', final:'Argentina 3-3 France', fact:'Messi and Mbappe trade destiny for 120 minutes before Argentina wins the penalty epic.', wiki:'2022_FIFA_World_Cup_final', image:'assets/images/history/wc-2022-messi.jpg', caption:'Messi finally lifts the trophy that completed his story.' }
 ];
 
-const PREDICTION_MARKETS = [
+const WC26_MOMENTS = [
   {
-    type:'Champion',
-    headline:'Who lifts it?',
-    note:'Trophy model blends squad depth, route pressure, knockout experience, and attacking ceiling.',
-    picks:[['Argentina',18],['France',16],['Brazil',15],['England',13]]
+    tag:'Final set',
+    title:'Spain And Argentina For The Cup',
+    dek:'The 104th match is locked: Spain meet defending champions Argentina at New York New Jersey Stadium on July 19.',
+    source:'FIFA',
+    href:'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/articles/final-live-watch-teams-tickets',
+    image:'https://commons.wikimedia.org/wiki/Special:FilePath/Metlife%20stadium%20%28Aerial%20view%29.jpg?width=960',
+    fallbackImage:'assets/images/brand/world-cup-trophy.webp'
   },
   {
-    type:'Golden Ball',
-    headline:'Best player race',
-    note:'Needs star output plus a deep run, so creators on finalists get the strongest pull.',
-    picks:[['Kylian Mbappe',14],['Lionel Messi',12],['Jude Bellingham',11],['Vinicius Junior',10]]
+    tag:'Icon duel',
+    title:'Messi Meets Yamal In A Final',
+    dek:'The final has a generational hook: Argentina built around Messi, Spain powered by Lamine Yamal and a control-first midfield.',
+    source:'Guardian',
+    href:'https://www.theguardian.com/football/live/2026/jul/17/world-cup-2026-spain-v-argentina-countdown-trump-to-attend-final-england-news-live',
+    image:'https://commons.wikimedia.org/wiki/Special:FilePath/Lamine%20Yamal%20in%202025%20%28cropped2%29.jpg?width=760',
+    fallbackImage:'assets/images/history/wc-2022-messi.jpg'
   },
   {
-    type:'Golden Boot',
-    headline:'Goal king',
-    note:'Penalty share, group draw, and minutes matter as much as pure finishing quality.',
-    picks:[['Harry Kane',13],['Kylian Mbappe',12],['Lautaro Martinez',9],['Cristiano Ronaldo',8]]
+    tag:'Comeback',
+    title:'Argentina Break England Late',
+    dek:'Anthony Gordon put England ahead, but Enzo Fernandez and Lautaro Martinez sent Argentina into another final.',
+    source:'AP News',
+    href:'https://apnews.com/article/afa13ed9fa933f8b75bd56eb16546031',
+    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Argentina_champion_of_the_FIFA_World_Cup_Qatar_2022.jpg/960px-Argentina_champion_of_the_FIFA_World_Cup_Qatar_2022.jpg',
+    fallbackImage:'assets/images/history/wc-2022-messi.jpg'
   },
   {
-    type:'Golden Glove',
-    headline:'Keeper path',
-    note:'Clean sheets usually follow defensive structure and semifinal-level team strength.',
-    picks:[['Mike Maignan',11],['Emiliano Martinez',10],['Alisson Becker',9],['Jordan Pickford',7]]
+    tag:'England',
+    title:'Tuchel Takes The Heat',
+    dek:'England are left with the third-place match after tactical criticism and a painful 2-1 semi-final collapse in Atlanta.',
+    source:'Guardian',
+    href:'https://www.theguardian.com/football/live/2026/jul/16/world-cup-2026-argentina-break-england-hearts-and-head-for-final-with-spain-live',
+    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/England_national_football_team_2018.jpg/960px-England_national_football_team_2018.jpg',
+    fallbackImage:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Jude_Bellingham_2023.jpg/640px-Jude_Bellingham_2023.jpg'
   },
   {
-    type:'Young Player',
-    headline:'Next face of the cup',
-    note:'A breakout award needs minutes, highlight moments, and a team that survives the early noise.',
-    picks:[['Lamine Yamal',12],['Endrick',9],['Jamal Musiala',9],['Kobbie Mainoo',7]]
+    tag:'Spain watch',
+    title:'Smoke Disrupts Final Prep',
+    dek:'Wildfire smoke around New Jersey has complicated Spain training before the final, though conditions are expected to improve.',
+    source:'talkSPORT',
+    href:'https://talksport.com/football/world-cup/4436395/spain-world-cup-final-canada-wildfires-smoke-new-jersey/',
+    image:'https://commons.wikimedia.org/wiki/Special:FilePath/Metlife%20stadium%20%28Aerial%20view%29.jpg?width=960',
+    fallbackImage:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/FIFA_World_Cup_2010_Spain_with_cup.jpg/960px-FIFA_World_Cup_2010_Spain_with_cup.jpg'
   },
   {
-    type:'Assist Leader',
-    headline:'Chance machine',
-    note:'Set pieces and high-volume creators dominate this market more than pure dribblers.',
-    picks:[['Bruno Fernandes',10],['Antoine Griezmann',9],['Kevin De Bruyne',8],['Pedri',7]]
+    tag:'Discipline',
+    title:'FIFA Reviews Argentina Banner',
+    dek:'Argentina celebrations after the England win triggered a FIFA disciplinary review over a Falklands/Malvinas political message.',
+    source:'talkSPORT',
+    href:'https://talksport.com/football/world-cup/4436200/fifa-statement-argentina-falklands-government-england/',
+    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Argentina_champion_of_the_FIFA_World_Cup_Qatar_2022.jpg/960px-Argentina_champion_of_the_FIFA_World_Cup_Qatar_2022.jpg',
+    fallbackImage:'assets/images/history/wc-2022-messi.jpg'
   },
   {
-    type:'Dark Horse',
-    headline:'Chaos bracket team',
-    note:'Host energy, tactical structure, and travel comfort can bend the tournament path.',
-    picks:[['USA',7],['Morocco',6],['Japan',6],['Colombia',5]]
+    tag:'Golden Boot',
+    title:'Messi And Mbappe Tied On Eight',
+    dek:'The Golden Boot race is level on goals, with Messi ahead on assists before Argentina face Spain and France face England.',
+    source:'New York Post',
+    href:'https://nypost.com/2026/07/17/betting/world-cup-golden-boot-race-picks-should-you-bet-kylian-mbappe-or-lionel-messi/',
+    image:'assets/images/history/wc-2022-messi.jpg',
+    fallbackImage:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/France_champion_of_the_Football_World_Cup_Russia_2018.jpg/960px-France_champion_of_the_Football_World_Cup_Russia_2018.jpg'
   },
   {
-    type:'Upset Watch',
-    headline:'Danger fixtures',
-    note:'These are matchup traps: pressing teams, hot climates, travel swings, and set-piece margins.',
-    picks:[['Japan over a European seed',8],['Morocco quarterfinal run',6],['USA extra-time win',6],['Uruguay bracket shock',5]]
+    tag:'Golden Glove',
+    title:'Unai Simon Leads The Glove Race',
+    dek:'Spain reach the final with the tournament clean-sheet leader and one of the strongest defensive runs of the whole World Cup.',
+    source:'talkSPORT',
+    href:'https://talksport.com/betting/4356447/world-cup-odds-2026/',
+    image:'https://commons.wikimedia.org/wiki/Special:FilePath/Unai%20Sim%C3%B3n.jpg?width=640',
+    fallbackImage:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Spain_national_football_team_Euro_2012_final.jpg/960px-Spain_national_football_team_Euro_2012_final.jpg'
+  },
+  {
+    tag:'Assists',
+    title:'Olise Still Owns The Creator Board',
+    dek:'Michael Olise remains top of the assist race, even after Spain shut down France in the semi-final.',
+    source:'Sofascore',
+    href:'https://www.sofascore.com/news/world-cup-2026-most-assists-olise-leads-pack',
+    image:'https://commons.wikimedia.org/wiki/Special:FilePath/El%20Hadji%20Malick%20Diouf%20Michael%20Olise%20France%20v%20Senegal%2016%20June%202026-362.jpg?width=960',
+    fallbackImage:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/FIFA_World_Cup_2010_Spain_with_cup.jpg/960px-FIFA_World_Cup_2010_Spain_with_cup.jpg'
+  },
+  {
+    tag:'Third place',
+    title:'England Get France Next',
+    dek:'England and France meet in Miami for third place, with both sides trying to leave the tournament with a final statement.',
+    source:'talkSPORT',
+    href:'https://talksport.com/football/world-cup/4437519/england-vs-france-referee-world-cup-jesus-valenzuela-saez/',
+    image:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/England_national_football_team_2018.jpg/960px-England_national_football_team_2018.jpg',
+    fallbackImage:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/France_champion_of_the_Football_World_Cup_Russia_2018.jpg/960px-France_champion_of_the_Football_World_Cup_Russia_2018.jpg'
+  },
+  {
+    tag:'White House',
+    title:'Trump To Attend The Final',
+    dek:'The White House says Donald Trump will attend the World Cup final, while Argentina president Javier Milei is set to skip it.',
+    source:'Times of India',
+    href:'https://timesofindia.indiatimes.com/world/us/trump-will-attend-fifa-world-cup-final-says-white-house-argentina-prez-milei-to-skip-event/articleshow/132454212.cms',
+    image:'https://commons.wikimedia.org/wiki/Special:FilePath/Metlife%20stadium%20%28Aerial%20view%29.jpg?width=960',
+    fallbackImage:'assets/images/brand/world-cup-trophy.webp'
+  },
+  {
+    tag:'Viral detail',
+    title:'Pickford Bottle Becomes A Story',
+    dek:'Messi spotted England goalkeeper Jordan Pickford\'s penalty cheat sheet after Argentina avoided a shootout anyway.',
+    source:'People',
+    href:'https://people.com/lionel-messi-discovers-england-goalies-water-bottle-cheat-sheet-world-cup-game-12020798',
+    image:'https://commons.wikimedia.org/wiki/Special:FilePath/Jordan%20Pickford%20England%20v%20Ghana%2023%20June%202026-004.jpg?width=640',
+    fallbackImage:'assets/images/history/wc-2022-messi.jpg'
+  },
+  {
+    tag:'France',
+    title:'Deschamps Exit Looms',
+    dek:'France head toward the third-place match with Didier Deschamps expected to step aside and Zidane talk growing louder.',
+    source:'Guardian',
+    href:'https://www.theguardian.com/football/live/2026/jul/17/world-cup-2026-spain-v-argentina-countdown-trump-to-attend-final-england-news-live',
+    image:'assets/images/history/zidane-headbutt.webp',
+    fallbackImage:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/France_champion_of_the_Football_World_Cup_Russia_2018.jpg/960px-France_champion_of_the_Football_World_Cup_Russia_2018.jpg'
+  },
+  {
+    tag:'Final ball',
+    title:'TRIONDA Final Takes The Stage',
+    dek:'The gold, black, and white final ball is part of the visual identity for the semi-finals and New Jersey showpiece.',
+    source:'FIFA',
+    href:'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/articles/final-live-watch-teams-tickets',
+    image:'assets/images/brand/jabulani.jpg',
+    fallbackImage:'assets/images/brand/jabulani.jpg'
   }
 ];
+
+function mediaImage(src, alt, fallback = '') {
+  return `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" loading="lazy" decoding="async" data-fallback="${escapeHtml(fallback)}" onload="this.classList.add('loaded')" onerror="swapImageFallback(this)">`;
+}
+
+function swapImageFallback(img) {
+  const fallback = img.dataset.fallback;
+  if (fallback && img.src !== fallback && !img.dataset.usedFallback) {
+    img.dataset.usedFallback = '1';
+    img.src = fallback;
+    return;
+  }
+  img.classList.add('loaded', 'image-missing');
+  img.removeAttribute('src');
+}
 
 const LIVE_LINKS = [
   { label:'FIFA news', href:'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/news' },
   { label:'Google news', href:'https://news.google.com/search?q=FIFA%20World%20Cup%202026' },
-  { label:'Odds tracker', href:'https://www.oddschecker.com/football/world-cup/winner' },
-  { label:'Fixtures', href:'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/fixtures-results' }
+  { label:'Fixtures', href:'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/fixtures-results' },
+  { label:'AP World Cup', href:'https://apnews.com/hub/world-cup' }
 ];
 
 const FEATURE_TITLES = {
@@ -991,30 +1374,108 @@ const FEATURE_TITLES = {
   bracket:['Knockout stage', 'Road To The Final'],
   stadiums:['Stadium explorer', 'Host Venues'],
   history:['World Cup history', 'Iconic Eras'],
-  predictions:['Predictions', 'Odds & News'],
+  predictions:['News Desk', 'WC26 Moments'],
   search:['Global search', 'Find Anything']
 };
 
+function matchesForNation(iso3) {
+  const nation = WC_NATIONS.find(n => n.iso === iso3);
+  const liveTeam = liveTeamForNation(nation);
+  return LIVE_DATA.matches.filter(m => {
+    const ids = [m.homeTeam.tla, m.awayTeam.tla].filter(Boolean);
+    const names = [m.homeTeam.name, m.awayTeam.name].map(normalizeName);
+    return ids.includes(iso3)
+      || (liveTeam?.tla && ids.includes(liveTeam.tla))
+      || (nation && names.includes(normalizeName(nation.name)))
+      || (liveTeam && names.includes(normalizeName(liveTeam.name)));
+  });
+}
+
+function titleCaseWords(value) {
+  return String(value || '').toLowerCase().replace(/\b\w/g, ch => ch.toUpperCase());
+}
+
+function matchStatusLabel(status) {
+  const labels = {
+    FINISHED: 'FT',
+    SCHEDULED: 'Scheduled',
+    TIMED: 'Scheduled',
+    IN_PLAY: 'Live',
+    PAUSED: 'Half-time',
+    POSTPONED: 'Postponed',
+    SUSPENDED: 'Suspended',
+    CANCELLED: 'Cancelled'
+  };
+  return labels[status] || titleCaseWords(String(status || 'Status TBC').replaceAll('_', ' '));
+}
+
+function matchStageLabel(match) {
+  const stage = titleCaseWords(String(match.stage || 'Group stage').replaceAll('_', ' '));
+  const group = match.group ? `Group ${match.group}` : '';
+  return [stage, group].filter(Boolean).join(' / ');
+}
+
+function formatFixtureForPanel(match) {
+  const date = match.utcDate
+    ? new Date(match.utcDate).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })
+    : 'Date TBC';
+  const score = (match.score.home !== null && match.score.away !== null)
+    ? `${match.homeTeam.name} ${match.score.home}-${match.score.away} ${match.awayTeam.name}`
+    : `${match.homeTeam.name} vs ${match.awayTeam.name}`;
+  const detail = [
+    matchStageLabel(match),
+    matchStatusLabel(match.status),
+    match.venue || ''
+  ].filter(Boolean).join(' / ');
+  return `${date} - ${score} / ${detail}`;
+}
+
 function profileForNation(n) {
-  return PLATFORM_PROFILES[n.iso] || {
-    rank: 'TBC',
-    form: 'TBC',
-    model: 'TBC',
-    summary: `${n.name} - Group ${n.group}. Team profile, squad, manager, and fixtures will load from the live feed once tournament data is available.`,
+  const liveTeam = liveTeamForNation(n);
+  if (liveTeam) {
+    const teamScorers = LIVE_DATA.scorers.filter(s => s.tla === liveTeam.tla || normalizeName(s.team) === normalizeName(liveTeam.name));
+    const star = teamScorers[0]?.short || liveTeam.squad.find(p => p.position === 'Offence')?.short || liveTeam.squad[0]?.short || `${n.name} squad`;
+    const manager = managerForNation(n, liveTeam) || 'staff TBC';
+    const fixtures = matchesForNation(n.iso);
+    return {
+      rank: rankForNation(n),
+      form: `${liveTeam.squad.length || 0} players`,
+      model: teamScorers.length ? `${teamScorers[0].goals} goals` : 'Live squad',
+      summary: `${n.name} - Group ${n.group}. Manager: ${manager}. Squad and fixtures loaded from football-data.org.`,
+      players: [
+        `${star} - Top live player`,
+        `${manager} - Manager`,
+        `${liveTeam.colors || 'Team colours TBC'} - Team colours`
+      ],
+      fixtures: fixtures.length ? fixtures.map(formatFixtureForPanel) : [`Group ${n.group} fixtures - Awaiting schedule from live feed`],
+      story: [
+        liveTeam.founded ? `Association founded ${liveTeam.founded}` : `${n.name} association data loaded`,
+        liveTeam.colors ? `Colours: ${liveTeam.colors}` : 'Team colours unavailable',
+        liveTeam.website ? `Official site: ${liveTeam.website}` : 'Official website unavailable'
+      ]
+    };
+  }
+  const fallbackProfile = PLATFORM_PROFILES[n.iso];
+  if (fallbackProfile) return { ...fallbackProfile, rank: rankForNation(n) };
+  return {
+    rank: rankForNation(n),
+    form: 'Feed offline',
+    model: 'Roster pending',
+    summary: `${n.name} is listed in Group ${n.group}. Live manager, squad, match stage, and fixture details require a valid football-data API response.`,
     players: [
-      `${n.name} captain - Data unavailable`,
-      `Key forward - Data unavailable`,
-      `Tactical key - Data unavailable`
+      `${n.name} squad - Live roster pending`,
+      `Manager - Live feed pending`,
+      `Top player - Live scorer feed pending`
     ],
     fixtures: [
-      `Group ${n.group} opener - Schedule pending`,
-      `Second group match - Schedule pending`,
-      `Third group match - Schedule pending`
+      `Group ${n.group} opener - Stage details pending from live matches API`,
+      `Group ${n.group} matchday 2 - Stage details pending from live matches API`,
+      `Group ${n.group} matchday 3 - Stage details pending from live matches API`
     ],
     story: [
-      `${n.name} World Cup history - Data soon`,
-      'Tournament records - Data soon',
-      'Qualification route - Data soon'
+      `${n.name} profile - Live feed required for verified squad details`,
+      `Group ${n.group} route - group stage`,
+      LIVE_DATA.lastError ? `Live feed issue: ${LIVE_DATA.lastError}` : 'Live feed waiting'
     ]
   };
 }
@@ -1029,20 +1490,24 @@ function splitDetailItem(item) {
 
 function nationDossier(n, profile) {
   const base = TEAM_DOSSIERS[n.iso] || {};
+  const liveTeam = liveTeamForNation(n);
+  const liveScorer = liveTeam
+    ? LIVE_DATA.scorers.find(s => s.tla === liveTeam.tla || normalizeName(s.team) === normalizeName(liveTeam.name))
+    : null;
   const iso2 = ISO3_TO_ISO2[n.iso] || '';
   const wikiName = `${n.name} national football team`.replaceAll(' ', '_');
   return {
-    manager: base.manager || 'Manager TBC',
-    star: base.star || (profile.players?.[0]?.split(' - ')[0] || 'Key player TBC'),
+    manager: managerForNation(n, liveTeam) || base.manager || 'Feed offline',
+    star: liveScorer?.short || liveTeam?.squad.find(p => p.position === 'Offence')?.short || base.star || (profile.players?.[0]?.split(' - ')[0] || 'Roster pending'),
     nickname: base.nickname || `${n.name} national team`,
     confed: base.confed || 'World football',
-    titles: base.titles || 'World Cup record TBC',
-    best: base.best || 'Tournament history loading',
+    titles: liveTeam?.founded ? `Founded ${liveTeam.founded}` : (base.titles || 'World Cup record TBC'),
+    best: liveTeam?.colors ? `Colours: ${liveTeam.colors}` : (base.best || 'Tournament history loading'),
     identity: base.identity || profile.summary,
     managerWiki: base.managerWiki || `https://en.wikipedia.org/wiki/${encodeURIComponent(wikiName)}`,
     starWiki: base.starWiki || `https://en.wikipedia.org/wiki/${encodeURIComponent(wikiName)}`,
     teamWiki: `https://en.wikipedia.org/wiki/${encodeURIComponent(wikiName)}`,
-    flagSrc: iso2 ? `https://flagcdn.com/w320/${iso2}.png` : '',
+    flagSrc: liveTeam?.crest || (iso2 ? `https://flagcdn.com/w320/${iso2}.png` : ''),
     squad: base.squad || profile.players.map(item => {
       const [name, role] = splitDetailItem(item);
       return `${name}|Player|${role || 'Squad profile'}`;
@@ -1120,12 +1585,11 @@ async function renderPanelContent(profile, nation) {
   if (liveSquad?.squad?.length) {
     const squad = liveSquad.squad.map(player => {
       const pos = player.position?.includes('Goalkeeper') ? 'GK'
-        : player.position?.includes('Defender') ? 'DEF'
-        : player.position?.includes('Midfielder') ? 'MID'
+        : player.position?.includes('Defence') || player.position?.includes('Defender') ? 'DEF'
+        : player.position?.includes('Midfield') || player.position?.includes('Midfielder') ? 'MID'
         : 'FWD';
       const meta = [
-        player.club || 'Club TBC',
-        player.number ? `#${player.number}` : '',
+        player.nationality || nation.name,
         player.age ? `${player.age}y` : ''
       ].filter(Boolean).join(' / ');
       return `${player.short || player.name}|${pos}|${meta}`;
@@ -1187,7 +1651,7 @@ function renderCountriesView(filterGroup = '') {
   const cards = nations.map(n => {
     const profile = profileForNation(n);
     const dossier = nationDossier(n, profile);
-    const rank = profile.rank !== 'TBC' ? `#${profile.rank}` : 'Rank TBC';
+    const rank = String(profile.rank || '').startsWith('#') ? profile.rank : (profile.rank !== 'TBC' ? `#${profile.rank}` : 'Rank TBC');
     const flagSrc = flagImgUrl(n.iso);
     return `
       <article class="hub-card country-card" data-iso="${escapeHtml(n.iso)}" tabindex="0" role="button" aria-label="${escapeHtml(n.name)}, Group ${n.group}">
@@ -1208,17 +1672,25 @@ function renderCountriesView(filterGroup = '') {
 }
 function renderGroupsView() {
   const groups = [...new Set(WC_NATIONS.map(n => n.group))].sort();
+  const knockoutCodes = new Set();
+  LIVE_DATA.matches
+    .filter(m => m.stage && m.stage !== 'GROUP_STAGE')
+    .forEach(m => {
+      [m.homeTeam.tla, m.awayTeam.tla].filter(Boolean).forEach(code => knockoutCodes.add(code));
+    });
   return `
+    ${liveFeedNote('group table')}
     <section class="stage-hero">
       <div>
-        <span>12 groups / 48 nations</span>
-        <strong>Group Stage Control Room</strong>
-        <p>Top two qualify automatically. The best third-place teams enter the round of 32, so every goal difference swing matters.</p>
+        <span>Final group stage tables</span>
+        <strong>Qualified Routes & Eliminations</strong>
+        <p>Completed standings from football-data.org. Teams that did not reach the knockout rounds are shaded softly for quick scanning.</p>
       </div>
       <div class="stage-stat"><b>104</b><small>total matches</small></div>
     </section>
     <div class="group-board">${groups.map(group => {
       const nations = WC_NATIONS.filter(n => n.group === group);
+      const liveRows = LIVE_DATA.standings[group] || [];
       return `
         <article class="group-card pro-table" style="--accent:${GROUP_COLORS[group] || '#00cc6e'}">
           <div class="group-card-head">
@@ -1226,23 +1698,98 @@ function renderGroupsView() {
             <span>${nations.length} teams</span>
           </div>
           <table class="group-table">
-            <thead><tr><th>Club</th><th>P</th><th>GD</th><th>Pts</th></tr></thead>
-            <tbody>${nations.map((n, i) => {
+            <thead><tr><th>Team</th><th>P</th><th>GD</th><th>Pts</th></tr></thead>
+            <tbody>${(liveRows.length ? liveRows : nations).map((row, i) => {
+              const n = liveRows.length ? nationForLiveRow(row) : row;
               const profile = profileForNation(n);
-              const seedPts = i < 2 ? 'Q' : i === 2 ? '3rd' : '-';
-              const rank = profile.rank !== 'TBC' ? `#${profile.rank}` : 'TBC';
+              const seedPts = liveRows.length ? row.pts : (i < 2 ? 'Q' : i === 2 ? '3rd' : '-');
+              const played = liveRows.length ? row.mp : 0;
+              const gd = liveRows.length ? row.gd : 0;
+              const advanced = liveRows.length ? knockoutCodes.has(row.tla) : i < 3;
+              const status = liveRows.length ? (advanced ? 'Advanced to knockouts' : 'Out') : (i < 2 ? 'Auto route' : i === 2 ? 'Third-place race' : 'At risk');
+              const rowClass = liveRows.length ? (advanced ? 'advanced' : 'eliminated') : (i < 3 ? 'advanced' : 'eliminated');
+              const rank = liveRows.length ? `${row.w}-${row.d}-${row.l}` : (profile.rank !== 'TBC' ? profile.rank : 'TBC');
               const flag = flagImgUrl(n.iso);
-              return `<tr>
-                <td><span class="table-rank">${i + 1}</span>${flag ? `<img src="${flag}" alt="" loading="lazy">` : ''}<strong>${escapeHtml(n.name)}</strong></td>
-                <td>0</td><td>0</td><td>${escapeHtml(seedPts)}</td>
-              </tr><tr class="table-sub"><td colspan="4">${escapeHtml(rank)} FIFA rank / ${escapeHtml(nationDossier(n, profile).star)}</td></tr>`;
+              return `<tr class="group-team-row ${rowClass}">
+                <td><span class="table-rank">${i + 1}</span>${flag ? `<img src="${flag}" alt="" loading="lazy">` : ''}<strong>${escapeHtml(n.name)}</strong><em>${escapeHtml(status)}</em></td>
+                <td>${escapeHtml(played)}</td><td>${escapeHtml(gd)}</td><td>${escapeHtml(seedPts)}</td>
+              </tr><tr class="table-sub ${rowClass}"><td colspan="4">${escapeHtml(rank)}${liveRows.length ? ' final record' : ' team data'} / ${escapeHtml(nationDossier(n, profile).star)}</td></tr>`;
             }).join('')}</tbody>
           </table>
         </article>`;
     }).join('')}</div>`;
 }
 
+const KNOCKOUT_ROUNDS = [
+  { key:'LAST_32', label:'Round of 32', accent:'#4da6ff' },
+  { key:'LAST_16', label:'Round of 16', accent:'#ff5f1f' },
+  { key:'QUARTER_FINALS', label:'Quarterfinals', accent:'#ffd100' },
+  { key:'SEMI_FINALS', label:'Semifinals', accent:'#00cc6e' },
+  { key:'THIRD_PLACE', label:'Third Place', accent:'#c9a84c' },
+  { key:'FINAL', label:'Final', accent:'#4da6ff' }
+];
+
+function knockoutWinner(match) {
+  const home = match.score?.home;
+  const away = match.score?.away;
+  if (home === null || away === null || home === away) return '';
+  return home > away ? 'home' : 'away';
+}
+
+function renderKnockoutMatch(match, index) {
+  const winner = knockoutWinner(match);
+  const homeName = match.homeTeam.name && match.homeTeam.name !== '?' ? match.homeTeam.name : 'TBC';
+  const awayName = match.awayTeam.name && match.awayTeam.name !== '?' ? match.awayTeam.name : 'TBC';
+  const hasTeams = homeName !== 'TBC' && awayName !== 'TBC';
+  const isFinished = match.status === 'FINISHED';
+  const date = match.utcDate
+    ? new Date(match.utcDate).toLocaleDateString('en-US', { month:'short', day:'numeric' })
+    : 'Date TBC';
+  const score = isFinished && match.score.home !== null && match.score.away !== null
+    ? `${match.score.home}-${match.score.away}`
+    : 'vs';
+  const status = isFinished ? 'FT' : matchStatusLabel(match.status);
+  const venue = match.venue ? ` / ${match.venue}` : '';
+  return `<article class="bracket-match final-path-card">
+    <span>${escapeHtml(date)} / Match ${index + 1} / ${escapeHtml(status)}</span>
+    <div class="bracket-teams">
+      <div class="bracket-side ${!hasTeams ? 'tbc' : winner === 'home' ? 'winner' : winner === 'away' ? 'out' : ''}">
+        <strong>${escapeHtml(homeName)}</strong>
+        <b>${escapeHtml(isFinished ? String(match.score.home ?? '-') : '')}</b>
+      </div>
+      <div class="bracket-side ${!hasTeams ? 'tbc' : winner === 'away' ? 'winner' : winner === 'home' ? 'out' : ''}">
+        <strong>${escapeHtml(awayName)}</strong>
+        <b>${escapeHtml(isFinished ? String(match.score.away ?? '-') : '')}</b>
+      </div>
+    </div>
+    <em>${escapeHtml(hasTeams ? score : 'Teams pending from semifinal results')}${venue}</em>
+  </article>`;
+}
+
 function renderBracketView() {
+  const knockoutMatches = LIVE_DATA.matches.filter(m => m.stage && m.stage !== 'GROUP_STAGE');
+  if (knockoutMatches.length) {
+    return `
+      <section class="stage-hero bracket-hero">
+        <div>
+          <span>Updated knockout bracket</span>
+          <strong>Road To The Trophy</strong>
+          <p>Knockout results and scheduled ties from football-data.org. Eliminated sides are shaded softly once a match is finished.</p>
+        </div>
+        <div class="stage-stat"><b>${knockoutMatches.length}</b><small>knockout matches</small></div>
+      </section>
+      <div class="bracket-track live-bracket">${KNOCKOUT_ROUNDS.map((round, index) => {
+        const matches = knockoutMatches
+          .filter(match => match.stage === round.key)
+          .sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
+        return `<div class="bracket-column" style="--round:${index + 1}; --round-accent:${round.accent}">
+          <div class="bracket-round">${escapeHtml(round.label)} <small>${matches.length}</small></div>
+          ${matches.length
+            ? matches.map(renderKnockoutMatch).join('')
+            : `<article class="bracket-match"><span>Pending</span><strong>No matches</strong><em>Waiting for live feed</em></article>`}
+        </div>`;
+      }).join('')}</div>`;
+  }
   return `
     <section class="stage-hero bracket-hero">
       <div>
@@ -1269,7 +1816,7 @@ function renderStadiumsView() {
     <div class="stadium-grid">${HOST_STADIUMS.map(stadium => `
       <article class="stadium-card">
         <div class="media-fallback" aria-hidden="true"></div>
-        <img src="${escapeHtml(stadium.image)}" alt="${escapeHtml(stadium.name)}" loading="lazy" onload="this.classList.add('loaded')" onerror="this.remove()">
+        <img src="${escapeHtml(stadium.image)}" alt="${escapeHtml(stadium.name)}" loading="eager" onload="this.classList.add('loaded')" onerror="this.remove()">
         <div>
           <span>${escapeHtml(stadium.city)}</span>
           <strong>${escapeHtml(stadium.name)}</strong>
@@ -1301,7 +1848,7 @@ function renderHistoryView() {
     <div class="history-wall">${HISTORY_TIMELINE.map(item => `
       <article class="history-card">
         <div class="moment-fallback" aria-hidden="true"></div>
-        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.caption)}" loading="lazy" onload="this.classList.add('loaded')" onerror="this.remove()">
+        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.caption)}" loading="eager" onload="this.classList.add('loaded')" onerror="this.remove()">
         <div>
           <span>${escapeHtml(item.year)} / ${escapeHtml(item.host)}</span>
           <strong>${escapeHtml(item.moment)}</strong>
@@ -1313,38 +1860,54 @@ function renderHistoryView() {
 }
 
 function renderPredictionsView() {
+  const tapeItems = [...WC26_MOMENTS, ...WC26_MOMENTS];
   return `
-    <section class="stage-hero predictions-hero">
-      <div>
-        <span>Market pulse</span>
-        <strong>Favorites, Signals, News</strong>
-        <p>Percentages are pre-tournament model weights, kept separate from verified match data. Links jump to live news, fixtures, and odds trackers.</p>
+    <div class="news-stack">
+      <div class="news-tape" aria-label="Moving World Cup headlines">
+        <div class="news-tape-track">${tapeItems.map((item, index) => `
+          <a href="${escapeHtml(item.href)}" target="_blank" rel="noreferrer">
+            <span>${escapeHtml(item.tag)}</span>
+            <strong>${escapeHtml(item.title)}</strong>
+            <em>${escapeHtml(item.source)}</em>
+          </a>
+        `).join('')}</div>
       </div>
-      <div class="stage-stat"><b>${PREDICTION_MARKETS.length}</b><small>markets tracked</small></div>
-    </section>
-    <div class="prediction-stack prediction-dashboard">
-      <div class="prediction-market-grid">${PREDICTION_MARKETS.map(market => {
-        const leader = market.picks[0];
-        return `
-          <article class="prediction-market-card">
-            <div class="market-top">
-              <span>${escapeHtml(market.type)}</span>
-              <b>${leader[1]}%</b>
+      <div class="news-terminal">
+        <a class="news-lead" href="${escapeHtml(WC26_MOMENTS[0].href)}" target="_blank" rel="noreferrer">
+          <div class="moment-fallback" aria-hidden="true"></div>
+          ${mediaImage(WC26_MOMENTS[0].image, WC26_MOMENTS[0].title, WC26_MOMENTS[0].fallbackImage)}
+          <div class="news-card-content">
+            <span>${escapeHtml(WC26_MOMENTS[0].tag)} / Lead story</span>
+            <strong>${escapeHtml(WC26_MOMENTS[0].title)}</strong>
+            <p>${escapeHtml(WC26_MOMENTS[0].dek)}</p>
+            <small>${escapeHtml(WC26_MOMENTS[0].source)} / Open story</small>
+          </div>
+        </a>
+        <div class="news-story-board">${WC26_MOMENTS.slice(1).map((item, index) => `
+          <a class="news-story-row" href="${escapeHtml(item.href)}" target="_blank" rel="noreferrer" style="--delay:${index * 70}ms">
+            <span>${String(index + 1).padStart(2, '0')}</span>
+            <div>
+              <strong>${escapeHtml(item.title)}</strong>
+              <p>${escapeHtml(item.dek)}</p>
             </div>
-            <strong>${escapeHtml(market.headline)}</strong>
-            <p>${escapeHtml(market.note)}</p>
-            <div class="market-picks">${market.picks.map(([pick, pct], index) => `
-              <div class="market-pick ${index === 0 ? 'leader' : ''}">
-                <span>${escapeHtml(pick)}</span>
-                <em>${pct}%</em>
-                <i style="--pct:${pct}"></i>
-              </div>
-            `).join('')}</div>
-          </article>`;
-      }).join('')}</div>
+            <em>${escapeHtml(item.tag)}</em>
+            <small>${escapeHtml(item.source)}</small>
+          </a>
+        `).join('')}</div>
+      </div>
+      <div class="news-image-rail">${WC26_MOMENTS.slice(1).map(item => `
+        <a class="news-rail-card" href="${escapeHtml(item.href)}" target="_blank" rel="noreferrer">
+          ${mediaImage(item.image, item.title, item.fallbackImage)}
+          <span>${escapeHtml(item.tag)}</span>
+          <div>
+            <strong>${escapeHtml(item.title)}</strong>
+            <p>${escapeHtml(item.dek)}</p>
+          </div>
+        </a>
+      `).join('')}</div>
       <div class="live-link-grid">${LIVE_LINKS.map(link => `
         <a class="live-link-card" href="${escapeHtml(link.href)}" target="_blank" rel="noreferrer">
-          <span>Live link</span><strong>${escapeHtml(link.label)}</strong><p>Open current World Cup 2026 updates in a new tab.</p>
+          <span>News link</span><strong>${escapeHtml(link.label)}</strong><p>Open current World Cup 2026 updates in a new tab.</p>
         </a>
       `).join('')}</div>
     </div>`;
@@ -1386,6 +1949,7 @@ function renderFeatureView(view, query = '') {
   const [nextKicker, nextTitle] = FEATURE_TITLES[view] || FEATURE_TITLES.overview;
   kicker.textContent = nextKicker;
   title.textContent = nextTitle;
+  document.body.classList.toggle('feature-active', view !== 'overview');
 
   const views = {
     countries: renderCountriesView,
@@ -1421,6 +1985,7 @@ function closeNationPanel() {
 function closeHub() {
   const hub = document.getElementById('feature-hub');
   if (hub) hub.classList.remove('visible');
+  document.body.classList.remove('feature-active');
 }
 
 function openNationPanel(n) {
@@ -1493,7 +2058,7 @@ function nationForPolygon(props) {
   return WC_NATIONS.find(n => normalizeName(n.name) === name) || null;
 }
 
-function updateTournamentStatus() {
+function updateStaticTournamentStatus() {
   const start = new Date('2026-06-11T00:00:00');
   const end   = new Date('2026-07-19T23:59:59');
   const now   = new Date();
@@ -1512,7 +2077,7 @@ function updateTournamentStatus() {
   }
 }
 
-function buildTicker() {
+function buildStaticTicker() {
   const fixtures = [
     '<span class="live">● LIVE</span> 🇲🇽 Mexico 0–0 🇿🇦 South Africa · Group A',
     '🇫🇷 France vs 🇮🇶 Iraq · Jun 15 · Dallas',
@@ -1529,6 +2094,7 @@ function buildTicker() {
 
 updateTournamentStatus();
 buildTicker();
+refreshAll();
 
 document.querySelectorAll('.nav-pill').forEach(btn => {
   btn.addEventListener('click', () => setPlatformView(btn.dataset.view));
@@ -1831,9 +2397,14 @@ setTimeout(() => {
   let cameraAltitude = 2.35;
   let cameraLat = 18;
   let cameraLng = -45;
+  let globeStyleFrame = 0;
 
   function refreshGlobeStyles() {
-    if (globe) globe.polygonsData(geoFeatures);
+    if (!globe || globeStyleFrame) return;
+    globeStyleFrame = requestAnimationFrame(() => {
+      globeStyleFrame = 0;
+      globe.polygonsData(geoFeatures);
+    });
   }
 
   function pauseSpin() {
@@ -1979,6 +2550,12 @@ setTimeout(() => {
   controls.enablePan = false;
   controls.minDistance = 120;
   controls.maxDistance = 420;
+  window.__WCIM_SET_GLOBE_ACTIVE = active => {
+    if (controls) controls.autoRotate = active;
+    if (globe && typeof globe.resumeAnimation === 'function' && active) globe.resumeAnimation();
+    if (globe && typeof globe.pauseAnimation === 'function' && !active) globe.pauseAnimation();
+  };
+  window.__WCIM_SET_GLOBE_ACTIVE(!document.body.classList.contains('stats-active'));
   globe.pointOfView({ lat: cameraLat, lng: cameraLng, altitude: cameraAltitude }, 0);
   zoomGlobe = direction => {
     try {
