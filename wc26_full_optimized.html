@@ -53,9 +53,9 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+SC:wght@300;400;500&family=Barlow+Condensed:wght@200;300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=20260707-visible-images">
-<script src="https://unpkg.com/globe.gl"></script>
-<script src="https://unpkg.com/topojson-client@3"></script>
+<link rel="stylesheet" href="css/styles.css?v=20260717-secure-news">
+<script defer src="https://unpkg.com/globe.gl"></script>
+<script defer src="https://unpkg.com/topojson-client@3"></script>
 </head>
 <body class="light-cursor">
 
@@ -73,6 +73,27 @@
 <!-- Apple liquid glass layer -->
 <div id="glass"></div>
 
+<div id="live-match-bar" class="is-hidden" aria-live="polite">
+  <div class="live-orbit">
+    <span class="live-dot" aria-hidden="true"></span>
+    <span class="live-state">Live</span>
+  </div>
+  <div class="live-mainline">
+    <span class="live-team home">Home</span>
+    <strong class="live-scoreline">0-0</strong>
+    <span class="live-team away">Away</span>
+  </div>
+  <div class="live-meta-row">
+    <strong class="live-match-title">Loading live match</strong>
+    <span class="live-stage">football-data.org</span>
+  </div>
+  <p class="live-scorers">Goal details loading</p>
+  <div class="live-next-row">
+    <span>Next</span>
+    <strong>Loading fixture</strong>
+  </div>
+</div>
+
 <!-- Globe (hidden, revealed on scroll) -->
 <div id="globe-wrap">
   <div id="globe-ui">
@@ -82,7 +103,7 @@
       <button class="nav-pill" data-view="bracket">Bracket</button>
       <button class="nav-pill" data-view="stadiums">Stadiums</button>
       <button class="nav-pill" data-view="history">History</button>
-      <button class="nav-pill" data-view="predictions">Predictions</button>
+      <button class="nav-pill" data-view="predictions">News</button>
     </nav>
     <div id="globe-zoom" aria-label="Globe zoom controls">
       <button class="zoom-btn" type="button" data-zoom="in" aria-label="Zoom in">+</button>
@@ -122,9 +143,9 @@
     </div>
     <p id="panel-summary">Spin the globe and choose a country to reveal the manager, star player, squad shape, fixtures, and World Cup story in one connected team dossier.</p>
     <div class="panel-metrics">
-      <div><span id="metric-rank">--</span><small>FIFA rank</small></div>
+      <div><span id="metric-rank">--</span><small>Team data</small></div>
       <div><span id="metric-form">--</span><small>Manager</small></div>
-      <div><span id="metric-odds">--</span><small>Star player</small></div>
+      <div><span id="metric-odds">--</span><small>Top player</small></div>
     </div>
     <div class="panel-tabs" role="tablist" aria-label="Nation detail sections">
       <button class="panel-tab active" data-panel="overview">Overview</button>
@@ -156,9 +177,9 @@
       <p>Titles, iconic runs, and edition timelines can be explored from each country.</p>
     </article>
     <article class="deck-card" data-card="predictions">
-      <span>Predictions</span>
-      <strong>Probability signals presented as elegant match intelligence.</strong>
-      <p>Kept clearly separated from live facts so the product stays trustworthy.</p>
+      <span>News</span>
+      <strong>World Cup 2026 moments, records, and knockout headlines.</strong>
+      <p>Story cards open trusted live coverage without changing the globe experience.</p>
     </article>
   </section>
   <section id="feature-hub" aria-label="World Cup feature hub">
@@ -254,6 +275,7 @@
       <span class="lb-col-player">Player</span>
       <span class="lb-col-stat" id="lb-stat-label">Goals</span>
     </div>
+    <p class="data-note">Checking football-data.org live feed...</p>
 
     <!-- Goals -->
     <div class="lb-rows" data-tab="goals">
@@ -600,37 +622,7 @@
   </div>
 </section>
 
-<script src="js/app.js?v=20260707-visible-images"></script>
-<script>
-// ── LEADERBOARD TABS ─────────────────────────────────────────
-(function(){
-  var tabs   = document.querySelectorAll('.lb-tab');
-  var rows   = document.querySelectorAll('.lb-rows');
-  var label  = document.getElementById('lb-stat-label');
-  var labels = {
-    goals:'Goals',
-    assists:'Assists',
-    xg:'xG',
-    shots:'Shots on Target',
-    chances:'Key Passes',
-    clean:'Clean Sheets',
-    saves:'Saves',
-    tackles:'Tackles Won',
-    interceptions:'Interceptions',
-    motm:'MOTM',
-    yellow:'Yellow Cards',
-    red:'Red Cards'
-  };
-  tabs.forEach(function(tab){
-    tab.addEventListener('click', function(){
-      var key = this.dataset.lb;
-      tabs.forEach(function(t){ t.classList.toggle('active', t===tab); });
-      rows.forEach(function(r){ r.style.display = r.dataset.tab===key ? 'block' : 'none'; });
-      if(label) label.textContent = labels[key] || key;
-    });
-  });
-})();
-</script>
+<script defer src="js/app.js?v=20260717-secure-news"></script>
 
 </body>
 </html>
