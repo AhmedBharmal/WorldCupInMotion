@@ -10,8 +10,10 @@ GitHub Repository: https://github.com/AhmedBharmal/WorldCupInMotion
 
 ## Project Preview
 
-Add your main project screenshot here:
 <img width="1897" height="865" alt="Screenshot 2026-07-18 211531" src="https://github.com/user-attachments/assets/f9548bfe-39fb-4a5d-b299-b269e224d397" />
+<img width="1895" height="868" alt="Screenshot 2026-07-18 211616" src="https://github.com/user-attachments/assets/8043bfd9-168c-4a7d-a632-509d27490be4" />
+<img width="1891" height="865" alt="Screenshot 2026-07-18 211706" src="https://github.com/user-attachments/assets/9d54b95a-7b87-4487-9bf3-e902b8ab3b0b" />
+<img width="1896" height="865" alt="Screenshot 2026-07-18 211757" src="https://github.com/user-attachments/assets/3291c305-d069-462b-ad7e-f08b0ec2cab0" />
 
 
 ## About the Project
@@ -126,7 +128,7 @@ Computer Engineering Student and Web Developer
 
 GitHub: https://github.com/AhmedBharmal
 
-LinkedIn: ADD_YOUR_LINKEDIN_LINK
+LinkedIn: www.linkedin.com/in/ahmed-bharmal
 
 ## Support
 
