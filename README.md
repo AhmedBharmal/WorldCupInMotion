@@ -4,7 +4,7 @@ A cinematic and interactive FIFA World Cup 2026 web experience.
 
 WorldCupInMotion allows users to explore countries, teams, players, fixtures, stadiums, tournament history, statistics, and football updates through an interactive 3D globe.
 
-Live Website: YOUR_VERCEL_LINK
+Live Website: https://worldcupinmotion.vercel.app/
 
 GitHub Repository: https://github.com/AhmedBharmal/WorldCupInMotion
 
